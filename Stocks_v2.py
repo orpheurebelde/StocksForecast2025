@@ -130,7 +130,11 @@ if st.sidebar.button("❌ Exit App"):
 # Sector Map Section
 if menu == "Sector Map":
     st.title("📊 Sector Map - Finviz")
-    st.components.v1.iframe("https://finviz.com/map.ashx?t=sec&st=w1", height=600)
+    
+    finviz_url = "https://finviz.com/map.ashx?t=sec&st=w1"
+    
+    # Display a clickable link instead of an iframe
+    st.markdown(f"[🔗 Click here to view the Finviz Sector Map]({finviz_url})", unsafe_allow_html=True)
 
 # Stock Forecast Section
 if menu == "Stock Forecast":
