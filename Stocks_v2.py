@@ -122,6 +122,23 @@ def train_model(data):
     # Return the model for future predictions
     return model, X_test, y_test, y_pred
 
+# Function to fetch VIX data
+def get_vix():
+    vix = yf.Ticker("^VIX")
+    vix_data = vix.history(period="1d")  # Get the latest data
+    return vix_data["Close"].iloc[-1] if not vix_data.empty else None
+
+# Function to determine VIX Indicator signal
+def vix_indicator(vix_value):
+    if vix_value is None:
+        return "No Data", "gray"
+    elif vix_value < 15:
+        return "🟢 BUY - Low Volatility (Bullish)", "green"
+    elif 15 <= vix_value <= 25:
+        return "🟡 NEUTRAL - Moderate Volatility", "yellow"
+    else:
+        return "🔴 SELL - High Volatility (Bearish)", "red"
+
 # Sidebar Menu
 st.sidebar.title("📈 Stock Forecast Dashboard")
 menu = st.sidebar.radio("Select a Section", ["Stock Forecast", "Historical Analysis", "Monte Carlo Simulations", "Export Data", "Sector Map", "Refined Strategy (RSI with Trend)"])
@@ -350,6 +367,20 @@ if menu == "Historical Analysis":
             st.markdown(f"   - 50.0%: {fib_50:.2f}")
             st.markdown(f"   - 38.2%: {fib_38_2:.2f}")
             st.markdown(f"   - 23.6%: {fib_23_6:.2f}")
+
+            # Fetch VIX data
+            vix_value = get_vix()
+            
+            # Get VIX indicator signal
+            signal, color = vix_indicator(vix_value)
+            
+            # Display VIX Level & Signal
+            st.subheader("📊 VIX Indicator")
+            if vix_value:
+                st.metric(label="VIX Index Level", value=round(vix_value, 2))
+                st.markdown(f"<h3 style='color:{color};'>{signal}</h3>", unsafe_allow_html=True)
+            else:
+                st.warning("⚠️ Could not fetch VIX data.")
     else:
         st.error("No valid price data available for calculations.")
 
