@@ -336,21 +336,19 @@ if menu == "Historical Analysis":
             st.write(f"📊 Bearish with High Volume: {'Yes' if is_bearish_high_volume else 'No'}")
 
         with col2:
-            # Fetch VIX data
-            vix_value = get_vix()
-            
-            # Get VIX indicator signal
-            signal, color = vix_indicator(vix_value)
-            
-            # Display VIX Level & Signal
-            st.subheader("📊 VIX Indicator")
-            if vix_value:
-                st.metric(label="VIX Index Level", value=round(vix_value, 2))
-                st.markdown(f"<h3 style='color:{color};'>{signal}</h3>", unsafe_allow_html=True)
-            else:
-                st.warning("⚠️ Could not fetch VIX data.")
+            with st.container():  # Wrap the code in a container to avoid extra spacing
+                vix_value = get_vix()
+                signal, color = vix_indicator(vix_value)
+                
+                st.subheader("📊 VIX Indicator")
+                if vix_value:
+                    st.metric(label="VIX Index Level", value=round(vix_value, 2))
+                    st.markdown(f"<h3 style='color:{color};'>{signal}</h3>", unsafe_allow_html=True)
+                else:
+                    st.warning("⚠️ Could not fetch VIX data.")
 
             #Display the Fibonacci Retracement
+            st.write("")  # Empty line
             st.markdown(f"📈 Fibonacci Retracement Levels:")
 
             period = st.selectbox('Select period', ['1 Day', '1 Week', '1 Month', '3 Months', '1 Year'], index=4)
