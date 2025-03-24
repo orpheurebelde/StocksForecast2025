@@ -336,6 +336,20 @@ if menu == "Historical Analysis":
             st.write(f"📊 Bearish with High Volume: {'Yes' if is_bearish_high_volume else 'No'}")
 
         with col2:
+            # Fetch VIX data
+            vix_value = get_vix()
+            
+            # Get VIX indicator signal
+            signal, color = vix_indicator(vix_value)
+            
+            # Display VIX Level & Signal
+            st.subheader("📊 VIX Indicator")
+            if vix_value:
+                st.metric(label="VIX Index Level", value=round(vix_value, 2))
+                st.markdown(f"<h3 style='color:{color};'>{signal}</h3>", unsafe_allow_html=True)
+            else:
+                st.warning("⚠️ Could not fetch VIX data.")
+
             #Display the Fibonacci Retracement
             st.markdown(f"📈 Fibonacci Retracement Levels:")
 
@@ -367,20 +381,6 @@ if menu == "Historical Analysis":
             st.markdown(f"   - 50.0%: {fib_50:.2f}")
             st.markdown(f"   - 38.2%: {fib_38_2:.2f}")
             st.markdown(f"   - 23.6%: {fib_23_6:.2f}")
-
-            # Fetch VIX data
-            vix_value = get_vix()
-            
-            # Get VIX indicator signal
-            signal, color = vix_indicator(vix_value)
-            
-            # Display VIX Level & Signal
-            st.subheader("📊 VIX Indicator")
-            if vix_value:
-                st.metric(label="VIX Index Level", value=round(vix_value, 2))
-                st.markdown(f"<h3 style='color:{color};'>{signal}</h3>", unsafe_allow_html=True)
-            else:
-                st.warning("⚠️ Could not fetch VIX data.")
     else:
         st.error("No valid price data available for calculations.")
 
