@@ -8,6 +8,9 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
 
+# Set app to wide mode
+st.set_page_config(layout="wide")
+
 # Fetch Historical Data
 def fetch_data(ticker):
     stock = yf.Ticker(ticker)
