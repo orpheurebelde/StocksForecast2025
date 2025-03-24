@@ -245,8 +245,7 @@ if menu == "Historical Analysis":
             # Now compare with the timezone-aware index
             st.metric("📈 Year to Date", f"{data['Close'][data.index >= start_of_year].pct_change().sum() * 100:.2f}%")
 
-        st.markdown("### 📊 Metrics and Averages Analysis")
-                    
+                           
         #Create 2 Columns, Multiple Lines in Each Column
         col1, col2 = st.columns(2)
 
@@ -265,6 +264,7 @@ if menu == "Historical Analysis":
         with col1:
             st.write("")  # Empty line
             st.write("")  # Empty line
+            st.markdown("### 📊 Metrics and Averages Analysis")
             # Calculate moving averages
             ma_10 = data['Close'].rolling(window=10).mean().iloc[-1]
             ma_50 = data['Close'].rolling(window=50).mean().iloc[-1]
