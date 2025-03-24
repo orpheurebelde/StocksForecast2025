@@ -263,7 +263,9 @@ if menu == "Historical Analysis":
 
         # Moving Averages
         with col1:
-                # Calculate moving averages
+            st.write("")  # Empty line
+            st.write("")  # Empty line
+            # Calculate moving averages
             ma_10 = data['Close'].rolling(window=10).mean().iloc[-1]
             ma_50 = data['Close'].rolling(window=50).mean().iloc[-1]
             ma_100 = data['Close'].rolling(window=100).mean().iloc[-1]
