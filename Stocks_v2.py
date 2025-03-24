@@ -345,11 +345,11 @@ if menu == "Historical Analysis":
             fib_61_8 = low + (high - low) * 0.618
             fib_100 = high
             # Display the Fibonacci retracement levels
-            st.markdown(f"   - 23.6%: {fib_23_6:.2f}")
-            st.markdown(f"   - 38.2%: {fib_38_2:.2f}")
-            st.markdown(f"   - 50.0%: {fib_50:.2f}")
-            st.markdown(f"   - 61.8%: {fib_61_8:.2f}")
             st.markdown(f"   - 100%: {fib_100:.2f}")
+            st.markdown(f"   - 61.8%: {fib_61_8:.2f}")
+            st.markdown(f"   - 50.0%: {fib_50:.2f}")
+            st.markdown(f"   - 38.2%: {fib_38_2:.2f}")
+            st.markdown(f"   - 23.6%: {fib_23_6:.2f}")
     else:
         st.error("No valid price data available for calculations.")
 
