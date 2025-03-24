@@ -342,6 +342,8 @@ if menu == "Historical Analysis":
                 vix_value = get_vix()
                 signal, color = vix_indicator(vix_value)
                 
+                st.write("")  # Empty line
+                st.write("")  # Empty line
                 st.subheader("📊 VIX Indicator")
                 if vix_value:
                     st.metric(label="VIX Index Level", value=round(vix_value, 2))
