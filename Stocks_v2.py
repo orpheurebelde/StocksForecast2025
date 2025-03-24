@@ -353,7 +353,7 @@ if menu == "Historical Analysis":
             #Display the Fibonacci Retracement
             st.markdown(f"📈 Fibonacci Retracement Levels:")
 
-            period = st.selectbox('Select period', ['1 Day', '1 Week', '1 Month', '3 Months', '1 Year'])
+            period = st.selectbox('Select period', ['1 Day', '1 Week', '1 Month', '3 Months', '1 Year'], index=4)
 
             if period == '1 Day':
                 data_filtered = data.tail(1)
