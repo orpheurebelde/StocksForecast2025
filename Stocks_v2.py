@@ -201,14 +201,14 @@ if menu == "Historical Analysis":
         return data
 
     # TradingView widget function
-def tradingview_chart(symbol):
-    with st.expander("📉 Click to Expand TradingView Chart"):
-        st.markdown(f"""
-            <iframe 
-                src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_1&symbol={symbol}&interval=D&theme=dark&style=1&hide_top_toolbar=1&hide_side_toolbar=0&allow_symbol_change=1&save_image=0&watchlist=stocks&calendar=1"
-                width="100%" height="400px" style="border: none;">
-            </iframe>
-        """, unsafe_allow_html=True)
+    def tradingview_chart(symbol):
+        with st.expander("📉 Click to Expand TradingView Chart"):
+            st.markdown(f"""
+                <iframe 
+                    src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_1&symbol={symbol}&interval=D&theme=dark&style=1&hide_top_toolbar=1&hide_side_toolbar=0&allow_symbol_change=1&save_image=0&watchlist=stocks&calendar=1"
+                    width="100%" height="400px" style="border: none;">
+                </iframe>
+            """, unsafe_allow_html=True)
 
     # App UI
     st.title("📉 Historical Analysis")
