@@ -28,9 +28,11 @@ def dcf_valuation(eps, growth_rate, discount_rate, years=10):
     dcf_value = sum([cf / (1 + discount_rate) ** i for i, cf in enumerate(future_cash_flows, 1)])
     return dcf_value
 
-# Corrected PEG Ratio Calculation
 def peg_ratio(pe_ratio, growth_rate):
-    return pe_ratio / growth_rate / 100
+    """Calculates the PEG ratio while preventing division by zero."""
+    if pe_ratio is None or growth_rate is None or growth_rate == 0:
+        return float('inf')  # Avoid ZeroDivisionError by returning an infinite PEG ratio
+    return pe_ratio / (growth_rate / 100)  # Convert percentage growth to decimal
 
 # Monte Carlo Simulation
 def monte_carlo_simulation(data, n_simulations=1000, n_days=252, log_normal=False, volatility=None):
