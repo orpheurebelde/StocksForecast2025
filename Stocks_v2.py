@@ -387,7 +387,6 @@ if menu == "Historical Analysis":
     else:
         st.error("No valid price data available for calculations.")
 
-
 # Monte Carlo Simulations Section
 if menu == "Monte Carlo Simulations":
     st.title("🎲 Monte Carlo Simulations")
@@ -409,18 +408,11 @@ if menu == "Monte Carlo Simulations":
     simulations = monte_carlo_simulation(data, n_simulations, 252 * n_years, log_normal, volatility)
     last_price = data['Close'].iloc[-1]
     final_prices = simulations[:, -1]
-    
-    # Compute Statistics
-    mean_price = np.mean(final_prices)
-    percentile_5 = np.percentile(final_prices, 5)
-    percentile_95 = np.percentile(final_prices, 95)
-    prob_price_increase = np.sum(final_prices > last_price) / len(final_prices) * 100
 
-    # Display Key Metrics
     # Compute Statistics
     mean_price = np.mean(final_prices)
     percentile_5 = np.percentile(final_prices, 5)
-    percentile_25 = np.percentile(final_prices, 25)     
+    percentile_25 = np.percentile(final_prices, 25)
     percentile_95 = np.percentile(final_prices, 95)
     prob_price_increase = np.sum(final_prices > last_price) / len(final_prices) * 100
 
@@ -447,20 +439,32 @@ if menu == "Monte Carlo Simulations":
 
     st.subheader("Simulated Price Paths")
 
-    # Create figure and axis explicitly
+    # Create figure
     fig, ax = plt.subplots(figsize=(10, 6))
 
-    # Plot up to 10 simulation paths
-    for i in range(min(n_simulations, 10)):
-        ax.plot(simulations[i], alpha=0.5)
+    # Sample a subset of simulations (max 100)
+    sample_size = min(n_simulations, 100)
+    sample_indices = np.random.choice(n_simulations, sample_size, replace=False)
+
+    for i in sample_indices:
+        ax.plot(simulations[i], alpha=0.3, linewidth=0.8)
+
+    # Compute and plot mean path + confidence intervals
+    mean_path = np.mean(simulations, axis=0)
+    percentile_5_path = np.percentile(simulations, 5, axis=0)
+    percentile_95_path = np.percentile(simulations, 95, axis=0)
+
+    ax.plot(mean_path, color="black", linewidth=2, label="Mean Projection")
+    ax.fill_between(range(simulations.shape[1]), percentile_5_path, percentile_95_path, color='gray', alpha=0.3, label="5%-95% Confidence Interval")
 
     # Set labels and title
     ax.set_title("Monte Carlo Simulations")
     ax.set_xlabel("Days")
     ax.set_ylabel("Price")
+    ax.legend()
 
-    # Pass the figure to Streamlit
-    st.pyplot(fig)  # ✅ Explicitly passing the figure
+    # Pass figure to Streamlit
+    st.pyplot(fig)
 
 
 # Export Data Section
