@@ -397,7 +397,7 @@ if menu == "Monte Carlo Simulations":
     # User Inputs
     n_simulations = st.slider("Number of Simulations", 100, 10000, 5000)
     n_years = st.slider("Projection Period (Years)", 0, 10, 3)
-    n_months = st.slider("Additional Months", 0, 11, 0)  # New: Add months
+    n_months = st.slider("Additional Months", 0, 11, 1)  # New: Add months
     log_normal = st.checkbox("Use Log-Normal Distribution")
     manual_vol = st.checkbox("Manually Adjust Volatility")
 
