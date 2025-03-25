@@ -464,7 +464,8 @@ if menu == "Monte Carlo Simulations":
     ax.legend()
 
     # Pass figure to Streamlit
-    st.pyplot(fig)
+    with st.expander("📊 Click to Expand Simulation Chart"):
+        st.pyplot(fig)
 
 
 # Export Data Section
