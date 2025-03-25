@@ -23,53 +23,63 @@ def fetch_data(ticker):
     return data, info
 
 def dcf_valuation(ticker, years=10, manual_growth=None, manual_terminal_growth=None):
-    # Fetch stock data
-    stock = ticker
-    
-    # Get EPS (Trailing Twelve Months)
-    eps = stock.info.get("trailingEps", 0)  # Default to 0 if missing
-
-    # Get shares outstanding
-    shares_outstanding = stock.info.get("sharesOutstanding", 1)
-    
-    # Get Cash Flow Statement
-    cashflow_df = stock.cashflow
-
-    # Extract FCF components safely
     try:
-        operating_cash_flow = cashflow_df.loc["Total Cash From Operating Activities"].iloc[0]
-        capital_expenditures = cashflow_df.loc["Capital Expenditures"].iloc[0]
-        fcf = operating_cash_flow - capital_expenditures
-    except KeyError:
-        fcf = None  # Set to None if missing
+        # Fetch stock data
+        stock = yf.Ticker(ticker)
+        info = stock.info
 
-    # Use FCF per share if available, otherwise use EPS
-    fcf_per_share = (fcf / shares_outstanding) if fcf else eps
+        # Get EPS (Trailing Twelve Months)
+        eps = info.get("trailingEps", 0)  # Default to 0 if missing
 
-    # Get analyst growth estimate or allow manual input
-    analyst_growth = stock.info.get("earningsGrowth", 0.10)  # Default to 10%
-    growth_rate = manual_growth if manual_growth else analyst_growth
+        # Get shares outstanding
+        shares_outstanding = info.get("sharesOutstanding", 1)
 
-    # Set Discount Rate (WACC approximation)
-    discount_rate = stock.info.get("costOfCapital", 0.08) or 0.08  # Default to 8%
+        # Get Cash Flow Statement
+        cashflow_df = stock.cashflow
 
-    # Set Terminal Growth Rate (manual or assume 4%)
-    terminal_growth = manual_terminal_growth if manual_terminal_growth else 0.04
+        # Extract FCF components safely
+        try:
+            operating_cash_flow = cashflow_df.loc["Total Cash From Operating Activities"].iloc[0]
+            capital_expenditures = cashflow_df.loc["Capital Expenditures"].iloc[0]
+            fcf = operating_cash_flow - capital_expenditures
+        except (KeyError, IndexError):
+            fcf = None  # Set to None if missing
 
-    # Calculate future cash flows
-    future_cash_flows = [fcf_per_share * (1 + growth_rate) ** i for i in range(1, years + 1)]
-    
-    # Discount future cash flows to present value
-    dcf_value = sum([cf / (1 + discount_rate) ** i for i, cf in enumerate(future_cash_flows, 1)])
+        # Use last known FCF instead of EPS if missing
+        if fcf is None:
+            fcf = eps * shares_outstanding  # Approximate using EPS
 
-    # Add Terminal Value (TV) using the Gordon Growth Model
-    terminal_value = (future_cash_flows[-1] * (1 + terminal_growth)) / (discount_rate - terminal_growth)
-    terminal_value_discounted = terminal_value / ((1 + discount_rate) ** years)
-    
-    # Final DCF Value per share
-    intrinsic_value = (dcf_value + terminal_value_discounted)
+        # Convert to FCF per share
+        fcf_per_share = fcf / shares_outstanding
 
-    return round(intrinsic_value, 2)
+        # Get analyst growth estimate or allow manual input
+        analyst_growth = info.get("earningsGrowth", 0.10)  # Default to 10%
+        growth_rate = manual_growth if manual_growth else analyst_growth
+
+        # Set Discount Rate (WACC approximation)
+        discount_rate = info.get("costOfCapital", 0.08)  # Default to 8%
+
+        # Set Terminal Growth Rate (manual or assume 4%)
+        terminal_growth = manual_terminal_growth if manual_terminal_growth else 0.04
+
+        # Calculate future cash flows
+        future_cash_flows = [fcf_per_share * (1 + growth_rate) ** i for i in range(1, years + 1)]
+        
+        # Discount future cash flows to present value
+        dcf_value = sum([cf / (1 + discount_rate) ** i for i, cf in enumerate(future_cash_flows, 1)])
+
+        # Add Terminal Value (TV) using the Gordon Growth Model
+        terminal_value = (future_cash_flows[-1] * (1 + terminal_growth)) / (discount_rate - terminal_growth)
+        terminal_value_discounted = terminal_value / ((1 + discount_rate) ** years)
+        
+        # Final DCF Value per share
+        intrinsic_value = (dcf_value + terminal_value_discounted)
+
+        return round(intrinsic_value, 2)
+
+    except Exception as e:
+        st.error(f"❌ Error calculating DCF for {ticker}: {e}")
+        return None  # Return None instead of crashing
 
 # Corrected PEG Ratio Calculation
 def peg_ratio(pe_ratio, growth_rate):
