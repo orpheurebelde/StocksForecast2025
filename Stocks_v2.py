@@ -201,7 +201,7 @@ if menu == "Stock Forecast":
         pe_ratio = info['trailingPE']
         earnings_growth = info['earningsGrowth']
         forward_pe = info.get('forwardPE', 'N/A')
-        dcf_value = dcf_valuation(info['trailingEps'], 0.1, info['trailingEps'])
+        dcf_value = dcf_valuation(ticker, 10, None, None)
         peg = peg_ratio(pe_ratio, earnings_growth)
 
         st.markdown("### 📈 Stock Overview")
