@@ -23,27 +23,39 @@ def fetch_data(ticker):
     return data, info
 
 def dcf_valuation(ticker, years=10, manual_growth=None, manual_terminal_growth=None):
-    # Fetch data from Yahoo Finance
+    # Fetch stock data
     stock = yf.Ticker(ticker)
     
-    # Get EPS (Trailing Twelve Months) and Free Cash Flow
-    eps = stock.info.get("trailingEps", 0)  # Get EPS or set to 0 if not found
-    fcf = stock.cashflow.loc["Total Cash From Operating Activities"].iloc[0] - stock.cashflow.loc["Capital Expenditures"].iloc[0]
+    # Get EPS (Trailing Twelve Months)
+    eps = stock.info.get("trailingEps", 0)  # Default to 0 if missing
+
+    # Get shares outstanding
     shares_outstanding = stock.info.get("sharesOutstanding", 1)
     
-    # Use FCF per share if available, otherwise use EPS
-    fcf_per_share = fcf / shares_outstanding if fcf else eps
+    # Get Cash Flow Statement
+    cashflow_df = stock.cashflow
 
-    # Get analyst growth estimate (default to 10% if not available)
-    analyst_growth = stock.info.get("earningsGrowth", 0.10)
+    # Extract FCF components safely
+    try:
+        operating_cash_flow = cashflow_df.loc["Total Cash From Operating Activities"].iloc[0]
+        capital_expenditures = cashflow_df.loc["Capital Expenditures"].iloc[0]
+        fcf = operating_cash_flow - capital_expenditures
+    except KeyError:
+        fcf = None  # Set to None if missing
+
+    # Use FCF per share if available, otherwise use EPS
+    fcf_per_share = (fcf / shares_outstanding) if fcf else eps
+
+    # Get analyst growth estimate or allow manual input
+    analyst_growth = stock.info.get("earningsGrowth", 0.10)  # Default to 10%
     growth_rate = manual_growth if manual_growth else analyst_growth
-    
+
     # Set Discount Rate (WACC approximation)
-    discount_rate = stock.info.get("costOfCapital", 0.08) or 0.08  # Default to 8% if missing
-    
+    discount_rate = stock.info.get("costOfCapital", 0.08) or 0.08  # Default to 8%
+
     # Set Terminal Growth Rate (manual or assume 4%)
     terminal_growth = manual_terminal_growth if manual_terminal_growth else 0.04
-    
+
     # Calculate future cash flows
     future_cash_flows = [fcf_per_share * (1 + growth_rate) ** i for i in range(1, years + 1)]
     
@@ -201,7 +213,7 @@ if menu == "Stock Forecast":
         pe_ratio = info['trailingPE']
         earnings_growth = info['earningsGrowth']
         forward_pe = info.get('forwardPE', 'N/A')
-        dcf_value = dcf_valuation(ticker, 10, None, None)
+        dcf_value = dcf_valuation(info['trailingEps'], 0.1, info['trailingEps'])
         peg = peg_ratio(pe_ratio, earnings_growth)
 
         st.markdown("### 📈 Stock Overview")
