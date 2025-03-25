@@ -396,7 +396,8 @@ if menu == "Monte Carlo Simulations":
 
     # User Inputs
     n_simulations = st.slider("Number of Simulations", 100, 10000, 5000)
-    n_years = st.slider("Projection Period (Years)", 1, 10, 3)
+    n_years = st.slider("Projection Period (Years)", 0, 10, 3)
+    n_months = st.slider("Additional Months", 0, 11, 0)  # New: Add months
     log_normal = st.checkbox("Use Log-Normal Distribution")
     manual_vol = st.checkbox("Manually Adjust Volatility")
 
@@ -405,7 +406,10 @@ if menu == "Monte Carlo Simulations":
         volatility = st.slider("Set Volatility (%)", 0.5, 5.0, data['Close'].pct_change().std() * 100) / 100
 
     # Run Monte Carlo Simulation
-    simulations = monte_carlo_simulation(data, n_simulations, 252 * n_years, log_normal, volatility)
+    # Convert years & months into total trading days
+    total_days = (n_years * 252) + (n_months * 21)  # ✅ Includes months
+    # Run Monte Carlo Simulation with new total_days
+    simulations = monte_carlo_simulation(data, n_simulations, total_days, log_normal, volatility)
     last_price = data['Close'].iloc[-1]
     final_prices = simulations[:, -1]
 
