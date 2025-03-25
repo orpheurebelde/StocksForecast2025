@@ -22,11 +22,65 @@ def fetch_data(ticker):
 
     return data, info
 
-# Discounted Cash Flow Valuation
-def dcf_valuation(eps, growth_rate, discount_rate, years=10):
-    future_cash_flows = [eps * (1 + growth_rate) ** i for i in range(1, years + 1)]
-    dcf_value = sum([cf / (1 + discount_rate) ** i for i, cf in enumerate(future_cash_flows, 1)])
-    return dcf_value
+def dcf_valuation(ticker, years=10, manual_growth=None, manual_terminal_growth=None):
+    try:
+        # Fetch stock data
+        stock = yf.Ticker(ticker)
+        info = stock.info
+
+        # Get EPS: Prefer Forward EPS but fallback to Trailing EPS
+        eps = stock.info.get("forwardEps", stock.info.get("trailingEps", 0))
+
+
+        # Get shares outstanding
+        shares_outstanding = info.get("sharesOutstanding", 1)
+
+        # Get Cash Flow Statement
+        cashflow_df = stock.cashflow
+
+        # Extract FCF components safely
+        try:
+            operating_cash_flow = cashflow_df.loc["Total Cash From Operating Activities"].iloc[0]
+            capital_expenditures = cashflow_df.loc["Capital Expenditures"].iloc[0]
+            fcf = operating_cash_flow - capital_expenditures
+        except (KeyError, IndexError):
+            fcf = None  # Set to None if missing
+
+        # Use last known FCF instead of EPS if missing
+        if fcf is None:
+            fcf = eps * shares_outstanding  # Approximate using EPS
+
+        # Convert to FCF per share
+        fcf_per_share = fcf / shares_outstanding
+
+        # Get analyst growth estimate or allow manual input
+        analyst_growth = info.get("earningsGrowth", 0.10)  # Default to 10%
+        growth_rate = manual_growth if manual_growth else analyst_growth
+
+        # Set Discount Rate (WACC approximation)
+        discount_rate = info.get("costOfCapital", 0.08)  # Default to 8%
+
+        # Set Terminal Growth Rate (manual or assume 4%)
+        terminal_growth = manual_terminal_growth if manual_terminal_growth else 0.04
+
+        # Calculate future cash flows
+        future_cash_flows = [fcf_per_share * (1 + growth_rate) ** i for i in range(1, years + 1)]
+        
+        # Discount future cash flows to present value
+        dcf_value = sum([cf / (1 + discount_rate) ** i for i, cf in enumerate(future_cash_flows, 1)])
+
+        # Add Terminal Value (TV) using the Gordon Growth Model
+        terminal_value = (future_cash_flows[-1] * (1 + terminal_growth)) / (discount_rate - terminal_growth)
+        terminal_value_discounted = terminal_value / ((1 + discount_rate) ** years)
+        
+        # Final DCF Value per share
+        intrinsic_value = (dcf_value + terminal_value_discounted)
+
+        return round(intrinsic_value, 2)
+
+    except Exception as e:
+        st.error(f"❌ Error calculating DCF for {ticker}: {e}")
+        return None  # Return None instead of crashing
 
 def peg_ratio(pe_ratio, growth_rate):
     """Calculates the PEG ratio while preventing division by zero."""
@@ -172,7 +226,7 @@ if menu == "Stock Forecast":
         pe_ratio = info['trailingPE']
         earnings_growth = info['earningsGrowth']
         forward_pe = info.get('forwardPE', 'N/A')
-        dcf_value = dcf_valuation(info['trailingEps'], 0.1, info['trailingEps'])
+        dcf_value = dcf_valuation(ticker)
         peg = peg_ratio(pe_ratio, earnings_growth)
 
         st.markdown("### 📈 Stock Overview")
@@ -204,12 +258,13 @@ if menu == "Historical Analysis":
 
     # TradingView widget function
     def tradingview_chart(symbol):
-        st.markdown(f"""
-            <iframe 
-                src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_1&symbol={symbol}&interval=D&theme=dark&style=1&hide_top_toolbar=1&hide_side_toolbar=0&allow_symbol_change=1&save_image=0&watchlist=stocks&calendar=1"
-                width="100%" height="500px" style="border: none;">
-            </iframe>
-        """, unsafe_allow_html=True)
+        with st.expander("📉 Click to Expand TradingView Chart"):
+            st.markdown(f"""
+                <iframe 
+                    src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_1&symbol={symbol}&interval=D&theme=dark&style=1&hide_top_toolbar=1&hide_side_toolbar=0&allow_symbol_change=1&save_image=0&watchlist=stocks&calendar=1"
+                    width="100%" height="400px" style="border: none;">
+                </iframe>
+            """, unsafe_allow_html=True)
 
     # App UI
     st.title("📉 Historical Analysis")
@@ -388,7 +443,6 @@ if menu == "Historical Analysis":
     else:
         st.error("No valid price data available for calculations.")
 
-
 # Monte Carlo Simulations Section
 if menu == "Monte Carlo Simulations":
     st.title("🎲 Monte Carlo Simulations")
@@ -398,7 +452,8 @@ if menu == "Monte Carlo Simulations":
 
     # User Inputs
     n_simulations = st.slider("Number of Simulations", 100, 10000, 5000)
-    n_years = st.slider("Projection Period (Years)", 1, 10, 3)
+    n_years = st.slider("Projection Period (Years)", 0, 10, 3)
+    n_months = st.slider("Additional Months", 0, 11, 1)  # New: Add months
     log_normal = st.checkbox("Use Log-Normal Distribution")
     manual_vol = st.checkbox("Manually Adjust Volatility")
 
@@ -407,21 +462,17 @@ if menu == "Monte Carlo Simulations":
         volatility = st.slider("Set Volatility (%)", 0.5, 5.0, data['Close'].pct_change().std() * 100) / 100
 
     # Run Monte Carlo Simulation
-    simulations = monte_carlo_simulation(data, n_simulations, 252 * n_years, log_normal, volatility)
+    # Convert years & months into total trading days
+    total_days = (n_years * 252) + (n_months * 21)  # ✅ Includes months
+    # Run Monte Carlo Simulation with new total_days
+    simulations = monte_carlo_simulation(data, n_simulations, total_days, log_normal, volatility)
     last_price = data['Close'].iloc[-1]
     final_prices = simulations[:, -1]
-    
-    # Compute Statistics
-    mean_price = np.mean(final_prices)
-    percentile_5 = np.percentile(final_prices, 5)
-    percentile_95 = np.percentile(final_prices, 95)
-    prob_price_increase = np.sum(final_prices > last_price) / len(final_prices) * 100
 
-    # Display Key Metrics
     # Compute Statistics
     mean_price = np.mean(final_prices)
     percentile_5 = np.percentile(final_prices, 5)
-    percentile_25 = np.percentile(final_prices, 25)     
+    percentile_25 = np.percentile(final_prices, 25)
     percentile_95 = np.percentile(final_prices, 95)
     prob_price_increase = np.sum(final_prices > last_price) / len(final_prices) * 100
 
@@ -448,20 +499,33 @@ if menu == "Monte Carlo Simulations":
 
     st.subheader("Simulated Price Paths")
 
-    # Create figure and axis explicitly
+    # Create figure
     fig, ax = plt.subplots(figsize=(10, 6))
 
-    # Plot up to 10 simulation paths
-    for i in range(min(n_simulations, 10)):
-        ax.plot(simulations[i], alpha=0.5)
+    # Sample a subset of simulations (max 100)
+    sample_size = min(n_simulations, 100)
+    sample_indices = np.random.choice(n_simulations, sample_size, replace=False)
+
+    for i in sample_indices:
+        ax.plot(simulations[i], alpha=0.3, linewidth=0.8)
+
+    # Compute and plot mean path + confidence intervals
+    mean_path = np.mean(simulations, axis=0)
+    percentile_5_path = np.percentile(simulations, 5, axis=0)
+    percentile_95_path = np.percentile(simulations, 95, axis=0)
+
+    ax.plot(mean_path, color="black", linewidth=2, label="Mean Projection")
+    ax.fill_between(range(simulations.shape[1]), percentile_5_path, percentile_95_path, color='gray', alpha=0.3, label="5%-95% Confidence Interval")
 
     # Set labels and title
     ax.set_title("Monte Carlo Simulations")
     ax.set_xlabel("Days")
     ax.set_ylabel("Price")
+    ax.legend()
 
-    # Pass the figure to Streamlit
-    st.pyplot(fig)  # ✅ Explicitly passing the figure
+    # Pass figure to Streamlit
+    with st.expander("📊 Click to Expand Simulation Chart"):
+        st.pyplot(fig)
 
 
 # Export Data Section
