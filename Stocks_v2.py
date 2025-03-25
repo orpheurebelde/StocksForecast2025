@@ -22,6 +22,9 @@ def fetch_data(ticker):
 
     return data, info
 
+import yfinance as yf
+import streamlit as st
+
 def dcf_valuation(ticker, years=10, manual_growth=None, manual_terminal_growth=None):
     try:
         # Fetch stock data
@@ -30,7 +33,6 @@ def dcf_valuation(ticker, years=10, manual_growth=None, manual_terminal_growth=N
 
         # Get EPS: Prefer Forward EPS but fallback to Trailing EPS
         eps = stock.info.get("forwardEps", stock.info.get("trailingEps", 0))
-
 
         # Get shares outstanding
         shares_outstanding = info.get("sharesOutstanding", 1)
@@ -54,14 +56,14 @@ def dcf_valuation(ticker, years=10, manual_growth=None, manual_terminal_growth=N
         fcf_per_share = fcf / shares_outstanding
 
         # Get analyst growth estimate or allow manual input
-        analyst_growth = info.get("earningsGrowth", 0.10)  # Default to 10%
+        analyst_growth = info.get("earningsGrowth", 0.10)  # Default to 10% if missing
         growth_rate = manual_growth if manual_growth else analyst_growth
 
-        # Set Discount Rate (WACC approximation)
-        discount_rate = info.get("costOfCapital", 0.08)  # Default to 8%
-
-        # Set Terminal Growth Rate (manual or assume 4%)
+        # Use default terminal growth rate if not provided manually
         terminal_growth = manual_terminal_growth if manual_terminal_growth else 0.04
+
+        # Set Discount Rate (WACC approximation), default to 8%
+        discount_rate = info.get("costOfCapital", 0.08)  # Default to 8% if missing
 
         # Calculate future cash flows
         future_cash_flows = [fcf_per_share * (1 + growth_rate) ** i for i in range(1, years + 1)]
@@ -81,6 +83,7 @@ def dcf_valuation(ticker, years=10, manual_growth=None, manual_terminal_growth=N
     except Exception as e:
         st.error(f"❌ Error calculating DCF for {ticker}: {e}")
         return None  # Return None instead of crashing
+
 
 def peg_ratio(pe_ratio, growth_rate):
     """Calculates the PEG ratio while preventing division by zero."""
