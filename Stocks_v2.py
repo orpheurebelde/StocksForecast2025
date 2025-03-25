@@ -22,32 +22,42 @@ def fetch_data(ticker):
 
     return data, info
 
-def dcf_valuation(eps, growth_rate, discount_rate, years=10, terminal_growth=0.02):
-    """
-    Calculate the intrinsic value of a stock using the Discounted Cash Flow (DCF) method.
+def dcf_valuation(ticker, years=10, manual_growth=None, manual_terminal_growth=None):
+    # Fetch data from Yahoo Finance
+    stock = yf.Ticker(ticker)
     
-    Parameters:
-        eps (float): Current Earnings Per Share (EPS).
-        growth_rate (float): Expected EPS growth rate per year (e.g., 0.1 for 10%).
-        discount_rate (float): Discount rate (e.g., 0.08 for 8%).
-        years (int, optional): Number of years to project (default is 10).
-        terminal_growth (float, optional): Growth rate for terminal value calculation (default is 2%).
+    # Get EPS (Trailing Twelve Months) and Free Cash Flow
+    eps = stock.info.get("trailingEps", 0)  # Get EPS or set to 0 if not found
+    fcf = stock.cashflow.loc["Total Cash From Operating Activities"].iloc[0] - stock.cashflow.loc["Capital Expenditures"].iloc[0]
+    shares_outstanding = stock.info.get("sharesOutstanding", 1)
+    
+    # Use FCF per share if available, otherwise use EPS
+    fcf_per_share = fcf / shares_outstanding if fcf else eps
 
-    Returns:
-        float: Present value of future cash flows (Intrinsic Stock Value per Share).
-    """
-    # Calculate Future Cash Flows
-    future_cash_flows = [eps * (1 + growth_rate) ** i for i in range(1, years + 1)]
+    # Get analyst growth estimate (default to 10% if not available)
+    analyst_growth = stock.info.get("earningsGrowth", 0.10)
+    growth_rate = manual_growth if manual_growth else analyst_growth
+    
+    # Set Discount Rate (WACC approximation)
+    discount_rate = stock.info.get("costOfCapital", 0.08) or 0.08  # Default to 8% if missing
+    
+    # Set Terminal Growth Rate (manual or assume 4%)
+    terminal_growth = manual_terminal_growth if manual_terminal_growth else 0.04
+    
+    # Calculate future cash flows
+    future_cash_flows = [fcf_per_share * (1 + growth_rate) ** i for i in range(1, years + 1)]
+    
+    # Discount future cash flows to present value
+    dcf_value = sum([cf / (1 + discount_rate) ** i for i, cf in enumerate(future_cash_flows, 1)])
 
-    # Discount Future Cash Flows to Present Value
-    dcf_value = sum(cf / (1 + discount_rate) ** i for i, cf in enumerate(future_cash_flows, 1))
+    # Add Terminal Value (TV) using the Gordon Growth Model
+    terminal_value = (future_cash_flows[-1] * (1 + terminal_growth)) / (discount_rate - terminal_growth)
+    terminal_value_discounted = terminal_value / ((1 + discount_rate) ** years)
+    
+    # Final DCF Value per share
+    intrinsic_value = (dcf_value + terminal_value_discounted)
 
-    # Add Terminal Value (TV) - Only if discount rate > terminal growth rate
-    if discount_rate > terminal_growth:
-        terminal_value = (future_cash_flows[-1] * (1 + terminal_growth)) / (discount_rate - terminal_growth)
-        dcf_value += terminal_value / (1 + discount_rate) ** years  # Discount TV to present value
-
-    return dcf_value
+    return round(intrinsic_value, 2)
 
 # Corrected PEG Ratio Calculation
 def peg_ratio(pe_ratio, growth_rate):
