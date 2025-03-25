@@ -28,8 +28,9 @@ def dcf_valuation(ticker, years=10, manual_growth=None, manual_terminal_growth=N
         stock = yf.Ticker(ticker)
         info = stock.info
 
-        # Get EPS (Trailing Twelve Months)
-        eps = info.get("trailingEps", 0)  # Default to 0 if missing
+        # Get EPS: Prefer Forward EPS but fallback to Trailing EPS
+        eps = stock.info.get("forwardEps", stock.info.get("trailingEps", 0))
+
 
         # Get shares outstanding
         shares_outstanding = info.get("sharesOutstanding", 1)
