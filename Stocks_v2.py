@@ -24,7 +24,7 @@ def fetch_data(ticker):
 
 def dcf_valuation(ticker, years=10, manual_growth=None, manual_terminal_growth=None):
     # Fetch stock data
-    stock = yf.Ticker(ticker)
+    stock = ticker
     
     # Get EPS (Trailing Twelve Months)
     eps = stock.info.get("trailingEps", 0)  # Default to 0 if missing
@@ -213,7 +213,7 @@ if menu == "Stock Forecast":
         pe_ratio = info['trailingPE']
         earnings_growth = info['earningsGrowth']
         forward_pe = info.get('forwardPE', 'N/A')
-        dcf_value = dcf_valuation(info['trailingEps'], 0.1, info['trailingEps'])
+        dcf_value = dcf_valuation(ticker)
         peg = peg_ratio(pe_ratio, earnings_growth)
 
         st.markdown("### 📈 Stock Overview")
