@@ -234,8 +234,8 @@ if menu == "Stock Forecast":
         grossmargin = info.get('grossMargins', 'N/A')
         operatingmargin = info.get('operatingMargins', 'N/A')
         profit_margin = info.get('profitMargins', 'N/A')
-        institutional_ownership = info.get('institutionOwnership', 'N/A')
-        insider_ownership = info.get('insiderOwnership', 'N/A')
+        institutional_ownership = info.get('heldPercentInstitutions', 'N/A')
+        insider_ownership = info.get('heldPercentInsiders', 'N/A')
         trailingeps = info.get('trailingEps', 'N/A')
         forwardeps = info.get('forwardEps', 'N/A')
         # Calculate DCF Value
