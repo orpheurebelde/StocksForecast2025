@@ -269,7 +269,7 @@ if menu == "Stock Info":
             st.write(info)
 
     if info and 'trailingPE' in info and 'earningsGrowth' in info:
-        pe_ratio = info['trailingPE', 'N/A']
+        pe_ratio = info.get['trailingPE', 'N/A']
         peg_ratio = info.get('trailingPegRatio', 'N/A')
         earnings_growth = info['earningsGrowth']
         forward_pe = info.get('forwardPE', 'N/A')
