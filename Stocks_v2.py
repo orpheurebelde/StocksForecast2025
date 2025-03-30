@@ -21,7 +21,7 @@ def get_ticker_from_name(search_input):
         matches = results.get("quotes", [])
 
         if not matches:
-            return None, {}
+            return {}
 
         # Extract tickers and names
         ticker_options = {item["shortname"]: item["symbol"] for item in matches if "symbol" in item and "shortname" in item}
@@ -30,7 +30,7 @@ def get_ticker_from_name(search_input):
 
     except Exception as e:
         st.error(f"Error fetching ticker: {e}")
-        return None, {}
+        return {}
 
 
 # Function to fetch stock data
@@ -243,9 +243,8 @@ if menu == "Stock Info":
         ticker_options = get_ticker_from_name(search_input)
 
         if ticker_options:
-            # Display matching options in a dropdown
-            selected_company = st.selectbox("Select the correct company:", list(ticker_options.keys()))
-            ticker = ticker_options[selected_company]
+            # Dynamically filter results in the text input dropdown
+            ticker = st.selectbox("Matching Companies", options=list(ticker_options.values()), format_func=lambda x: f"{x} - {list(ticker_options.keys())[list(ticker_options.values()).index(x)]}")
 
             # Fetch and display stock data
             if ticker:
