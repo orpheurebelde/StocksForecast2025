@@ -24,17 +24,23 @@ st.set_page_config(layout="wide")
 
 # Fetch stock news headlines
 def get_stock_news(ticker):
-    api_url = f"https://newsapi.org/v2/everything?q={ticker}&apiKey=YOUR_NEWSAPI_KEY"
+    api_url = f"https://finance.yahoo.com/quote/{ticker}?p={ticker}"
     response = requests.get(api_url)
     if response.status_code == 200:
-        articles = response.json().get("articles", [])
-        return [article["title"] for article in articles[:5]]  # Get top 5 news
+        soup = BeautifulSoup(response.text, 'html.parser')
+        headlines = soup.find_all('h3', class_='Mb(5px)')
+        return [headline.text for headline in headlines[:10]]  # Get top 10 news
     return ["No recent news found."]
 
 # Perform sentiment analysis
 def analyze_sentiment(headlines):
-    sentiment_pipeline = pipeline("sentiment-analysis", model="ProsusAI/finbert")
-    return [sentiment_pipeline(headline)[0] for headline in headlines]
+    try:
+        # Load the FinBERT model for sentiment analysis
+        sentiment_pipeline = pipeline("sentiment-analysis", model="ProsusAI/finbert")
+        return [sentiment_pipeline(headline)[0] for headline in headlines]
+    except Exception as e:
+        st.error(f"Error performing sentiment analysis: {e}")
+        return [{"label": "Error", "score": 0.0} for _ in headlines]
 
 
 
