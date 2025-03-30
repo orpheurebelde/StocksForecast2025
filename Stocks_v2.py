@@ -268,10 +268,10 @@ if menu == "Stock Info":
         with st.expander("Company Info", expanded=False):
             st.write(info)
 
-    if info and 'trailingPE' in info and 'earningsGrowth' in info:
-        pe_ratio = info.get['trailingPE', 'N/A']
+        if info and 'trailingPE' in info and 'earningsGrowth' in info:
+        pe_ratio = info.get('trailingPE', 'N/A')
         peg_ratio = info.get('trailingPegRatio', 'N/A')
-        earnings_growth = info.get['earningsGrowth']
+        earnings_growth = info.get('earningsGrowth', 'N/A')
         forward_pe = info.get('forwardPE', 'N/A')
         freecash_flow = info.get('freeCashflow', 'N/A')
         netincome = info.get('netIncomeToCommon', 'N/A')
