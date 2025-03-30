@@ -253,30 +253,30 @@ if menu == "Stock Info":
             st.metric(label="📈 Dividend Yield", value=f"{info['dividendYield']:.2%}" if info.get('dividendYield') and isinstance(info['dividendYield'], (int, float)) else "N/A")
         with col2:
             peg_color = "green" if peg_ratio < 1 else "orange" if 1 <= peg_ratio <= 2 else "red"
-            st.markdown(f'<div style="color: {peg_color}; font-size: 30px;"><b>📈 PEG Ratio: {peg_ratio:.2f}</b></div>', unsafe_allow_html=True)
+            st.markdown(f'<div style="color: {peg_color}; font-size: 25px;"><b>📈 PEG Ratio: {peg_ratio:.2f}</b></div>', unsafe_allow_html=True)
             #Categorize P/E Ratio, adding Green, Orange and Red colors
             if pe_ratio < 15:       
-                st.markdown(f"<span style='color:green; font-size:30px;'>📈 P/E Ratio: {pe_ratio:.2f}</span>", unsafe_allow_html=True)
+                st.markdown(f"<span style='color:green; font-size:25px;'>📈 P/E Ratio: {pe_ratio:.2f}</span>", unsafe_allow_html=True)
             elif 15 <= pe_ratio <= 25:
-                st.markdown(f"<span style='color:orange; font-size:30px;'>📈 P/E Ratio: {pe_ratio:.2f}</span>", unsafe_allow_html=True)
+                st.markdown(f"<span style='color:orange; font-size:25px;'>📈 P/E Ratio: {pe_ratio:.2f}</span>", unsafe_allow_html=True)
             else:
-                st.markdown(f"<span style='color:red; font-size:30px;'>📈 P/E Ratio: {pe_ratio:.2f}</span>", unsafe_allow_html=True)
+                st.markdown(f"<span style='color:red; font-size:25px;'>📈 P/E Ratio: {pe_ratio:.2f}</span>", unsafe_allow_html=True)
             #Categorize Forward P/E Ratio, adding Green, Orange and Red colors
             if forward_pe < 15:       
-                st.markdown(f"<span style='color:green; font-size:30px;'>📈 Forward P/E Ratio: {forward_pe:.2f}</span>", unsafe_allow_html=True)
+                st.markdown(f"<span style='color:green; font-size:25px;'>📈 Forward P/E Ratio: {forward_pe:.2f}</span>", unsafe_allow_html=True)
             elif 15 <= forward_pe <= 25:
-                st.markdown(f"<span style='color:orange; font-size:30px;'>📈 Forward P/E Ratio: {forward_pe:.2f}</span>", unsafe_allow_html=True)
+                st.markdown(f"<span style='color:orange; font-size: 250px;'>📈 Forward P/E Ratio: {forward_pe:.2f}</span>", unsafe_allow_html=True)
             else:
-                st.markdown(f"<span style='color:red; font-size:30px;'>📈 Forward P/E Ratio: {forward_pe:.2f}</span>", unsafe_allow_html=True)
+                st.markdown(f"<span style='color:red; font-size:25px;'>📈 Forward P/E Ratio: {forward_pe:.2f}</span>", unsafe_allow_html=True)
             #Categorize Debt to Equity Ratio, adding Green, Orange and Red colors
             if totaldebt and totalcash and isinstance(totaldebt, (int, float)) and isinstance(totalcash, (int, float)):
                 debt_to_equity = totaldebt / totalcash
                 if debt_to_equity < 1:
-                    st.markdown(f"<span style='color:green; font-size:30px;'>📈 Debt to Equity Ratio: {debt_to_equity:.2f}</span>", unsafe_allow_html=True)
+                    st.markdown(f"<span style='color:green; font-size:25px;'>📈 Debt to Equity Ratio: {debt_to_equity:.2f}</span>", unsafe_allow_html=True)
                 elif 1 <= debt_to_equity <= 2:
-                    st.markdown(f"<span style='color:orange; font-size: 30px;'>📈 Debt to Equity Ratio: {debt_to_equity:.2f}</span>", unsafe_allow_html=True)
+                    st.markdown(f"<span style='color:orange; font-size: 25px;'>📈 Debt to Equity Ratio: {debt_to_equity:.2f}</span>", unsafe_allow_html=True)
                 else:
-                    st.markdown(f"<span style='color:red;font-size: 30px;'>📈 Debt to Equity Ratio: {debt_to_equity:.2f}</span>", unsafe_allow_html=True)
+                    st.markdown(f"<span style='color:red;font-size: 25px;'>📈 Debt to Equity Ratio: {debt_to_equity:.2f}</span>", unsafe_allow_html=True)
             else:
                 st.metric(label="📈 Debt to Equity Ratio", value="N/A")
             st.write("")  # Empty line
