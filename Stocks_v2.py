@@ -216,14 +216,10 @@ if menu == "Stock Info":
     # Search for ticker or name
     if search_input:
         try:
-            # Use yfinance to search for matching tickers
-            search_results = yf.utils.get_tickers(search_input)
-            if search_results:
-                ticker = st.selectbox("Select a Stock", search_results)
-            else:
-                st.error("No matching stocks found. Please try again.")
+            # Directly use the input as the ticker
+            ticker = search_input.upper()
         except Exception as e:
-            st.error(f"Error fetching stock options: {e}")
+            st.error(f"Error processing stock ticker: {e}")
     else:
         ticker = "AAPL"  # Default ticker
 
