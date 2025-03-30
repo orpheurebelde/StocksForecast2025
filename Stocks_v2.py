@@ -215,6 +215,10 @@ if menu == "Stock Info":
 
     data, info = fetch_data(ticker)
     
+    #write the name of the stock
+    st.markdown(f"### 📈 {ticker} - {info.get('longName', 'Company Name Not Found')}")
+    st.markdown(f"#### Sector: {info.get('sector', 'Sector Not Found')}")
+    st.markdown(f"#### Industry: {info.get('industry', 'Industry Not Found')}")
     with st.expander("Company Info", expanded=False):
         st.write(info)
 
