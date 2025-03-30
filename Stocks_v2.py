@@ -264,11 +264,11 @@ if menu == "Stock Info":
         with st.expander("Stock Overview", expanded=True):
             col1, col2, col3 = st.columns(3)
         with col1:
-            st.markdown(f"### Name: {selected_ticker} - {info.get('longName', 'Company Name Not Found')}")
+            st.markdown(f"<h4>Name: {selected_ticker} - {info.get('longName', 'Company Name Not Found')}</h4>", unsafe_allow_html=True)
         with col2:
-            st.markdown(f"#### Sector: {info.get('sector', 'Sector Not Found')}")
+            st.markdown(f"<h4>Sector: {info.get('sector', 'Sector Not Found')}</h4>", unsafe_allow_html=True)
         with col3:
-            st.markdown(f"#### Industry: {info.get('industry', 'Industry Not Found')}")
+            st.markdown(f"<h4>Industry: {info.get('industry', 'Industry Not Found')}</h4>", unsafe_allow_html=True)
         with st.expander("Company Info", expanded=False):
             st.write(info)
        
