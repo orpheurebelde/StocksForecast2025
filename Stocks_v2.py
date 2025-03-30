@@ -63,10 +63,25 @@ def get_ticker_from_name(search_input):
 # Function to fetch stock data
 @st.cache_data
 def fetch_data(ticker):
-    # Fetch data from Yahoo Finance
-    stock = yf.Ticker(ticker)
-    ticker = stock.history(period="10y")  # You might be using a different period
-    return data, info
+    try:
+        # Fetch data from Yahoo Finance
+        stock = yf.Ticker(ticker)
+        data = stock.history(period="10y")  # Fetch 10 years of historical data
+        info = stock.info  # Fetch stock information
+
+        # Ensure data and info are not empty
+        if data.empty:
+            st.error(f"No historical data found for ticker: {ticker}")
+            return None, None
+        if not info:
+            st.error(f"No stock information found for ticker: {ticker}")
+            return data, None
+
+        return data, info
+
+    except Exception as e:
+        st.error(f"Error fetching data for ticker {ticker}: {e}")
+        return None, None
 
 # Train Prophet model and forecast
 def predict_future(df):
