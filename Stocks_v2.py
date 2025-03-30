@@ -238,6 +238,10 @@ if menu == "Stock Forecast":
         insider_ownership = info.get('heldPercentInsiders', 'N/A')
         trailingeps = info.get('trailingEps', 'N/A')
         forwardeps = info.get('forwardEps', 'N/A')
+        revenue = info.get('TotalRevenue', 'N/A')
+        totaldebt = info.get('totalDebt', 'N/A')
+        totalcash = info.get('totalCash', 'N/A')
+        revenuegrowth = info.get('revenueGrowth', 'N/A')
         # Calculate DCF Value
         dcf_value = dcf_valuation(ticker)
         # Calculate PEG Ratio
@@ -266,6 +270,11 @@ if menu == "Stock Forecast":
         with col3:
             st.metric(label="📈 Trailing EPS", value=f"${trailingeps:.2f}")
             st.metric(label="📈 Forward EPS", value=f"${forwardeps:.2f}")
+            st.metric(label="📈 Revenue", value=f"${revenue / 1e9:.2f}B" if revenue and isinstance(revenue, (int, float)) else "N/A")
+            st.metric(label="📈 Revenue Growth", value=f"{revenuegrowth:.2%}" if revenuegrowth and isinstance(revenuegrowth, (int, float)) else "N/A")
+            st.metric(label="📈 Total Debt", value=f"${totaldebt / 1e9:.2f}B" if totaldebt and isinstance(totaldebt, (int, float)) else "N/A")
+            st.metric(label="📈 Total Cash", value=f"${totalcash / 1e9:.2f}B" if totalcash and isinstance(totalcash, (int, float)) else "N/A")
+            st.metric(label="📈 Debt to Equity", value=f"{totaldebt / totalcash:.2f}" if totaldebt and totalcash and isinstance(totaldebt, (int, float)) and isinstance(totalcash, (int, float)) else "N/A")
             st.metric(label="📈 Institutional Ownership", value=f"{institutional_ownership:.2%}")
             st.metric(label="📈 Insider Ownership", value=f"{insider_ownership:.2%}")
     
