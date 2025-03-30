@@ -254,7 +254,6 @@ if menu == "Stock Info":
         with col2:
             peg_color = "green" if peg_ratio < 1 else "orange" if 1 <= peg_ratio <= 2 else "red"
             st.markdown(f'<div style="color: {peg_color}; font-size: 30px;"><b>📈 PEG Ratio: {peg_ratio:.2f}</b></div>', unsafe_allow_html=True)
-            st.write("")  # Empty line
             #Categorize P/E Ratio, adding Green, Orange and Red colors
             if pe_ratio < 15:       
                 st.markdown(f"<span style='color:green; font-size:30px;'>📈 P/E Ratio: {pe_ratio:.2f}</span>", unsafe_allow_html=True)
@@ -269,7 +268,6 @@ if menu == "Stock Info":
                 st.markdown(f"<span style='color:orange; font-size:30px;'>📈 Forward P/E Ratio: {forward_pe:.2f}</span>", unsafe_allow_html=True)
             else:
                 st.markdown(f"<span style='color:red; font-size:30px;'>📈 Forward P/E Ratio: {forward_pe:.2f}</span>", unsafe_allow_html=True)
-            st.write("")  # Empty line
             #Categorize Debt to Equity Ratio, adding Green, Orange and Red colors
             if totaldebt and totalcash and isinstance(totaldebt, (int, float)) and isinstance(totalcash, (int, float)):
                 debt_to_equity = totaldebt / totalcash
