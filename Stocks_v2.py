@@ -211,26 +211,18 @@ if menu == "Sector Map":
 # Stock Info Section
 if menu == "Stock Info":
     st.title("📊 Stock Info and Metrics")
+    #Search Ticker by Name or Ticker
     search_input = st.text_input("Enter Stock Ticker or Name", "AAPL")
-    
-    # If input is not empty, process it
-    if search_input:
-        try:
-            # Search for ticker or name
-            search_results = yf.utils.get_tickers(search_input)
-            
-            if len(search_results) > 1:
-                # If multiple results, show a dropdown to select
-                selected_name = st.selectbox("Select a Company", search_results.keys())
-                ticker = search_results[selected_name]
-            else:
-                # If only one result, use it directly
-                ticker = list(search_results.values())[0]
-        except Exception as e:
-            st.error(f"Error processing stock ticker or name: {e}")
-            ticker = "AAPL"  # Default ticker in case of error
-    else:
-        ticker = "AAPL"  # Default ticker if no input
+    ticker = search_input.upper()  # Convert to uppercase for consistency
+    # Function to fetch stock data 
+    @st.cache_data
+    def fetch_data(ticker):
+        stock = yf.Ticker(ticker)
+        data = stock.history(period="10y")  # Fetch 10 years of data
+        info = stock.info 
+        if data.index.tz is not None:  # Remove timezone info if present
+            data.index = data.index.tz_localize(None)
+        return data, info
 
     # Fetch data
     data, info = fetch_data(ticker)
