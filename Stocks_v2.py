@@ -300,7 +300,10 @@ if menu == "Stock Info":
                 peg_color = "green" if peg_ratio < 1 else "orange" if 1 <= peg_ratio <= 2 else "red"
             except (ValueError, TypeError):
                 peg_color = "gray"  # Default to gray if conversion fails
-            st.markdown(f'<div style="color: {peg_color}; font-size: 25px;"><b>📈 PEG Ratio: {peg_ratio:.2f}</b></div>', unsafe_allow_html=True)
+            if isinstance(peg_ratio, (int, float)):
+                st.markdown(f'<div style="color: {peg_color}; font-size: 25px;"><b>📈 PEG Ratio: {peg_ratio:.2f}</b></div>', unsafe_allow_html=True)
+            else:
+                st.markdown('<div style="color: gray; font-size: 25px;"><b>📈 PEG Ratio: N/A</b></div>', unsafe_allow_html=True)
             #Categorize P/E Ratio, adding Green, Orange and Red colors
             if pe_ratio < 15:       
                 st.markdown(f"<span style='color:green; font-size:25px;'>📈 P/E Ratio: {pe_ratio:.2f}</span>", unsafe_allow_html=True)
