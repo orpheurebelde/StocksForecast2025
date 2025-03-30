@@ -261,17 +261,17 @@ if menu == "Stock Forecast":
             st.metric(label="📈 Dividend Yield", value=f"{info['dividendYield']:.2%}" if info.get('dividendYield') and isinstance(info['dividendYield'], (int, float)) else "N/A")
         with col2:
             peg_color = "green" if peg < 1 else "orange" if 1 <= peg <= 2 else "red"
-            st.markdown(f'<div style="color: {peg_color}; font-size: 20px;"><b>PEG Ratio: {peg:.2f}</b></div>', unsafe_allow_html=True)
+            st.markdown(f'<div style="color: {peg_color}; font-size: 30px;"><b>PEG Ratio: {peg:.2f}</b></div>', unsafe_allow_html=True)
             st.write("")  # Empty line
             #Categorize Debt to Equity Ratio, adding Green, Orange and Red colors
             if totaldebt and totalcash and isinstance(totaldebt, (int, float)) and isinstance(totalcash, (int, float)):
                 debt_to_equity = totaldebt / totalcash
                 if debt_to_equity < 1:
-                    st.markdown(f"<span style='color:green;'>📈 Debt to Equity Ratio: {debt_to_equity:.2f}</span>", unsafe_allow_html=True)
+                    st.markdown(f"<span style='color:green; font-size:30px;'>📈 Debt to Equity Ratio: {debt_to_equity:.2f}</span>", unsafe_allow_html=True)
                 elif 1 <= debt_to_equity <= 2:
-                    st.markdown(f"<span style='color:orange;'>📈 Debt to Equity Ratio: {debt_to_equity:.2f}</span>", unsafe_allow_html=True)
+                    st.markdown(f"<span style='color:orange; font-size: 30px;'>📈 Debt to Equity Ratio: {debt_to_equity:.2f}</span>", unsafe_allow_html=True)
                 else:
-                    st.markdown(f"<span style='color:red;'>📈 Debt to Equity Ratio: {debt_to_equity:.2f}</span>", unsafe_allow_html=True)
+                    st.markdown(f"<span style='color:red;font-size: 30px;'>📈 Debt to Equity Ratio: {debt_to_equity:.2f}</span>", unsafe_allow_html=True)
             else:
                 st.metric(label="📈 Debt to Equity Ratio", value="N/A")
             st.write("")  # Empty line
