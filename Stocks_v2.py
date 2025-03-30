@@ -266,7 +266,7 @@ if menu == "Stock Info":
             if forward_pe < 15:       
                 st.markdown(f"<span style='color:green; font-size:25px;'>📈 Forward P/E Ratio: {forward_pe:.2f}</span>", unsafe_allow_html=True)
             elif 15 <= forward_pe <= 25:
-                st.markdown(f"<span style='color:orange; font-size: 250px;'>📈 Forward P/E Ratio: {forward_pe:.2f}</span>", unsafe_allow_html=True)
+                st.markdown(f"<span style='color:orange; font-size: 25px;'>📈 Forward P/E Ratio: {forward_pe:.2f}</span>", unsafe_allow_html=True)
             else:
                 st.markdown(f"<span style='color:red; font-size:25px;'>📈 Forward P/E Ratio: {forward_pe:.2f}</span>", unsafe_allow_html=True)
             #Categorize Debt to Equity Ratio, adding Green, Orange and Red colors
