@@ -263,6 +263,8 @@ if menu == "Stock Forecast":
             peg_color = "green" if peg < 1 else "orange" if 1 <= peg <= 2 else "red"
             st.markdown(f'<div style="color: {peg_color}; font-size: 30px;"><b>PEG Ratio: {peg:.2f}</b></div>', unsafe_allow_html=True)
             st.write("")  # Empty line
+            st.metric(label="📈 Total Debt", value=f"${totaldebt / 1e9:.2f}B" if totaldebt and isinstance(totaldebt, (int, float)) else "N/A")
+            st.metric(label="📈 Total Cash", value=f"${totalcash / 1e9:.2f}B" if totalcash and isinstance(totalcash, (int, float)) else "N/A")
             #Categorize Debt to Equity Ratio, adding Green, Orange and Red colors
             if totaldebt and totalcash and isinstance(totaldebt, (int, float)) and isinstance(totalcash, (int, float)):
                 debt_to_equity = totaldebt / totalcash
@@ -284,8 +286,6 @@ if menu == "Stock Forecast":
             st.metric(label="📈 Forward EPS", value=f"${forwardeps:.2f}")
             st.metric(label="📈 Revenue", value=f"${revenue / 1e9:.2f}B" if revenue and isinstance(revenue, (int, float)) else "N/A")
             st.metric(label="📈 Revenue Growth", value=f"{revenuegrowth:.2%}" if revenuegrowth and isinstance(revenuegrowth, (int, float)) else "N/A")
-            st.metric(label="📈 Total Debt", value=f"${totaldebt / 1e9:.2f}B" if totaldebt and isinstance(totaldebt, (int, float)) else "N/A")
-            st.metric(label="📈 Total Cash", value=f"${totalcash / 1e9:.2f}B" if totalcash and isinstance(totalcash, (int, float)) else "N/A")
             st.metric(label="📈 Institutional Ownership", value=f"{institutional_ownership:.2%}")
             st.metric(label="📈 Insider Ownership", value=f"{insider_ownership:.2%}")
     
