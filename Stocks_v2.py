@@ -261,7 +261,7 @@ if menu == "Stock Forecast":
             st.metric(label="📈 Dividend Yield", value=f"{info['dividendYield']:.2%}" if info.get('dividendYield') and isinstance(info['dividendYield'], (int, float)) else "N/A")
         with col2:
             peg_color = "green" if peg < 1 else "orange" if 1 <= peg <= 2 else "red"
-            st.markdown(f'<div style="color: {peg_color}; font-size: 30px;"><b>PEG Ratio: {peg:.2f}</b></div>', unsafe_allow_html=True)
+            st.markdown(f'<div style="color: {peg_color}; font-size: 30px;"><b>📈 PEG Ratio: {peg:.2f}</b></div>', unsafe_allow_html=True)
             st.write("")  # Empty line
             #Categorize Debt to Equity Ratio, adding Green, Orange and Red colors
             if totaldebt and totalcash and isinstance(totaldebt, (int, float)) and isinstance(totalcash, (int, float)):
