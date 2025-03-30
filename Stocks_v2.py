@@ -229,25 +229,36 @@ if menu == "Stock Forecast":
         pe_ratio = info['trailingPE']
         earnings_growth = info['earningsGrowth']
         forward_pe = info.get('forwardPE', 'N/A')
+        freecash_flow = info('freeCashflow', 'N/A')
+        netincome = info('netIncomeToCommon', 'N/A')
+        grossmargin = info('grossMargins', 'N/A')
+        operatingmargin = info('operatingMargins', 'N/A')
+        profit_margin = info('profitMargins', 'N/A')
+        # Calculate DCF Value
         dcf_value = dcf_valuation(ticker)
+        # Calculate PEG Ratio
         peg = peg_ratio(pe_ratio, earnings_growth)
 
         st.markdown("### 📈 Stock Overview")
-        col1, col2, col3, col4 = st.columns(4)
+        col1, col2 = st.columns(2)
 
         with col1:
+            st.metric(label="📈 Market Cap", value=f"${info['marketCap'] / 1e9:.2f}B")
+            st.metric(label="📈 Free Cash Flow", value=f"${freecash_flow / 1e9:.2f}B")
+            st.metric(label="📈 Net Income", value=f"${netincome / 1e9:.2f}B")
+            st.metric(label="📈 Gross Margin", value=f"{grossmargin:.2%}")
+            st.metric(label="📈 Operating Margin", value=f"{operatingmargin:.2%}")
+            st.metric(label="📈 Profit Margin", value=f"{profit_margin:.2%}")
             st.metric(label="📊 Current Price", value=f"${info['currentPrice']:.2f}")
-
-        with col2:
             st.metric(label="💰 P/E Ratio", value=f"{pe_ratio:.2f}")
             st.metric(label="📊 Forward P/E", value=f"{forward_pe:.2f}")
-
-        with col3:
+            st.metric(label="📈 Earnings Growth", value=f"{earnings_growth:.2%}")
+            st.metric(label="📈 Dividend Yield", value=f"{info['dividendYield']:.2%}")
+        with col2:
             peg_color = "green" if peg < 1 else "orange" if 1 <= peg <= 2 else "red"
-            st.markdown(f'<div style="color: {peg_color}; font-size: 20px;"><b>PEG Ratio: {peg:.2f}</b></div>', unsafe_allow_html=True)
-
-        with col4:
+            st.markdown(f'<div style="color: {peg_color}; font-size: 20px;"><b>PEG Ratio: {peg:.2f}</b></div>', unsafe_allow_html=True)~
             st.metric(label="📉 DCF Valuation", value=f"${dcf_value:,.2f}")
+    
 
 # Historical Analysis Section
 if menu == "Historical Analysis":
