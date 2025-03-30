@@ -454,19 +454,19 @@ if menu == "Stock Info":
             st.metric(label="📈 Institutional Ownership", value=f"{institutional_ownership:.2%}")
             st.metric(label="📈 Insider Ownership", value=f"{insider_ownership:.2%}")
     
-    #Using AI to analyse the stock based on the uper metrics
-    st.markdown("📊 AI-Powered Stock Analysis", )
-    with st.expander("Stock Analysis", expanded=True):
+        #Using AI to analyse the stock based on the uper metrics
+        st.markdown("📊 AI-Powered Stock Analysis", )
+        with st.expander("Stock Analysis", expanded=True):
 
-        if ticker:
-            # Sentiment Analysis
-            st.subheader("📰 Sentiment Analysis")
-            news = get_stock_news(ticker)
-            sentiments = analyze_sentiment(news)
+            if ticker:
+                # Sentiment Analysis
+                st.subheader("📰 Sentiment Analysis")
+                news = get_stock_news(ticker)
+                sentiments = analyze_sentiment(news)
 
-            for headline, sentiment in zip(news, sentiments):
-                st.write(f"🗞️ {headline}")
-                st.write(f"💡 Sentiment: **{sentiment['label']}** (Confidence: {sentiment['score']:.2f})")
+                for headline, sentiment in zip(news, sentiments):
+                    st.write(f"🗞️ {headline}")
+                    st.write(f"💡 Sentiment: **{sentiment['label']}** (Confidence: {sentiment['score']:.2f})")
 
 # Historical Analysis Section
 if menu == "Historical Analysis":
