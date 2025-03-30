@@ -217,7 +217,7 @@ if menu == "Sector Map":
 
 # Stock Forecast Section
 if menu == "Stock Forecast":
-    st.title("📊 Stock Forecast")
+    st.title("📊 Stock Info and Metrics")
     ticker = st.text_input("Enter Stock Ticker", "AAPL")
 
     data, info = fetch_data(ticker)
