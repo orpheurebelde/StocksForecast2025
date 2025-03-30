@@ -233,9 +233,6 @@ if menu == "Stock Info":
         ticker = "AAPL"  # Default ticker if no input
 
     # Fetch data
-    @st.cache_data
-    def fetch_data(ticker):
-        stock = yf.Ticker(ticker)
     data, info = fetch_data(ticker)
     
     #write the name of the stock
