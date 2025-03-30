@@ -353,7 +353,7 @@ if menu == "Stock Info":
 
     # Fetch and display stock data if a ticker is selected
     if selected_ticker:
-        data, info, df = fetch_data(selected_ticker)
+        data, info = fetch_data(selected_ticker)
 
         # Display stock information
         with st.expander("Stock Overview", expanded=True):
