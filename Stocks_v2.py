@@ -261,12 +261,17 @@ if menu == "Stock Info":
         data, info = fetch_data(selected_ticker)
 
         # Display stock information
-        st.markdown(f"### 📈 {selected_ticker} - {info.get('longName', 'Company Name Not Found')}")
-        st.markdown(f"#### Sector: {info.get('sector', 'Sector Not Found')}")
-        st.markdown(f"#### Industry: {info.get('industry', 'Industry Not Found')}")
+        with st.expander("Stock Overview", expanded=True):
+            col1, col2, col3 = st.columns(3)
+        with col1:
+            st.markdown(f"### 📈 {selected_ticker} - {info.get('longName', 'Company Name Not Found')}")
+        with col2:
+            st.markdown(f"#### Sector: {info.get('sector', 'Sector Not Found')}")
+        with col3:
+            st.markdown(f"#### Industry: {info.get('industry', 'Industry Not Found')}")
         with st.expander("Company Info", expanded=False):
             st.write(info)
-
+       
         if info and 'trailingPE' in info and 'earningsGrowth' in info:
             pe_ratio = info.get('trailingPE', 'N/A')
             peg_ratio = info.get('trailingPegRatio', 'N/A')
