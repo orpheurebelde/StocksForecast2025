@@ -229,11 +229,11 @@ if menu == "Stock Forecast":
         pe_ratio = info['trailingPE']
         earnings_growth = info['earningsGrowth']
         forward_pe = info.get('forwardPE', 'N/A')
-        freecash_flow = info('freeCashflow', 'N/A')
-        netincome = info('netIncomeToCommon', 'N/A')
-        grossmargin = info('grossMargins', 'N/A')
-        operatingmargin = info('operatingMargins', 'N/A')
-        profit_margin = info('profitMargins', 'N/A')
+        freecash_flow = info.get('freeCashflow', 'N/A')
+        netincome = info.get('netIncomeToCommon', 'N/A')
+        grossmargin = info.get('grossMargins', 'N/A')
+        operatingmargin = info.get('operatingMargins', 'N/A')
+        profit_margin = info.get('profitMargins', 'N/A')
         # Calculate DCF Value
         dcf_value = dcf_valuation(ticker)
         # Calculate PEG Ratio
