@@ -199,8 +199,8 @@ def vix_indicator(vix_value):
         return "🔴 SELL - High Volatility (Bearish)", "red"
 
 # Sidebar Menu
-st.sidebar.title("📈 Stock Forecast Dashboard")
-menu = st.sidebar.radio("Select a Section", ["Stock Forecast", "Historical Analysis", "Monte Carlo Simulations", "Export Data", "Sector Map", "Refined Strategy (RSI with Trend)"])
+st.sidebar.title("📈 Stock Info Dashboard")
+menu = st.sidebar.radio("Select a Section", ["Stock Info", "Historical Analysis", "Monte Carlo Simulations", "Export Data", "Sector Map", "Refined Strategy (RSI with Trend)"])
 
 # Exit App Button
 if st.sidebar.button("❌ Exit App"):
@@ -215,8 +215,8 @@ if menu == "Sector Map":
     # Display a clickable link instead of an iframe
     st.markdown(f"[🔗 Click here to view the Finviz Sector Map]({finviz_url})", unsafe_allow_html=True)
 
-# Stock Forecast Section
-if menu == "Stock Forecast":
+# Stock Info Section
+if menu == "Stock Info":
     st.title("📊 Stock Info and Metrics")
     ticker = st.text_input("Enter Stock Ticker", "AAPL")
 
