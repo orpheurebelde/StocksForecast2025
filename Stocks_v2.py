@@ -7,23 +7,51 @@ import streamlit as st
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
+from yahooquery import search
 
 # Set app to wide mode
 st.set_page_config(layout="wide")
 
-# Fetch Historical Data
+# Function to get stock ticker from company name
+def get_ticker_from_name(search_input):
+    """Fetch possible tickers from Yahoo Finance when a company name is entered."""
+    if len(search_input) <= 5:  # Assuming stock tickers are short (e.g., AAPL, TSLA)
+        return search_input.upper()  # Return input directly if it's already a ticker
+
+    try:
+        results = search(search_input)  # Search for tickers matching the company name
+        matches = results.get("quotes", [])
+
+        if not matches:
+            st.error("No matching stocks found. Please enter a valid ticker or company name.")
+            return None
+
+        # Extract tickers and names
+        ticker_options = {item["shortname"]: item["symbol"] for item in matches if "symbol" in item}
+
+        if len(ticker_options) == 1:
+            return list(ticker_options.values())[0]  # If only one match, return directly
+        else:
+            selected_company = st.selectbox("Select the correct company:", list(ticker_options.keys()))
+            return ticker_options[selected_company]  # Return the ticker from selection
+
+    except Exception as e:
+        st.error(f"Error fetching ticker: {e}")
+        return None
+
+
+# Function to fetch stock data
+@st.cache_data
 def fetch_data(ticker):
+    """Fetch historical stock data and company info from Yahoo Finance."""
     stock = yf.Ticker(ticker)
-    data = stock.history(period="10y")  # 10 years of historical data
-    info = stock.info
+    data = stock.history(period="10y")  # Fetch 10 years of data
+    info = stock.info 
 
     if data.index.tz is not None:  # Remove timezone info if present
         data.index = data.index.tz_localize(None)
 
     return data, info
-
-import yfinance as yf
-import streamlit as st
 
 def dcf_valuation(ticker, years=10, manual_growth=None, manual_terminal_growth=None):
     try:
@@ -211,21 +239,19 @@ if menu == "Sector Map":
 # Stock Info Section
 if menu == "Stock Info":
     st.title("📊 Stock Info and Metrics")
-    #Search Ticker by Name or Ticker
-    search_input = st.text_input("Enter Stock Ticker or Name", "AAPL")
-    ticker = search_input.upper()  # Convert to uppercase for consistency
-    # Function to fetch stock data 
-    @st.cache_data
-    def fetch_data(ticker):
-        stock = yf.Ticker(ticker)
-        data = stock.history(period="10y")  # Fetch 10 years of data
-        info = stock.info 
-        if data.index.tz is not None:  # Remove timezone info if present
-            data.index = data.index.tz_localize(None)
-        return data, info
+    #Search Ticker by Name or Ticker by selecting from a dropdown list
+    # Search Section
+    st.markdown("### Search for a Stock Ticker")
+    st.markdown("You can search by Ticker or Company Name (e.g., AAPL, Apple Inc.)")
 
-    # Fetch data
-    data, info = fetch_data(ticker)
+    search_input = st.text_input("Enter Stock Ticker or Name", "Apple")
+
+    if search_input:
+        ticker = get_ticker_from_name(search_input)  # Convert name to ticker
+
+        if ticker:
+            # Fetch and display stock data
+            data, info = fetch_data(ticker)
     
     #write the name of the stock
     st.markdown(f"### 📈 {ticker} - {info.get('longName', 'Company Name Not Found')}")
