@@ -8,9 +8,35 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
 from yahooquery import search
+import requests
+from transformers import pipeline  # FinBERT for sentiment analysis
+from prophet import Prophet  # Predictive modeling
+from sklearn.preprocessing import StandardScaler
+from bs4 import BeautifulSoup
+from sklearn.ensemble import RandomForestRegressor  # Alternative ML Model
 
 # Set app to wide mode
 st.set_page_config(layout="wide")
+
+# -------------------------------
+# 1️⃣ SENTIMENT ANALYSIS (FinBERT)
+# -------------------------------
+
+# Fetch stock news headlines
+def get_stock_news(ticker):
+    api_url = f"https://newsapi.org/v2/everything?q={ticker}&apiKey=YOUR_NEWSAPI_KEY"
+    response = requests.get(api_url)
+    if response.status_code == 200:
+        articles = response.json().get("articles", [])
+        return [article["title"] for article in articles[:5]]  # Get top 5 news
+    return ["No recent news found."]
+
+# Perform sentiment analysis
+def analyze_sentiment(headlines):
+    sentiment_pipeline = pipeline("sentiment-analysis", model="ProsusAI/finbert")
+    return [sentiment_pipeline(headline)[0] for headline in headlines]
+
+
 
 # Function to get stock ticker from company name
 def get_ticker_from_name(search_input):
@@ -39,12 +65,87 @@ def fetch_data(ticker):
     """Fetch historical stock data and company info from Yahoo Finance."""
     stock = yf.Ticker(ticker)
     data = stock.history(period="10y")  # Fetch 10 years of data
+    df = df.reset_index()[["Date", "Close"]]
+    df.columns = ["ds", "y"]  # Prophet requires "ds" (date) and "y" (target variable)
     info = stock.info 
 
     if data.index.tz is not None:  # Remove timezone info if present
         data.index = data.index.tz_localize(None)
 
-    return data, info
+    return data, info, df
+
+# Train Prophet model and forecast
+def predict_future(df):
+    model = Prophet()
+    model.fit(df)
+    future = model.make_future_dataframe(periods=365)  # Predict 1 year ahead
+    forecast = model.predict(future)
+    return forecast
+
+# -------------------------------
+# 3️⃣ FUNDAMENTAL & TECHNICAL AI ANALYSIS
+# -------------------------------
+
+# Compare stock fundamentals against industry benchmarks
+def analyze_fundamentals(ticker):
+    stock = yf.Ticker(ticker)
+    info = stock.info
+    
+    # Extract key metrics
+    pe_ratio = info.get("trailingPE", "N/A")  # P/E Ratio
+    eps = info.get("trailingEps", "N/A")  # Earnings Per Share
+    peg_ratio = info.get("pegRatio", "N/A")  # PEG Ratio
+    #Dinamically fetch the industry average P/E ratio
+    # Fetch industry average P/E ratio dynamically
+    # Ensure `info` is a dictionary before accessing its keys
+    if isinstance(info, dict):
+        industry = info.get("industry")
+    else:
+        industry = None
+
+    if industry:
+        try:
+            # Fetch the webpage content
+            response = requests.get("https://fullratio.com/pe-ratio-by-industry", timeout=5)
+            response.raise_for_status()  # Raise an error for HTTP issues
+
+            # Parse the HTML content
+            soup = BeautifulSoup(response.text, 'html.parser')
+
+            # Find the table row corresponding to the industry
+            table = soup.find('table')
+            rows = table.find_all('tr')
+            industry_pe = None
+
+            for row in rows:
+                columns = row.find_all('td')
+                if len(columns) >= 2 and industry.lower() in columns[0].text.lower():
+                    industry_pe = float(columns[1].text.strip())
+                    break
+
+            if industry_pe is None:
+                st.warning("Industry P/E ratio not found on the page. Using default value.")
+                industry_pe = 20
+
+        except Exception as e:
+            st.warning(f"Error fetching industry P/E ratio: {e}. Using default value.")
+            industry_pe = st.number_input(
+            "Industry P/E ratio not available. Please input the Industry P/E ratio:",
+            min_value=0.0,
+            value=20.0,
+            step=0.1
+        )
+
+    # AI Valuation
+    valuation = "Undervalued" if pe_ratio != "N/A" and pe_ratio < industry_pe else "Overvalued"
+    
+    return {
+        "P/E Ratio": pe_ratio,
+        "EPS": eps,
+        "PEG Ratio": peg_ratio,
+        "Industry Avg P/E": industry_pe,
+        "Valuation": valuation
+    }
 
 def dcf_valuation(ticker, years=10, manual_growth=None, manual_terminal_growth=None):
     try:
@@ -353,6 +454,16 @@ if menu == "Stock Info":
             st.metric(label="📈 Institutional Ownership", value=f"{institutional_ownership:.2%}")
             st.metric(label="📈 Insider Ownership", value=f"{insider_ownership:.2%}")
     
+    #Using AI to analyse the stock based on the uper metrics
+    if selected_ticker:
+        st.subheader("🧠 AI Analysis")
+        st.expander("### Using AI to analyze the stock based on the metrics above.", expanded=True)
+        # Placeholder for AI analysis
+
+        # Here you can integrate your AI model or logic to analyze the stock based on the fetched data and metrics.
+        # For demonstration, we will just display a static message.
+        st.write("AI is analyzing the stock...")
+        # You can replace this with actual AI analysis results.
 
 # Historical Analysis Section
 if menu == "Historical Analysis":
