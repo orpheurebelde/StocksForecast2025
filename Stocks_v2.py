@@ -235,8 +235,11 @@ if menu == "Stock Info":
     st.markdown("### Search for a Stock Ticker")
     st.markdown("You can search by Ticker or Company Name (e.g., AAPL, Apple Inc.)")
 
-    # Input box for user to type the stock name
-    search_input = st.text_input("Enter Stock Ticker or Name", "")
+    # Input box for user to type the stock name, with a default value
+    search_input = st.text_input("Enter Stock Ticker or Name", "Apple")
+
+    # Initialize selected ticker
+    selected_ticker = None
 
     if search_input:
         # Dynamically fetch matching tickers
@@ -249,21 +252,21 @@ if menu == "Stock Info":
                 if st.button(f"{ticker} - {company_name}"):
                     selected_ticker = ticker
                     break
-            else:
-                selected_ticker = None
-
-            # Fetch and display stock data if a ticker is selected
-            if selected_ticker:
-                data, info = fetch_data(selected_ticker)
-
-                # Display stock information
-                st.markdown(f"### 📈 {selected_ticker} - {info.get('longName', 'Company Name Not Found')}")
-                st.markdown(f"#### Sector: {info.get('sector', 'Sector Not Found')}")
-                st.markdown(f"#### Industry: {info.get('industry', 'Industry Not Found')}")
-                with st.expander("Company Info", expanded=False):
-                    st.write(info)
         else:
             st.warning("No matching stocks found. Please refine your search.")
+    else:
+        st.info("Please enter a stock name or ticker to search.")
+
+    # Fetch and display stock data if a ticker is selected
+    if selected_ticker:
+        data, info = fetch_data(selected_ticker)
+
+        # Display stock information
+        st.markdown(f"### 📈 {selected_ticker} - {info.get('longName', 'Company Name Not Found')}")
+        st.markdown(f"#### Sector: {info.get('sector', 'Sector Not Found')}")
+        st.markdown(f"#### Industry: {info.get('industry', 'Industry Not Found')}")
+        with st.expander("Company Info", expanded=False):
+            st.write(info)
 
     if 'trailingPE' in info and 'earningsGrowth' in info:
         pe_ratio = info['trailingPE']
