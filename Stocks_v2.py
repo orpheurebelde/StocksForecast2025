@@ -239,8 +239,8 @@ if menu == "Stock Info":
         # Calculate DCF Value
         dcf_value = dcf_valuation(ticker)
 
-        st.markdown("### 📈 Stock Overview")
-        col1, col2, col3 = st.columns(3)
+        with st.expander("### 📈 Stock Overview", expanded=True):
+            col1, col2, col3 = st.columns(3)
 
         with col1:
             st.metric(label="📈 Market Cap", value=f"${info['marketCap'] / 1e9:.2f}B")
