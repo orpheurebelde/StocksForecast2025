@@ -455,15 +455,18 @@ if menu == "Stock Info":
             st.metric(label="📈 Insider Ownership", value=f"{insider_ownership:.2%}")
     
     #Using AI to analyse the stock based on the uper metrics
-    if selected_ticker:
-        st.subheader("🧠 AI Analysis")
-        st.expander("### Using AI to analyze the stock based on the metrics above.", expanded=True)
-        # Placeholder for AI analysis
+    st.markdown("📊 AI-Powered Stock Analysis", )
+    with st.expander("Stock Analysis", expanded=True):
 
-        # Here you can integrate your AI model or logic to analyze the stock based on the fetched data and metrics.
-        # For demonstration, we will just display a static message.
-        st.write("AI is analyzing the stock...")
-        # You can replace this with actual AI analysis results.
+        if ticker:
+            # Sentiment Analysis
+            st.subheader("📰 Sentiment Analysis")
+            news = get_stock_news(ticker)
+            sentiments = analyze_sentiment(news)
+
+            for headline, sentiment in zip(news, sentiments):
+                st.write(f"🗞️ {headline}")
+                st.write(f"💡 Sentiment: **{sentiment['label']}** (Confidence: {sentiment['score']:.2f})")
 
 # Historical Analysis Section
 if menu == "Historical Analysis":
