@@ -278,11 +278,11 @@ if menu == "Stock Forecast":
             if totaldebt and totalcash and isinstance(totaldebt, (int, float)) and isinstance(totalcash, (int, float)):
                 debt_to_equity = totaldebt / totalcash
                 if debt_to_equity < 1:
-                    st.metric(label="📈 Debt to Equity Ratio", value=f"{debt_to_equity:.2f}", delta_color="normal")
+                    st.markdown(f"<span style='color:green;'>📈 Debt to Equity Ratio: {debt_to_equity:.2f}</span>", unsafe_allow_html=True)
                 elif 1 <= debt_to_equity <= 2:
-                    st.metric(label="📈 Debt to Equity Ratio", value=f"{debt_to_equity:.2f}", delta_color="warning")
+                    st.markdown(f"<span style='color:orange;'>📈 Debt to Equity Ratio: {debt_to_equity:.2f}</span>", unsafe_allow_html=True)
                 else:
-                    st.metric(label="📈 Debt to Equity Ratio", value=f"{debt_to_equity:.2f}", delta_color="inverse")
+                    st.markdown(f"<span style='color:red;'>📈 Debt to Equity Ratio: {debt_to_equity:.2f}</span>", unsafe_allow_html=True)
             else:
                 st.metric(label="📈 Debt to Equity Ratio", value="N/A")
             st.metric(label="📈 Institutional Ownership", value=f"{institutional_ownership:.2%}")
