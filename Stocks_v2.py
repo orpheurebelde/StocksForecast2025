@@ -14,29 +14,23 @@ st.set_page_config(layout="wide")
 
 # Function to get stock ticker from company name
 def get_ticker_from_name(search_input):
-    """Fetch possible tickers from Yahoo Finance when a company name is entered."""
+    """Fetch possible tickers from Yahoo Finance dynamically as the user types."""
     try:
         # Use YahooQuery's search function to find matches
         results = search(search_input)  # Search for tickers matching the company name
         matches = results.get("quotes", [])
 
         if not matches:
-            st.error("No matching stocks found. Please enter a valid ticker or company name.")
-            return None
+            return None, {}
 
         # Extract tickers and names
         ticker_options = {item["shortname"]: item["symbol"] for item in matches if "symbol" in item and "shortname" in item}
 
-        if len(ticker_options) == 1:
-            return list(ticker_options.values())[0]  # If only one match, return directly
-        else:
-            # Display all matching companies in a dropdown for user selection
-            selected_company = st.selectbox("Select the correct company:", list(ticker_options.keys()))
-            return ticker_options[selected_company]  # Return the ticker from selection
+        return ticker_options
 
     except Exception as e:
         st.error(f"Error fetching ticker: {e}")
-        return None
+        return None, {}
 
 
 # Function to fetch stock data
@@ -238,26 +232,33 @@ if menu == "Sector Map":
 # Stock Info Section
 if menu == "Stock Info":
     st.title("📊 Stock Info and Metrics")
-    #Search Ticker by Name or Ticker by selecting from a dropdown list
-    # Search Section
     st.markdown("### Search for a Stock Ticker")
     st.markdown("You can search by Ticker or Company Name (e.g., AAPL, Apple Inc.)")
 
-    search_input = st.text_input("Enter Stock Ticker or Name", "Apple")
+    # Input box for user to type the stock name
+    search_input = st.text_input("Enter Stock Ticker or Name", "")
 
     if search_input:
-        ticker = get_ticker_from_name(search_input)  # Convert name to ticker
+        # Dynamically fetch matching tickers
+        ticker_options = get_ticker_from_name(search_input)
 
-        if ticker:
+        if ticker_options:
+            # Display matching options in a dropdown
+            selected_company = st.selectbox("Select the correct company:", list(ticker_options.keys()))
+            ticker = ticker_options[selected_company]
+
             # Fetch and display stock data
-            data, info = fetch_data(ticker)
-    
-    #write the name of the stock
-    st.markdown(f"### 📈 {ticker} - {info.get('longName', 'Company Name Not Found')}")
-    st.markdown(f"#### Sector: {info.get('sector', 'Sector Not Found')}")
-    st.markdown(f"#### Industry: {info.get('industry', 'Industry Not Found')}")
-    with st.expander("Company Info", expanded=False):
-        st.write(info)
+            if ticker:
+                data, info = fetch_data(ticker)
+
+                # Display stock information
+                st.markdown(f"### 📈 {ticker} - {info.get('longName', 'Company Name Not Found')}")
+                st.markdown(f"#### Sector: {info.get('sector', 'Sector Not Found')}")
+                st.markdown(f"#### Industry: {info.get('industry', 'Industry Not Found')}")
+                with st.expander("Company Info", expanded=False):
+                    st.write(info)
+        else:
+            st.warning("No matching stocks found. Please refine your search.")
 
     if 'trailingPE' in info and 'earningsGrowth' in info:
         pe_ratio = info['trailingPE']
