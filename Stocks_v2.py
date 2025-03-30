@@ -84,13 +84,6 @@ def dcf_valuation(ticker, years=10, manual_growth=None, manual_terminal_growth=N
         st.error(f"❌ Error calculating DCF for {ticker}: {e}")
         return None  # Return None instead of crashing
 
-
-def peg_ratio(pe_ratio, growth_rate):
-    """Calculates the PEG ratio while preventing division by zero."""
-    if pe_ratio is None or growth_rate is None or growth_rate == 0:
-        return float('inf')  # Avoid ZeroDivisionError by returning an infinite PEG ratio
-    return pe_ratio / growth_rate / 100  # Convert percentage growth to decimal
-
 # Monte Carlo Simulation
 def monte_carlo_simulation(data, n_simulations=1000, n_days=252, log_normal=False, volatility=None):
     daily_returns = data['Close'].pct_change().dropna()
@@ -227,6 +220,7 @@ if menu == "Stock Info":
 
     if 'trailingPE' in info and 'earningsGrowth' in info:
         pe_ratio = info['trailingPE']
+        peg_ratio = info.get('trailingPegRatio', 'N/A')
         earnings_growth = info['earningsGrowth']
         forward_pe = info.get('forwardPE', 'N/A')
         freecash_flow = info.get('freeCashflow', 'N/A')
@@ -244,8 +238,6 @@ if menu == "Stock Info":
         revenuegrowth = info.get('revenueGrowth', 'N/A')
         # Calculate DCF Value
         dcf_value = dcf_valuation(ticker)
-        # Calculate PEG Ratio
-        peg = peg_ratio(pe_ratio, earnings_growth)
 
         st.markdown("### 📈 Stock Overview")
         col1, col2, col3 = st.columns(3)
@@ -260,8 +252,8 @@ if menu == "Stock Info":
             st.metric(label="📈 Earnings Growth", value=f"{earnings_growth:.2%}" if earnings_growth and isinstance(earnings_growth, (int, float)) else "N/A")
             st.metric(label="📈 Dividend Yield", value=f"{info['dividendYield']:.2%}" if info.get('dividendYield') and isinstance(info['dividendYield'], (int, float)) else "N/A")
         with col2:
-            peg_color = "green" if peg < 1 else "orange" if 1 <= peg <= 2 else "red"
-            st.markdown(f'<div style="color: {peg_color}; font-size: 30px;"><b>📈 PEG Ratio: {peg:.2f}</b></div>', unsafe_allow_html=True)
+            peg_color = "green" if peg_ratio < 1 else "orange" if 1 <= peg_ratio <= 2 else "red"
+            st.markdown(f'<div style="color: {peg_color}; font-size: 30px;"><b>📈 PEG Ratio: {peg_ratio:.2f}</b></div>', unsafe_allow_html=True)
             st.write("")  # Empty line
             #Categorize Debt to Equity Ratio, adding Green, Orange and Red colors
             if totaldebt and totalcash and isinstance(totaldebt, (int, float)) and isinstance(totalcash, (int, float)):
