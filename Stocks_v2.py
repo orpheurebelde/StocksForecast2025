@@ -61,18 +61,23 @@ def get_ticker_from_name(search_input):
 
 # Function to fetch stock data
 @st.cache_data
-def fetch_data(ticker):
-    """Fetch historical stock data and company info from Yahoo Finance."""
-    stock = yf.Ticker(ticker)
-    data = stock.history(period="10y")  # Fetch 10 years of data
+def fetch_data(selected_ticker):
+    # Fetch the data (ensure this function returns a valid DataFrame)
+    stock = yf.Ticker(selected_ticker)
+    df = stock.history(period="10y")  # Fetch historical data for the maximum available period
+
+    # Ensure df is a DataFrame before proceeding
+    if df is None or not isinstance(df, pd.DataFrame) or df.empty:
+        return None, None, None  # Or handle it differently
+
+    # Ensure required columns exist
+    expected_columns = {"Date", "Close"}
+    if not expected_columns.issubset(df.columns):
+        raise ValueError(f"Missing required columns in df: {expected_columns - set(df.columns)}")
+
     df = df.reset_index()[["Date", "Close"]]
-    df.columns = ["ds", "y"]  # Prophet requires "ds" (date) and "y" (target variable)
-    info = stock.info 
-
-    if data.index.tz is not None:  # Remove timezone info if present
-        data.index = data.index.tz_localize(None)
-
-    return data, info, df
+    
+    return data, info, df  # Ensure 'data' and 'info' are correctly returned too
 
 # Train Prophet model and forecast
 def predict_future(df):
