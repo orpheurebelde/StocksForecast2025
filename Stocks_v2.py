@@ -255,8 +255,6 @@ if menu == "Stock Forecast":
             st.metric(label="📈 Profit Margin", value=f"{profit_margin:.2%}")
             st.metric(label="📈 Earnings Growth", value=f"{earnings_growth:.2%}")
             st.metric(label="📈 Dividend Yield", value=f"{info['dividendYield']:.2%}")
-            st.metric(label="📈 Institutional Ownership", value=f"{institutional_ownership:.2%}")
-            st.metric(label="📈 Insider Ownership", value=f"{insider_ownership:.2%}")
         with col2:
             peg_color = "green" if peg < 1 else "orange" if 1 <= peg <= 2 else "red"
             st.markdown(f'<div style="color: {peg_color}; font-size: 20px;"><b>PEG Ratio: {peg:.2f}</b></div>', unsafe_allow_html=True)
@@ -265,6 +263,11 @@ if menu == "Stock Forecast":
             st.metric(label="💰 P/E Ratio", value=f"{pe_ratio:.2f}")
             st.metric(label="📊 Forward P/E", value=f"{forward_pe:.2f}")
             st.metric(label="📉 DCF Valuation", value=f"${dcf_value:,.2f}")
+        with col3:
+            st.metric(label="📈 Trailing EPS", value=f"${trailingeps:.2f}")
+            st.metric(label="📈 Forward EPS", value=f"${forwardeps:.2f}")
+            st.metric(label="📈 Institutional Ownership", value=f"{institutional_ownership:.2%}")
+            st.metric(label="📈 Insider Ownership", value=f"{insider_ownership:.2%}")
     
 
 # Historical Analysis Section
