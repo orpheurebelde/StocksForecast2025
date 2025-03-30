@@ -253,11 +253,11 @@ if menu == "Stock Forecast":
             st.metric(label="📈 Dividend Yield", value=f"{info['dividendYield']:.2%}")
         with col2:
             peg_color = "green" if peg < 1 else "orange" if 1 <= peg <= 2 else "red"
+            st.markdown(f'<div style="color: {peg_color}; font-size: 20px;"><b>PEG Ratio: {peg:.2f}</b></div>', unsafe_allow_html=True)
             st.write("")  # Empty line
             st.metric(label="📊 Current Price", value=f"${info['currentPrice']:.2f}")
             st.metric(label="💰 P/E Ratio", value=f"{pe_ratio:.2f}")
             st.metric(label="📊 Forward P/E", value=f"{forward_pe:.2f}")
-            st.markdown(f'<div style="color: {peg_color}; font-size: 20px;"><b>PEG Ratio: {peg:.2f}</b></div>', unsafe_allow_html=True)
             st.metric(label="📉 DCF Valuation", value=f"${dcf_value:,.2f}")
     
 
