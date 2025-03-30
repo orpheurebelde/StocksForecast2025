@@ -255,6 +255,21 @@ if menu == "Stock Info":
             peg_color = "green" if peg_ratio < 1 else "orange" if 1 <= peg_ratio <= 2 else "red"
             st.markdown(f'<div style="color: {peg_color}; font-size: 30px;"><b>📈 PEG Ratio: {peg_ratio:.2f}</b></div>', unsafe_allow_html=True)
             st.write("")  # Empty line
+            #Categorize P/E Ratio, adding Green, Orange and Red colors
+            if pe_ratio < 15:       
+                st.markdown(f"<span style='color:green; font-size:30px;'>📈 P/E Ratio: {pe_ratio:.2f}</span>", unsafe_allow_html=True)
+            elif 15 <= pe_ratio <= 25:
+                st.markdown(f"<span style='color:orange; font-size:30px;'>📈 P/E Ratio: {pe_ratio:.2f}</span>", unsafe_allow_html=True)
+            else:
+                st.markdown(f"<span style='color:red; font-size:30px;'>📈 P/E Ratio: {pe_ratio:.2f}</span>", unsafe_allow_html=True)
+            #Categorize Forward P/E Ratio, adding Green, Orange and Red colors
+            if forward_pe < 15:       
+                st.markdown(f"<span style='color:green; font-size:30px;'>📈 Forward P/E Ratio: {forward_pe:.2f}</span>", unsafe_allow_html=True)
+            elif 15 <= forward_pe <= 25:
+                st.markdown(f"<span style='color:orange; font-size:30px;'>📈 Forward P/E Ratio: {forward_pe:.2f}</span>", unsafe_allow_html=True)
+            else:
+                st.markdown(f"<span style='color:red; font-size:30px;'>📈 Forward P/E Ratio: {forward_pe:.2f}</span>", unsafe_allow_html=True)
+            st.write("")  # Empty line
             #Categorize Debt to Equity Ratio, adding Green, Orange and Red colors
             if totaldebt and totalcash and isinstance(totaldebt, (int, float)) and isinstance(totalcash, (int, float)):
                 debt_to_equity = totaldebt / totalcash
@@ -271,20 +286,6 @@ if menu == "Stock Info":
             st.metric(label="📈 Total Cash", value=f"${totalcash / 1e9:.2f}B" if totalcash and isinstance(totalcash, (int, float)) else "N/A")
             st.metric(label="📊 Current Price", value=f"${info['currentPrice']:.2f}")
             st.metric(label="💰 P/E Ratio", value=f"{pe_ratio:.2f}")
-            #Categorize P/E Ratio, adding Green, Orange and Red colors
-            if pe_ratio < 15:       
-                st.markdown(f"<span style='color:green; font-size:30px;'>📈 P/E Ratio: {pe_ratio:.2f}</span>", unsafe_allow_html=True)
-            elif 15 <= pe_ratio <= 25:
-                st.markdown(f"<span style='color:orange; font-size:30px;'>📈 P/E Ratio: {pe_ratio:.2f}</span>", unsafe_allow_html=True)
-            else:
-                st.markdown(f"<span style='color:red; font-size:30px;'>📈 P/E Ratio: {pe_ratio:.2f}</span>", unsafe_allow_html=True)
-            #Categorize Forward P/E Ratio, adding Green, Orange and Red colors
-            if forward_pe < 15:       
-                st.markdown(f"<span style='color:green; font-size:30px;'>📈 Forward P/E Ratio: {forward_pe:.2f}</span>", unsafe_allow_html=True)
-            elif 15 <= forward_pe <= 25:
-                st.markdown(f"<span style='color:orange; font-size:30px;'>📈 Forward P/E Ratio: {forward_pe:.2f}</span>", unsafe_allow_html=True)
-            else:
-                st.markdown(f"<span style='color:red; font-size:30px;'>📈 Forward P/E Ratio: {forward_pe:.2f}</span>", unsafe_allow_html=True)
             st.metric(label="📉 DCF Valuation", value=f"${dcf_value:,.2f}")
         with col3:
             st.metric(label="📈 Trailing EPS", value=f"${trailingeps:.2f}")
