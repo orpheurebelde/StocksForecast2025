@@ -274,7 +274,7 @@ if menu == "Stock Info":
         insider_ownership = info.get('heldPercentInsiders', 'N/A')
         trailingeps = info.get('trailingEps', 'N/A')
         forwardeps = info.get('forwardEps', 'N/A')
-        revenue = info.get('TotalRevenue', 'N/A')
+        revenue = info.get('totalRevenue', 'N/A')
         totaldebt = info.get('totalDebt', 'N/A')
         totalcash = info.get('totalCash', 'N/A')
         revenuegrowth = info.get('revenueGrowth', 'N/A')
