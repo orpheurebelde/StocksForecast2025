@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import streamlit as st
+import torch
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
@@ -35,6 +36,16 @@ def get_stock_news(ticker):
 # Perform sentiment analysis
 def analyze_sentiment(headlines):
     try:
+        # Check if PyTorch or TensorFlow is installed
+        try:
+            import torch
+        except ImportError:
+            try:
+                import tensorflow as tf
+            except ImportError:
+                st.error("Neither PyTorch nor TensorFlow is installed. Please install one of them to enable sentiment analysis.")
+                return [{"label": "Error", "score": 0.0} for _ in headlines]
+
         # Load the FinBERT model for sentiment analysis
         sentiment_pipeline = pipeline("sentiment-analysis", model="ProsusAI/finbert")
         return [sentiment_pipeline(headline)[0] for headline in headlines]
