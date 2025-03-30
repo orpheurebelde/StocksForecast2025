@@ -15,10 +15,8 @@ st.set_page_config(layout="wide")
 # Function to get stock ticker from company name
 def get_ticker_from_name(search_input):
     """Fetch possible tickers from Yahoo Finance when a company name is entered."""
-    if len(search_input) <= 5:  # Assuming stock tickers are short (e.g., AAPL, TSLA)
-        return search_input.upper()  # Return input directly if it's already a ticker
-
     try:
+        # Use YahooQuery's search function to find matches
         results = search(search_input)  # Search for tickers matching the company name
         matches = results.get("quotes", [])
 
@@ -27,11 +25,12 @@ def get_ticker_from_name(search_input):
             return None
 
         # Extract tickers and names
-        ticker_options = {item["shortname"]: item["symbol"] for item in matches if "symbol" in item}
+        ticker_options = {item["shortname"]: item["symbol"] for item in matches if "symbol" in item and "shortname" in item}
 
         if len(ticker_options) == 1:
             return list(ticker_options.values())[0]  # If only one match, return directly
         else:
+            # Display all matching companies in a dropdown for user selection
             selected_company = st.selectbox("Select the correct company:", list(ticker_options.keys()))
             return ticker_options[selected_company]  # Return the ticker from selection
 
