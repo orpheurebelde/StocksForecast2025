@@ -248,13 +248,13 @@ if menu == "Stock Forecast":
 
         with col1:
             st.metric(label="📈 Market Cap", value=f"${info['marketCap'] / 1e9:.2f}B")
-            st.metric(label="📈 Free Cash Flow", value=f"${freecash_flow / 1e9:.2f}B")
-            st.metric(label="📈 Net Income", value=f"${netincome / 1e9:.2f}B")
-            st.metric(label="📈 Gross Margin", value=f"{grossmargin:.2%}")
-            st.metric(label="📈 Operating Margin", value=f"{operatingmargin:.2%}")
-            st.metric(label="📈 Profit Margin", value=f"{profit_margin:.2%}")
-            st.metric(label="📈 Earnings Growth", value=f"{earnings_growth:.2%}")
-            st.metric(label="📈 Dividend Yield", value=f"{info['dividendYield']:.2%}")
+            st.metric(label="📈 Free Cash Flow", value=f"${freecash_flow / 1e9:.2f}B" if freecash_flow and isinstance(freecash_flow, (int, float)) else "N/A")
+            st.metric(label="📈 Net Income", value=f"${netincome / 1e9:.2f}B" if netincome and isinstance(netincome, (int, float)) else "N/A")
+            st.metric(label="📈 Gross Margin", value=f"{grossmargin:.2%}" if grossmargin and isinstance(grossmargin, (int, float)) else "N/A")
+            st.metric(label="📈 Operating Margin", value=f"{operatingmargin:.2%}" if operatingmargin and isinstance(operatingmargin, (int, float)) else "N/A")
+            st.metric(label="📈 Profit Margin", value=f"{profit_margin:.2%}" if profit_margin and isinstance(profit_margin, (int, float)) else "N/A")
+            st.metric(label="📈 Earnings Growth", value=f"{earnings_growth:.2%}" if earnings_growth and isinstance(earnings_growth, (int, float)) else "N/A")
+            st.metric(label="📈 Dividend Yield", value=f"{info['dividendYield']:.2%}" if info.get('dividendYield') and isinstance(info['dividendYield'], (int, float)) else "N/A")
         with col2:
             peg_color = "green" if peg < 1 else "orange" if 1 <= peg <= 2 else "red"
             st.markdown(f'<div style="color: {peg_color}; font-size: 20px;"><b>PEG Ratio: {peg:.2f}</b></div>', unsafe_allow_html=True)
