@@ -232,8 +232,7 @@ if menu == "Sector Map":
 # Stock Info Section
 if menu == "Stock Info":
     st.title("📊 Stock Info and Metrics")
-    st.markdown("### Search for a Stock Ticker")
-    st.markdown("You can search by Ticker or Company Name (e.g., AAPL, Apple Inc.)")
+    st.markdown("### Search for a Stock Ticker or Company Name")
 
     # Input box for user to type the stock name, with a default value
     search_input = st.text_input("Enter Stock Ticker or Name", "Apple")
