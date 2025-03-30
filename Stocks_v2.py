@@ -234,13 +234,17 @@ if menu == "Stock Forecast":
         grossmargin = info.get('grossMargins', 'N/A')
         operatingmargin = info.get('operatingMargins', 'N/A')
         profit_margin = info.get('profitMargins', 'N/A')
+        institutional_ownership = info.get('institutionOwnership', 'N/A')
+        insider_ownership = info.get('insiderOwnership', 'N/A')
+        trailingeps = info.get('trailingEps', 'N/A')
+        forwardeps = info.get('forwardEps', 'N/A')
         # Calculate DCF Value
         dcf_value = dcf_valuation(ticker)
         # Calculate PEG Ratio
         peg = peg_ratio(pe_ratio, earnings_growth)
 
         st.markdown("### 📈 Stock Overview")
-        col1, col2 = st.columns(2)
+        col1, col2, col3 = st.columns(3)
 
         with col1:
             st.metric(label="📈 Market Cap", value=f"${info['marketCap'] / 1e9:.2f}B")
@@ -251,6 +255,8 @@ if menu == "Stock Forecast":
             st.metric(label="📈 Profit Margin", value=f"{profit_margin:.2%}")
             st.metric(label="📈 Earnings Growth", value=f"{earnings_growth:.2%}")
             st.metric(label="📈 Dividend Yield", value=f"{info['dividendYield']:.2%}")
+            st.metric(label="📈 Institutional Ownership", value=f"{institutional_ownership:.2%}")
+            st.metric(label="📈 Insider Ownership", value=f"{insider_ownership:.2%}")
         with col2:
             peg_color = "green" if peg < 1 else "orange" if 1 <= peg <= 2 else "red"
             st.markdown(f'<div style="color: {peg_color}; font-size: 20px;"><b>PEG Ratio: {peg:.2f}</b></div>', unsafe_allow_html=True)
