@@ -213,16 +213,29 @@ if menu == "Stock Info":
     st.title("📊 Stock Info and Metrics")
     search_input = st.text_input("Enter Stock Ticker or Name", "AAPL")
     
-    # Search for ticker or name
+    # If input is not empty, process it
     if search_input:
         try:
-            # Directly use the input as the ticker
-            ticker = search_input.upper()
+            # Search for ticker or name
+            search_results = yf.utils.get_tickers(search_input)
+            
+            if len(search_results) > 1:
+                # If multiple results, show a dropdown to select
+                selected_name = st.selectbox("Select a Company", search_results.keys())
+                ticker = search_results[selected_name]
+            else:
+                # If only one result, use it directly
+                ticker = list(search_results.values())[0]
         except Exception as e:
-            st.error(f"Error processing stock ticker: {e}")
+            st.error(f"Error processing stock ticker or name: {e}")
+            ticker = "AAPL"  # Default ticker in case of error
     else:
-        ticker = "AAPL"  # Default ticker
+        ticker = "AAPL"  # Default ticker if no input
 
+    # Fetch data
+    @st.cache_data
+    def fetch_data(ticker):
+        stock = yf.Ticker(ticker)
     data, info = fetch_data(ticker)
     
     #write the name of the stock
