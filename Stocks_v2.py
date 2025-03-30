@@ -239,7 +239,7 @@ if menu == "Stock Info":
         # Calculate DCF Value
         dcf_value = dcf_valuation(ticker)
 
-        with st.expander("### 📈 Stock Overview", expanded=True):
+        with st.expander("### Stock Overview", expanded=True):
             col1, col2, col3 = st.columns(3)
 
         with col1:
