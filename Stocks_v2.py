@@ -484,14 +484,17 @@ if menu == "Stock Info":
         with st.expander("Stock Analysis", expanded=True):
 
             if ticker:
-                # Sentiment Analysis
-                st.subheader("📰 Sentiment Analysis")
-                news = get_stock_news(ticker)
+                news = get_stock_news(ticker)  # Replace "AAPL" with the desired stock ticker
+
+                # Perform sentiment analysis
                 sentiments = analyze_sentiment(news)
 
+                # Display the results
+                st.write("Sentiment Analysis Results:")
                 for headline, sentiment in zip(news, sentiments):
-                    st.write(f"🗞️ {headline}")
-                    st.write(f"💡 Sentiment: **{sentiment['label']}** (Confidence: {sentiment['score']:.2f})")
+                    st.write(f"Headline: {headline}")
+                    st.write(f"Sentiment: {sentiment['label']} (Score: {sentiment['score']:.2f})")
+                    st.write("---")
 
 # Historical Analysis Section
 if menu == "Historical Analysis":
