@@ -295,7 +295,7 @@ if menu == "Stock Info":
             st.metric(label="📈 Dividend Yield", value=f"{info['dividendYield']:.2%}" if info.get('dividendYield') and isinstance(info['dividendYield'], (int, float)) else "N/A")
         with col2:
             st.metric(label="📊 Current Price", value=f"${info['currentPrice']:.2f}")
-            peg_color = "green" if peg_ratio < 1 else "orange" if 1 <= peg_ratio <= 2 else "red"
+            peg_color = "gray" if peg_ratio == "N/A" else "green" if peg_ratio < 1 else "orange" if 1 <= peg_ratio <= 2 else "red"
             st.markdown(f'<div style="color: {peg_color}; font-size: 25px;"><b>📈 PEG Ratio: {peg_ratio:.2f}</b></div>', unsafe_allow_html=True)
             #Categorize P/E Ratio, adding Green, Orange and Red colors
             if pe_ratio < 15:       
