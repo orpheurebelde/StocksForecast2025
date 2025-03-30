@@ -264,7 +264,7 @@ if menu == "Stock Info":
         with st.expander("Stock Overview", expanded=True):
             col1, col2, col3 = st.columns(3)
         with col1:
-            st.markdown(f"### 📈 {selected_ticker} - {info.get('longName', 'Company Name Not Found')}")
+            st.markdown(f"### Name: {selected_ticker} - {info.get('longName', 'Company Name Not Found')}")
         with col2:
             st.markdown(f"#### Sector: {info.get('sector', 'Sector Not Found')}")
         with col3:
