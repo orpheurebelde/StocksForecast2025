@@ -59,25 +59,33 @@ def get_ticker_from_name(search_input):
         return {}
 
 
+
 # Function to fetch stock data
 @st.cache_data
-def fetch_data(selected_ticker):
-    # Fetch the data (ensure this function returns a valid DataFrame)
-    stock = yf.Ticker(selected_ticker)
-    df = stock.history(period="10y")  # Fetch historical data for the maximum available period
+def fetch_data(ticker):
+    # Fetch data from Yahoo Finance
+    stock = yf.Ticker(ticker)
+    df = stock.history(period="1y")  # You might be using a different period
 
-    # Ensure df is a DataFrame before proceeding
+    # Print debug info
+    print("Fetched columns:", df.columns)
+    print("Data sample:\n", df.head())
+
+    # Ensure df is a DataFrame
     if df is None or not isinstance(df, pd.DataFrame) or df.empty:
-        return None, None, None  # Or handle it differently
+        raise ValueError("Fetched data is empty or invalid.")
 
     # Ensure required columns exist
     expected_columns = {"Date", "Close"}
-    if not expected_columns.issubset(df.columns):
-        raise ValueError(f"Missing required columns in df: {expected_columns - set(df.columns)}")
+    actual_columns = set(df.columns)
 
+    if not expected_columns.issubset(actual_columns):
+        raise ValueError(f"Missing required columns in df: {expected_columns - actual_columns}")
+
+    # Reset index and filter necessary columns
     df = df.reset_index()[["Date", "Close"]]
-    
-    return data, info, df  # Ensure 'data' and 'info' are correctly returned too
+
+    return data, info, df
 
 # Train Prophet model and forecast
 def predict_future(df):
