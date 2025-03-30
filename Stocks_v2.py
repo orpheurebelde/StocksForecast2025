@@ -243,15 +243,21 @@ if menu == "Stock Info":
         ticker_options = get_ticker_from_name(search_input)
 
         if ticker_options:
-            # Dynamically filter results in the text input dropdown
-            ticker = st.selectbox("Matching Companies", options=list(ticker_options.values()), format_func=lambda x: f"{x} - {list(ticker_options.keys())[list(ticker_options.values()).index(x)]}")
+            # Display matching options as clickable buttons
+            st.markdown("### Matching Companies:")
+            for company_name, ticker in ticker_options.items():
+                if st.button(f"{ticker} - {company_name}"):
+                    selected_ticker = ticker
+                    break
+            else:
+                selected_ticker = None
 
-            # Fetch and display stock data
-            if ticker:
-                data, info = fetch_data(ticker)
+            # Fetch and display stock data if a ticker is selected
+            if selected_ticker:
+                data, info = fetch_data(selected_ticker)
 
                 # Display stock information
-                st.markdown(f"### 📈 {ticker} - {info.get('longName', 'Company Name Not Found')}")
+                st.markdown(f"### 📈 {selected_ticker} - {info.get('longName', 'Company Name Not Found')}")
                 st.markdown(f"#### Sector: {info.get('sector', 'Sector Not Found')}")
                 st.markdown(f"#### Industry: {info.get('industry', 'Industry Not Found')}")
                 with st.expander("Company Info", expanded=False):
