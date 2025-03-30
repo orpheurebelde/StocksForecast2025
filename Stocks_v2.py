@@ -274,7 +274,17 @@ if menu == "Stock Forecast":
             st.metric(label="📈 Revenue Growth", value=f"{revenuegrowth:.2%}" if revenuegrowth and isinstance(revenuegrowth, (int, float)) else "N/A")
             st.metric(label="📈 Total Debt", value=f"${totaldebt / 1e9:.2f}B" if totaldebt and isinstance(totaldebt, (int, float)) else "N/A")
             st.metric(label="📈 Total Cash", value=f"${totalcash / 1e9:.2f}B" if totalcash and isinstance(totalcash, (int, float)) else "N/A")
-            st.metric(label="📈 Debt to Equity", value=f"{totaldebt / totalcash:.2f}" if totaldebt and totalcash and isinstance(totaldebt, (int, float)) and isinstance(totalcash, (int, float)) else "N/A")
+            #Categorize Debt to Equity Ratio, adding Green, Orange and Red colors
+            if totaldebt and totalcash and isinstance(totaldebt, (int, float)) and isinstance(totalcash, (int, float)):
+                debt_to_equity = totaldebt / totalcash
+                if debt_to_equity < 1:
+                    st.metric(label="📈 Debt to Equity Ratio", value=f"{debt_to_equity:.2f}", delta_color="normal")
+                elif 1 <= debt_to_equity <= 2:
+                    st.metric(label="📈 Debt to Equity Ratio", value=f"{debt_to_equity:.2f}", delta_color="warning")
+                else:
+                    st.metric(label="📈 Debt to Equity Ratio", value=f"{debt_to_equity:.2f}", delta_color="inverse")
+            else:
+                st.metric(label="📈 Debt to Equity Ratio", value="N/A")
             st.metric(label="📈 Institutional Ownership", value=f"{institutional_ownership:.2%}")
             st.metric(label="📈 Insider Ownership", value=f"{insider_ownership:.2%}")
     
