@@ -557,14 +557,9 @@ if menu == "Stock Info":
                 news = get_stock_news(ticker)  # Replace "AAPL" with the desired stock ticker
 
                 # Perform sentiment analysis
-                sentiments = analyze_sentiment(news)
-
-                # Display the results
-                st.write("Sentiment Analysis Results:")
-                for headline, sentiment in zip(news, sentiments):
-                    st.write(f"Headline: {headline}")
-                    st.write(f"Sentiment: {sentiment['label']} (Score: {sentiment['score']:.2f})")
-                    st.write("---")
+                sentiment_results = analyze_sentiment(news)
+                for result in sentiment_results:
+                    print(f"{result['label']}: {result['headline']} ({result['score']})")
         
         # Predictive Analysis
         st.subheader("📈 AI Stock Price Prediction")
