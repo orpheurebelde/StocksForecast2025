@@ -15,6 +15,7 @@ from prophet import Prophet  # Predictive modeling
 from sklearn.preprocessing import StandardScaler
 from bs4 import BeautifulSoup
 from sklearn.ensemble import RandomForestRegressor  # Alternative ML Model
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 # Set app to wide mode
 st.set_page_config(layout="wide")
@@ -25,32 +26,40 @@ st.set_page_config(layout="wide")
 
 # Fetch stock news headlines
 def get_stock_news(ticker):
-    url = f"https://www.cnbc.com/quotes/{ticker}?qsearchterm={ticker}"
-    response = requests.get(url)
-    if response.status_code == 200:
-        headlines = response.json()  # Assuming the response is in JSON format
-    else:
-        headlines = []
-    return [headline['title'] for headline in headlines[:10]] if headlines else ["No recent news found."]
+    url = f"https://www.cnbc.com/quotes/{ticker}"
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
+
+    response = requests.get(url, headers=headers)
+    if response.status_code != 200:
+        return ["Error: Unable to fetch news."]
+
+    soup = BeautifulSoup(response.text, "html.parser")
+
+    # Find news headlines (adjust selector if needed)
+    articles = soup.select("div.QuickLinks-primary a")  
+    headlines = [article.get_text(strip=True) for article in articles[:10]]  # Get top 10
+
+    return headlines if headlines else ["No recent news found."]
 
 # Perform sentiment analysis
 def analyze_sentiment(headlines):
     try:
+        analyzer = SentimentIntensityAnalyzer()
         sentiments = []
+
         for headline in headlines:
-            analysis = TextBlob(headline)
-            polarity = analysis.sentiment.polarity  # Sentiment polarity (-1 to 1)
-            if polarity > 0:
-                label = "Positive"
-            elif polarity < 0:
-                label = "Negative"
-            else:
-                label = "Neutral"
-            sentiments.append({"label": label, "score": abs(polarity)})
+            sentiment_score = analyzer.polarity_scores(headline)
+            label = (
+                "Positive" if sentiment_score["compound"] > 0 
+                else "Negative" if sentiment_score["compound"] < 0 
+                else "Neutral"
+            )
+            sentiments.append({"headline": headline, "label": label, "score": sentiment_score["compound"]})
+
         return sentiments
     except Exception as e:
         st.error(f"Error performing sentiment analysis: {e}")
-        return [{"label": "Error", "score": 0.0} for _ in headlines]
+        return [{"headline": "Error", "label": "Error", "score": 0.0}]
 
 
 
