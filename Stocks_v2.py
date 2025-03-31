@@ -536,23 +536,23 @@ if menu == "Stock Info":
                     st.write(f"Sentiment: {sentiment['label']} (Score: {sentiment['score']:.2f})")
                     st.write("---")
         
-        # Predictive Analysis
-        st.subheader("📈 AI Stock Price Prediction")
-        df = get_stock_data(ticker)
-        forecast = predict_future(df)
+                # Predictive Analysis
+                st.subheader("📈 AI Stock Price Prediction")
+                df = get_stock_data(ticker)
+                forecast = predict_future(df)
 
-        st.line_chart(forecast[["ds", "yhat"]].set_index("ds"))  # Show predictions
+                st.line_chart(forecast[["ds", "yhat"]].set_index("ds"))  # Show predictions
 
-        # Fundamental & Technical Analysis
-        st.subheader("📊 Fundamental Analysis")
-        fundamentals = analyze_fundamentals(ticker)
+                # Fundamental & Technical Analysis
+                st.subheader("📊 Fundamental Analysis")
+                fundamentals = analyze_fundamentals(ticker)
 
-        for key, value in fundamentals.items():
-            st.write(f"**{key}:** {value}")
+                for key, value in fundamentals.items():
+                    st.write(f"**{key}:** {value}")
 
-        # Final AI Verdict
-        st.subheader("🧠 AI Verdict")
-        st.write(f"📌 **Valuation Based on P/E Ratio:** {fundamentals['Valuation']}")
+                # Final AI Verdict
+                st.subheader("🧠 AI Verdict")
+                st.write(f"📌 **Valuation Based on P/E Ratio:** {fundamentals['Valuation']}")
 
 # Historical Analysis Section
 if menu == "Historical Analysis":
