@@ -112,6 +112,15 @@ def get_stock_data(ticker):
         # Check for missing values and drop them
         data = data.dropna(subset=['ds', 'y'])
 
+        # Check for duplicate dates and remove them
+        data = data.drop_duplicates(subset=['ds'])
+
+        # Ensure 'y' column is numeric (float)
+        data['y'] = pd.to_numeric(data['y'], errors='coerce')
+
+        # Drop rows with NaN 'y' values after coercion
+        data = data.dropna(subset=['y'])
+
         # Sort the data by 'ds' (Prophet expects the dates to be in ascending order)
         data = data.sort_values(by='ds').reset_index(drop=True)
 
@@ -127,9 +136,16 @@ def predict_future(ticker):
     if "ds" not in df.columns or "y" not in df.columns:
         raise ValueError("The dataframe is missing required columns 'ds' and 'y'")
 
+    # Debug: print the first few rows of the dataframe
+    print(df.head())
+
     # Create and fit the Prophet model
     model = Prophet()
-    model.fit(df)
+
+    try:
+        model.fit(df)  # Fit the Prophet model
+    except Exception as e:
+        raise ValueError(f"Error fitting the Prophet model: {str(e)}")
 
     # Make future predictions (e.g., next 30 days)
     future = model.make_future_dataframe(df, periods=30)  # Predict next 30 days
