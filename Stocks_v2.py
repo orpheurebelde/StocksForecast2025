@@ -149,7 +149,7 @@ def predict_future(ticker):
     except Exception as e:
         raise ValueError(f"Error fitting the Prophet model: {str(e)}")
 
-    # Make future predictions (e.g., next 30 days) - Only one `make_future_dataframe` call
+    # Make future predictions (e.g., next 30 days)
     future = model.make_future_dataframe(df, periods=30)  # Predict next 30 days
     forecast = model.predict(future)
 
