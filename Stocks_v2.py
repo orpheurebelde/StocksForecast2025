@@ -473,11 +473,19 @@ if menu == "Stock Info":
 
         # Check if key exists and value is valid before using it
         def safe_metric(value, divisor=1, suffix="", percentage=False):
-            if value is not None and isinstance(value, (int, float)) and not math.isnan(value):
-                if percentage:
-                    return f"{value:.2%}"  # Convert to percentage format
-                return f"${value / divisor:.2f}{suffix}" if divisor > 1 else f"{value:.2f}"
-            return "N/A"
+            """Safely formats a metric value for Streamlit display."""
+            try:
+                if value is None:
+                    return "N/A"
+                if isinstance(value, (int, float)):
+                    if math.isnan(value):  # Handle NaN values
+                        return "N/A"
+                    if percentage:
+                        return f"{value:.2%}"
+                    return f"${value / divisor:.2f}{suffix}" if divisor > 1 else f"${value:.2f}"
+                return "N/A"
+            except Exception as e:
+                return f"Error: {e}"  # Return error message instead of crashing
 
         if info and 'trailingPE' in info and 'earningsGrowth' in info:
             pe_ratio = info.get('trailingPE', 'N/A')
