@@ -25,7 +25,12 @@ st.set_page_config(layout="wide")
 
 # Fetch stock news headlines
 def get_stock_news(ticker):
-    headlines = news.get_yf_rss(ticker)
+    url = f"https://www.cnbc.com/quotes/META?qsearchterm={ticker}"
+    response = requests.get(url)
+    if response.status_code == 200:
+        headlines = response.json()  # Assuming the response is in JSON format
+    else:
+        headlines = []
     return [headline['title'] for headline in headlines[:10]] if headlines else ["No recent news found."]
 
 # Perform sentiment analysis
