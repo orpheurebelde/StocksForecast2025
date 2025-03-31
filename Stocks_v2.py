@@ -76,10 +76,30 @@ def get_ticker_from_name(search_input):
 
 # Fetch historical stock data
 def get_stock_data(ticker):
+    # Fetch historical stock data
     stock = yf.Ticker(ticker)
-    df = stock.history(period="5y")  # 5 years of data
-    df = df.reset_index()[["Date", "Close"]]
-    df.columns = ["ds", "y"]  # Prophet requires "ds" (date) and "y" (target variable)
+    df = stock.history(period="1y")  # Adjust period if necessary
+    
+    # Check if data is returned correctly
+    if df.empty:
+        raise ValueError(f"No data found for {ticker}")
+
+    # Reset index to ensure 'Date' is a column
+    df = df.reset_index()
+
+    # Rename the columns to match Prophet's expected names
+    df = df.rename(columns={"Date": "ds", "Close": "y"})
+
+    # Ensure the date is in datetime format (Prophet requires this)
+    df["ds"] = pd.to_datetime(df["ds"])
+
+    # Ensure the 'y' column is numeric
+    df["y"] = df["y"].astype(float)
+    
+    # Check if 'ds' and 'y' are present
+    if "ds" not in df.columns or "y" not in df.columns:
+        raise ValueError("Missing 'ds' or 'y' columns in the data.")
+    
     return df
 
 # Function to fetch stock data
@@ -106,11 +126,18 @@ def fetch_data(ticker):
         return None, None
 
 # Train Prophet model and forecast
-def predict_future(df):
+def predict_future(ticker):
+    # Get the stock data for Prophet
+    df = get_stock_data(ticker)
+
+    # Create and fit the Prophet model
     model = Prophet()
     model.fit(df)
-    future = model.make_future_dataframe(periods=365)  # Predict 1 year ahead
+
+    # Make future predictions
+    future = model.make_future_dataframe(df, periods=30)  # Predict next 30 days
     forecast = model.predict(future)
+
     return forecast
 
 # -------------------------------
