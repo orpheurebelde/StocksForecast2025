@@ -485,6 +485,8 @@ if menu == "Stock Info":
             except Exception as e:
                 return f"Error: {e}"  # Return error message instead of crashing
 
+        freecash_flow = info.get('freeCashflow', 'N/A')
+        
         if info and 'trailingPE' in info and 'earningsGrowth' in info:
             pe_ratio = info.get('trailingPE', 'N/A')
             peg_ratio = info.get('trailingPegRatio', 'N/A')
@@ -511,7 +513,6 @@ if menu == "Stock Info":
             col1, col2, col3 = st.columns(3)
 
         with col1:
-
             st.metric(label="📈 Market Cap", value=safe_metric(info.get('marketCap'), 1e9, "B"))
             st.metric(label="📈 Free Cash Flow", value=safe_metric(freecash_flow, 1e9, "B"))
             st.metric(label="📈 Net Income", value=safe_metric(netincome, 1e9, "B"))
