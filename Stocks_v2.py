@@ -532,7 +532,7 @@ if menu == "Stock Info":
                 # Predictive Analysis
                 st.subheader("📈 AI Stock Price Prediction")
                 df = get_stock_data(ticker)
-                forecast = predict_future(df)
+                forecast = predict_future(ticker)
 
                 st.line_chart(forecast[["ds", "yhat"]].set_index("ds"))  # Show predictions
 
