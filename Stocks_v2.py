@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import streamlit as st
+import math 
 from textblob import TextBlob
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
@@ -468,24 +469,35 @@ if menu == "Stock Info":
         with st.expander("Company Info", expanded=False):
             st.write(info)
        
-        if info and 'trailingPE' in info and 'earningsGrowth' in info:
-            pe_ratio = info.get('trailingPE', 'N/A')
-            peg_ratio = info.get('trailingPegRatio', 'N/A')
-            earnings_growth = info.get('earningsGrowth', 'N/A')
-            forward_pe = info.get('forwardPE', 'N/A')
-            freecash_flow = info.get('freeCashflow', 'N/A')
-            netincome = info.get('netIncomeToCommon', 'N/A')
-            grossmargin = info.get('grossMargins', 'N/A')
-            operatingmargin = info.get('operatingMargins', 'N/A')
-            profit_margin = info.get('profitMargins', 'N/A')
-            institutional_ownership = info.get('heldPercentInstitutions', 'N/A')
-            insider_ownership = info.get('heldPercentInsiders', 'N/A')
-            trailingeps = info.get('trailingEps', 'N/A')
-            forwardeps = info.get('forwardEps', 'N/A')
-            revenue = info.get('totalRevenue', 'N/A')
-            totaldebt = info.get('totalDebt', 'N/A')
-            totalcash = info.get('totalCash', 'N/A')
-            revenuegrowth = info.get('revenueGrowth', 'N/A')
+        import math
+
+    # Check if key exists and value is valid before using it
+    def safe_metric(value, divisor=1, suffix="", percentage=False):
+        if value is not None and isinstance(value, (int, float)) and not math.isnan(value):
+            if percentage:
+                return f"{value:.2%}"  # Convert to percentage format
+            return f"${value / divisor:.2f}{suffix}" if divisor > 1 else f"{value:.2f}"
+        return "N/A"
+
+    if info and 'trailingPE' in info and 'earningsGrowth' in info:
+        pe_ratio = info.get('trailingPE', 'N/A')
+        peg_ratio = info.get('trailingPegRatio', 'N/A')
+        earnings_growth = info.get('earningsGrowth', 'N/A')
+        forward_pe = info.get('forwardPE', 'N/A')
+        freecash_flow = info.get('freeCashflow', 'N/A')
+        netincome = info.get('netIncomeToCommon', 'N/A')
+        grossmargin = info.get('grossMargins', 'N/A')
+        operatingmargin = info.get('operatingMargins', 'N/A')
+        profit_margin = info.get('profitMargins', 'N/A')
+        institutional_ownership = info.get('heldPercentInstitutions', 'N/A')
+        insider_ownership = info.get('heldPercentInsiders', 'N/A')
+        trailingeps = info.get('trailingEps', 'N/A')
+        forwardeps = info.get('forwardEps', 'N/A')
+        revenue = info.get('totalRevenue', 'N/A')
+        totaldebt = info.get('totalDebt', 'N/A')
+        totalcash = info.get('totalCash', 'N/A')
+        revenuegrowth = info.get('revenueGrowth', 'N/A')
+
         # Calculate DCF Value
         dcf_value = dcf_valuation(ticker)
 
@@ -493,14 +505,15 @@ if menu == "Stock Info":
             col1, col2, col3 = st.columns(3)
 
         with col1:
-            st.metric(label="📈 Market Cap", value=f"${info['marketCap'] / 1e9:.2f}B")
-            st.metric(label="📈 Free Cash Flow", value=f"${freecash_flow / 1e9:.2f}B" if freecash_flow and isinstance(freecash_flow, (int, float)) else "N/A")
-            st.metric(label="📈 Net Income", value=f"${netincome / 1e9:.2f}B" if netincome and isinstance(netincome, (int, float)) else "N/A")
-            st.metric(label="📈 Gross Margin", value=f"{grossmargin:.2%}" if grossmargin and isinstance(grossmargin, (int, float)) else "N/A")
-            st.metric(label="📈 Operating Margin", value=f"{operatingmargin:.2%}" if operatingmargin and isinstance(operatingmargin, (int, float)) else "N/A")
-            st.metric(label="📈 Profit Margin", value=f"{profit_margin:.2%}" if profit_margin and isinstance(profit_margin, (int, float)) else "N/A")
-            st.metric(label="📈 Earnings Growth", value=f"{earnings_growth:.2%}" if earnings_growth and isinstance(earnings_growth, (int, float)) else "N/A")
-            st.metric(label="📈 Dividend Yield", value=f"{info['dividendYield']:.2%}" if info.get('dividendYield') and isinstance(info['dividendYield'], (int, float)) else "N/A")
+            st.metric(label="📈 Market Cap", value=safe_metric(info.get('marketCap'), 1e9, "B"))
+            st.metric(label="📈 Free Cash Flow", value=safe_metric(freecash_flow, 1e9, "B"))
+            st.metric(label="📈 Net Income", value=safe_metric(netincome, 1e9, "B"))
+            st.metric(label="📈 Gross Margin", value=safe_metric(grossmargin, percentage=True))
+            st.metric(label="📈 Operating Margin", value=safe_metric(operatingmargin, percentage=True))
+            st.metric(label="📈 Profit Margin", value=safe_metric(profit_margin, percentage=True))
+            st.metric(label="📈 Earnings Growth", value=safe_metric(earnings_growth, percentage=True))
+            st.metric(label="📈 Dividend Yield", value=safe_metric(info.get('dividendYield'), percentage=True))
+
         with col2:
             st.metric(label="📊 Current Price", value=f"${info['currentPrice']:.2f}")
             try:
