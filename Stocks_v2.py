@@ -457,36 +457,6 @@ if menu == "Stock Info":
     if selected_ticker:
         data, info = fetch_data(selected_ticker)
 
-        # Display stock information
-        with st.expander("Stock Overview", expanded=True):
-            col1, col2, col3 = st.columns(3)
-        with col1:
-            st.markdown(f"<h4>Name: {selected_ticker} - {info.get('longName', 'Company Name Not Found')}</h4>", unsafe_allow_html=True)
-        with col2:
-            st.markdown(f"<h4>Sector: {info.get('sector', 'Sector Not Found')}</h4>", unsafe_allow_html=True)
-        with col3:
-            st.markdown(f"<h4>Industry: {info.get('industry', 'Industry Not Found')}</h4>", unsafe_allow_html=True)
-        with st.expander("Company Info", expanded=False):
-            st.write(info)
-       
-        import math
-
-        # Check if key exists and value is valid before using it
-        def safe_metric(value, divisor=1, suffix="", percentage=False):
-            """Safely formats a metric value for Streamlit display."""
-            try:
-                if value is None:
-                    return "N/A"
-                if isinstance(value, (int, float)):
-                    if math.isnan(value):  # Handle NaN values
-                        return "N/A"
-                    if percentage:
-                        return f"{value:.2%}"
-                    return f"${value / divisor:.2f}{suffix}" if divisor > 1 else f"${value:.2f}"
-                return "N/A"
-            except Exception as e:
-                return f"Error: {e}"  # Return error message instead of crashing
-
         if info and 'trailingPE' in info and 'earningsGrowth' in info:
             pe_ratio = info.get('trailingPE', 'N/A')
             peg_ratio = info.get('trailingPegRatio', 'N/A')
@@ -505,6 +475,34 @@ if menu == "Stock Info":
             totaldebt = info.get('totalDebt', 'N/A')
             totalcash = info.get('totalCash', 'N/A')
             revenuegrowth = info.get('revenueGrowth', 'N/A')
+
+        # Display stock information
+        with st.expander("Stock Overview", expanded=True):
+            col1, col2, col3 = st.columns(3)
+        with col1:
+            st.markdown(f"<h4>Name: {selected_ticker} - {info.get('longName', 'Company Name Not Found')}</h4>", unsafe_allow_html=True)
+        with col2:
+            st.markdown(f"<h4>Sector: {info.get('sector', 'Sector Not Found')}</h4>", unsafe_allow_html=True)
+        with col3:
+            st.markdown(f"<h4>Industry: {info.get('industry', 'Industry Not Found')}</h4>", unsafe_allow_html=True)
+        with st.expander("Company Info", expanded=False):
+            st.write(info)
+
+        # Check if key exists and value is valid before using it
+        def safe_metric(value, divisor=1, suffix="", percentage=False):
+            """Safely formats a metric value for Streamlit display."""
+            try:
+                if value is None:
+                    return "N/A"
+                if isinstance(value, (int, float)):
+                    if math.isnan(value):  # Handle NaN values
+                        return "N/A"
+                    if percentage:
+                        return f"{value:.2%}"
+                    return f"${value / divisor:.2f}{suffix}" if divisor > 1 else f"${value:.2f}"
+                return "N/A"
+            except Exception as e:
+                return f"Error: {e}"  # Return error message instead of crashing
 
         # Calculate DCF Value
         dcf_value = dcf_valuation(ticker)
