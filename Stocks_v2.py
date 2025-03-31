@@ -25,7 +25,7 @@ st.set_page_config(layout="wide")
 
 # Fetch stock news headlines
 def get_stock_news(ticker):
-    api_url = f"https://finance.yahoo.com/quote/{ticker}?p={ticker}"
+    api_url = f"https://finance.yahoo.com/quote/{ticker}/news/"
     response = requests.get(api_url)
     if response.status_code == 200:
         soup = BeautifulSoup(response.text, 'html.parser')
