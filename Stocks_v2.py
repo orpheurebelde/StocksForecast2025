@@ -133,18 +133,31 @@ def fetch_data(ticker):
         return None, None
 
 # Train Prophet model and forecast
-def predict_future(df):
-    # Get the stock data for Prophet
-    df = get_stock_data(ticker)
+def predict_future(ticker):
+    # Fetch stock data
+    try:
+        df = get_stock_data(ticker)  # Fetch stock data for the given ticker
+    except ValueError as e:
+        print(f"Error fetching data for ticker {ticker}: {e}")
+        return None  # Handle error gracefully and return None or empty forecast
 
+    # Ensure the data has the required 'ds' and 'y' columns
+    if 'Date' not in df.columns or 'Close' not in df.columns:
+        print("Error: Data does not have the required columns 'Date' and 'Close'")
+        return None
+
+    # Prepare the data for Prophet
+    df_prophet = df[['Date', 'Close']].rename(columns={'Date': 'ds', 'Close': 'y'})
+    
     # Create and fit the Prophet model
     model = Prophet()
-    model.fit(df)
+    model.fit(df_prophet)
 
-    # Make future predictions
-    future = model.make_future_dataframe(df, periods=30)  # Predict next 30 days
+    # Make future predictions (e.g., 30 days into the future)
+    future = model.make_future_dataframe(df_prophet, periods=30)
     forecast = model.predict(future)
 
+    # Return the forecast
     return forecast
 
 # -------------------------------
