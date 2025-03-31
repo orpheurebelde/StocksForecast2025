@@ -74,6 +74,41 @@ def get_ticker_from_name(search_input):
         st.error(f"Error fetching ticker: {e}")
         return {}
 
+# Fetch historical stock data
+def get_stock_data(ticker):
+    # Check if ticker is a valid string
+    if not isinstance(ticker, str) or not ticker.strip():
+        raise ValueError(f"Invalid ticker symbol: {ticker}")
+
+    # Fetch historical stock data
+    try:
+        stock = yf.Ticker(ticker)
+        df = stock.history(period="10y")  # Adjust period if necessary
+    except Exception as e:
+        raise ValueError(f"Error fetching data for {ticker}: {str(e)}")
+    
+    # Check if data is returned correctly
+    if df.empty:
+        raise ValueError(f"No data found for {ticker}")
+
+    # Reset index to ensure 'Date' is a column
+    df = df.reset_index()
+
+    # Rename the columns to match Prophet's expected names
+    df = df.rename(columns={"Date": "ds", "Close": "y"})
+
+    # Ensure the date is in datetime format (Prophet requires this)
+    df["ds"] = pd.to_datetime(df["ds"])
+
+    # Ensure the 'y' column is numeric
+    df["y"] = df["y"].astype(float)
+    
+    # Check if 'ds' and 'y' are present
+    if "ds" not in df.columns or "y" not in df.columns:
+        raise ValueError("Missing 'ds' or 'y' columns in the data.")
+    
+    return df
+
 # Function to fetch stock data
 @st.cache_data
 def fetch_data(ticker):
@@ -97,44 +132,18 @@ def fetch_data(ticker):
         st.error(f"Error fetching data for ticker {ticker}: {e}")
         return None, None
 
-# Fetch historical stock data
-def get_stock_data(ticker):
-    # Fetch stock data from Yahoo Finance
-    stock = yf.Ticker(ticker)
-    data = stock.history(period="1y")  # Retrieve 1 year of stock data
-    data = data.reset_index()[["Date", "Close"]]  # Keep Date and Close columns
-    data.rename(columns={"Date": "ds", "Close": "y"}, inplace=True)  # Prophet expects 'ds' for dates and 'y' for values
-    return data
-
 # Train Prophet model and forecast
-def predict_future(ticker):
+def predict_future(df):
     # Get the stock data for Prophet
     df = get_stock_data(ticker)
-
-    # Ensure the required columns are present in the dataframe
-    if "ds" not in df.columns or "y" not in df.columns:
-        raise ValueError("The dataframe is missing required columns 'ds' and 'y'")
 
     # Create and fit the Prophet model
     model = Prophet()
     model.fit(df)
 
-    # Make future predictions (e.g., next 30 days)
+    # Make future predictions
     future = model.make_future_dataframe(df, periods=30)  # Predict next 30 days
     forecast = model.predict(future)
-
-    # Check if forecast contains necessary columns
-    if "ds" in forecast.columns and "yhat" in forecast.columns:
-        # Clean the forecast data by dropping NaN values
-        forecast_cleaned = forecast[["ds", "yhat"]].dropna()
-
-        # Plot the forecast data if it's available and valid
-        if not forecast_cleaned.empty:
-            st.line_chart(forecast_cleaned.set_index("ds"))  # Plot predictions
-        else:
-            st.error("No valid forecast data available to plot.")
-    else:
-        st.error("Forecast data is missing necessary columns ('ds' and 'yhat').")
 
     return forecast
 
