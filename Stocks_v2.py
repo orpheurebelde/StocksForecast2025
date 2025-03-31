@@ -149,7 +149,7 @@ def predict_future(ticker):
     except Exception as e:
         raise ValueError(f"Error fitting the Prophet model: {str(e)}")
 
-    # Make future predictions (e.g., next 30 days) -- Only called once
+    # Make future predictions (e.g., next 30 days)
     future = model.make_future_dataframe(df, periods=30)  # Predict next 30 days
     forecast = model.predict(future)
 
@@ -167,7 +167,6 @@ def predict_future(ticker):
         st.error("Forecast data is missing necessary columns ('ds' and 'yhat').")
 
     return forecast
-
 
 # -------------------------------
 # 3️⃣ FUNDAMENTAL & TECHNICAL AI ANALYSIS
