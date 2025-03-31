@@ -136,15 +136,18 @@ def predict_future(ticker):
     if "ds" not in df.columns or "y" not in df.columns:
         raise ValueError("The dataframe is missing required columns 'ds' and 'y'")
 
-    # Debug: print the first few rows of the dataframe
+    # Debug: Print the first few rows of the dataframe
+    print("DataFrame before Prophet fitting:")
     print(df.head())
 
     # Create and fit the Prophet model
     model = Prophet()
 
     try:
-        model.fit(df)  # Fit the Prophet model
+        # Fitting the model to the data
+        model.fit(df)
     except Exception as e:
+        # Print the full error message if fitting fails
         raise ValueError(f"Error fitting the Prophet model: {str(e)}")
 
     # Make future predictions (e.g., next 30 days)
