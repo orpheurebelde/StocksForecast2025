@@ -471,32 +471,32 @@ if menu == "Stock Info":
        
         import math
 
-    # Check if key exists and value is valid before using it
-    def safe_metric(value, divisor=1, suffix="", percentage=False):
-        if value is not None and isinstance(value, (int, float)) and not math.isnan(value):
-            if percentage:
-                return f"{value:.2%}"  # Convert to percentage format
-            return f"${value / divisor:.2f}{suffix}" if divisor > 1 else f"{value:.2f}"
-        return "N/A"
+        # Check if key exists and value is valid before using it
+        def safe_metric(value, divisor=1, suffix="", percentage=False):
+            if value is not None and isinstance(value, (int, float)) and not math.isnan(value):
+                if percentage:
+                    return f"{value:.2%}"  # Convert to percentage format
+                return f"${value / divisor:.2f}{suffix}" if divisor > 1 else f"{value:.2f}"
+            return "N/A"
 
-    if info and 'trailingPE' in info and 'earningsGrowth' in info:
-        pe_ratio = info.get('trailingPE', 'N/A')
-        peg_ratio = info.get('trailingPegRatio', 'N/A')
-        earnings_growth = info.get('earningsGrowth', 'N/A')
-        forward_pe = info.get('forwardPE', 'N/A')
-        freecash_flow = info.get('freeCashflow', 'N/A')
-        netincome = info.get('netIncomeToCommon', 'N/A')
-        grossmargin = info.get('grossMargins', 'N/A')
-        operatingmargin = info.get('operatingMargins', 'N/A')
-        profit_margin = info.get('profitMargins', 'N/A')
-        institutional_ownership = info.get('heldPercentInstitutions', 'N/A')
-        insider_ownership = info.get('heldPercentInsiders', 'N/A')
-        trailingeps = info.get('trailingEps', 'N/A')
-        forwardeps = info.get('forwardEps', 'N/A')
-        revenue = info.get('totalRevenue', 'N/A')
-        totaldebt = info.get('totalDebt', 'N/A')
-        totalcash = info.get('totalCash', 'N/A')
-        revenuegrowth = info.get('revenueGrowth', 'N/A')
+        if info and 'trailingPE' in info and 'earningsGrowth' in info:
+            pe_ratio = info.get('trailingPE', 'N/A')
+            peg_ratio = info.get('trailingPegRatio', 'N/A')
+            earnings_growth = info.get('earningsGrowth', 'N/A')
+            forward_pe = info.get('forwardPE', 'N/A')
+            freecash_flow = info.get('freeCashflow', 'N/A')
+            netincome = info.get('netIncomeToCommon', 'N/A')
+            grossmargin = info.get('grossMargins', 'N/A')
+            operatingmargin = info.get('operatingMargins', 'N/A')
+            profit_margin = info.get('profitMargins', 'N/A')
+            institutional_ownership = info.get('heldPercentInstitutions', 'N/A')
+            insider_ownership = info.get('heldPercentInsiders', 'N/A')
+            trailingeps = info.get('trailingEps', 'N/A')
+            forwardeps = info.get('forwardEps', 'N/A')
+            revenue = info.get('totalRevenue', 'N/A')
+            totaldebt = info.get('totalDebt', 'N/A')
+            totalcash = info.get('totalCash', 'N/A')
+            revenuegrowth = info.get('revenueGrowth', 'N/A')
 
         # Calculate DCF Value
         dcf_value = dcf_valuation(ticker)
