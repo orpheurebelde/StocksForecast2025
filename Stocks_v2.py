@@ -25,7 +25,7 @@ st.set_page_config(layout="wide")
 
 # Fetch stock news headlines
 def get_stock_news(ticker):
-    url = f"https://www.cnbc.com/quotes/META?qsearchterm={ticker}"
+    url = f"https://www.cnbc.com/quotes/{ticker}?qsearchterm={ticker}"
     response = requests.get(url)
     if response.status_code == 200:
         headlines = response.json()  # Assuming the response is in JSON format
