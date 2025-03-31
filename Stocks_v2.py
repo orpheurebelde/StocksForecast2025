@@ -25,13 +25,8 @@ st.set_page_config(layout="wide")
 
 # Fetch stock news headlines
 def get_stock_news(ticker):
-    api_url = f"https://finance.yahoo.com/quote/{ticker}/news/"
-    response = requests.get(api_url)
-    if response.status_code == 200:
-        soup = BeautifulSoup(response.text, 'html.parser')
-        headlines = soup.find_all('h3', class_='Mb(5px)')
-        return [headline.text for headline in headlines[:10]]  # Get top 10 news
-    return ["No recent news found."]
+    headlines = news.get_yf_rss(ticker)
+    return [headline['title'] for headline in headlines[:10]] if headlines else ["No recent news found."]
 
 # Perform sentiment analysis
 def analyze_sentiment(headlines):
