@@ -129,7 +129,7 @@ def get_stock_data(ticker):
         raise ValueError(f"Invalid ticker symbol: {ticker}. Error: {str(e)}")
 
 def predict_future(ticker):
-    # Get the stock data for Prophet
+    # Fetch stock data
     df = get_stock_data(ticker)
 
     # Ensure the required columns are present in the dataframe
@@ -142,16 +142,15 @@ def predict_future(ticker):
 
     # Create and fit the Prophet model
     model = Prophet()
-
     try:
-        # Fitting the model to the data
-        model.fit(df)
+        model.fit(df)  # Fitting the model to the data
     except Exception as e:
-        # Print the full error message if fitting fails
         raise ValueError(f"Error fitting the Prophet model: {str(e)}")
 
     # Make future predictions (e.g., next 30 days)
     future = model.make_future_dataframe(df, periods=30)  # Predict next 30 days
+
+    # Forecast the future
     forecast = model.predict(future)
 
     # Check if forecast contains necessary columns
