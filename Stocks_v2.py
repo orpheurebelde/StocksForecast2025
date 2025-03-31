@@ -106,8 +106,8 @@ def get_stock_data(ticker):
         data = data.reset_index()[["Date", "Close"]]  # Keep Date and Close columns
         data.rename(columns={"Date": "ds", "Close": "y"}, inplace=True)  # Prophet expects 'ds' for dates and 'y' for values
 
-        # Ensure 'ds' is a datetime object
-        data['ds'] = pd.to_datetime(data['ds'])
+        # Ensure 'ds' is a datetime object (remove timezone)
+        data['ds'] = pd.to_datetime(data['ds']).dt.tz_localize(None)  # Remove timezone
 
         # Check for missing values and drop them
         data = data.dropna(subset=['ds', 'y'])
