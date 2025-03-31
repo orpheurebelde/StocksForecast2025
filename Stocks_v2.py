@@ -76,9 +76,16 @@ def get_ticker_from_name(search_input):
 
 # Fetch historical stock data
 def get_stock_data(ticker):
+    # Check if ticker is a valid string
+    if not isinstance(ticker, str) or not ticker.strip():
+        raise ValueError(f"Invalid ticker symbol: {ticker}")
+
     # Fetch historical stock data
-    stock = yf.Ticker(ticker)
-    df = stock.history(period="1y")  # Adjust period if necessary
+    try:
+        stock = yf.Ticker(ticker)
+        df = stock.history(period="10y")  # Adjust period if necessary
+    except Exception as e:
+        raise ValueError(f"Error fetching data for {ticker}: {str(e)}")
     
     # Check if data is returned correctly
     if df.empty:
