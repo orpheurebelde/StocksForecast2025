@@ -105,6 +105,16 @@ def get_stock_data(ticker):
         data = stock.history(period="1y")  # Retrieve 1 year of stock data
         data = data.reset_index()[["Date", "Close"]]  # Keep Date and Close columns
         data.rename(columns={"Date": "ds", "Close": "y"}, inplace=True)  # Prophet expects 'ds' for dates and 'y' for values
+
+        # Ensure 'ds' is a datetime object
+        data['ds'] = pd.to_datetime(data['ds'])
+
+        # Check for missing values and drop them
+        data = data.dropna(subset=['ds', 'y'])
+
+        # Sort the data by 'ds' (Prophet expects the dates to be in ascending order)
+        data = data.sort_values(by='ds').reset_index(drop=True)
+
         return data
     except Exception as e:
         raise ValueError(f"Invalid ticker symbol: {ticker}. Error: {str(e)}")
