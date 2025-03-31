@@ -134,30 +134,34 @@ def fetch_data(ticker):
 
 # Train Prophet model and forecast
 def predict_future(ticker):
-    # Fetch stock data
-    try:
-        df = get_stock_data(ticker)  # Fetch stock data for the given ticker
-    except ValueError as e:
-        print(f"Error fetching data for ticker {ticker}: {e}")
-        return None  # Handle error gracefully and return None or empty forecast
+    # Get the stock data for Prophet
+    df = get_stock_data(ticker)
 
-    # Ensure the data has the required 'ds' and 'y' columns
-    if 'Date' not in df.columns or 'Close' not in df.columns:
-        print("Error: Data does not have the required columns 'Date' and 'Close'")
-        return None
+    # Ensure the required columns are present in the dataframe
+    if "ds" not in df.columns or "y" not in df.columns:
+        raise ValueError("The dataframe is missing required columns 'ds' and 'y'")
 
-    # Prepare the data for Prophet
-    df_prophet = df[['Date', 'Close']].rename(columns={'Date': 'ds', 'Close': 'y'})
-    
     # Create and fit the Prophet model
     model = Prophet()
-    model.fit(df_prophet)
+    model.fit(df)
 
-    # Make future predictions (e.g., 30 days into the future)
-    future = model.make_future_dataframe(df_prophet, periods=30)
+    # Make future predictions (e.g., next 30 days)
+    future = model.make_future_dataframe(df, periods=30)  # Predict next 30 days
     forecast = model.predict(future)
 
-    # Return the forecast
+    # Check if forecast contains necessary columns
+    if "ds" in forecast.columns and "yhat" in forecast.columns:
+        # Clean the forecast data by dropping NaN values
+        forecast_cleaned = forecast[["ds", "yhat"]].dropna()
+
+        # Plot the forecast data if it's available and valid
+        if not forecast_cleaned.empty:
+            st.line_chart(forecast_cleaned.set_index("ds"))  # Plot predictions
+        else:
+            st.error("No valid forecast data available to plot.")
+    else:
+        st.error("Forecast data is missing necessary columns ('ds' and 'yhat').")
+
     return forecast
 
 # -------------------------------
