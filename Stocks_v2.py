@@ -133,7 +133,7 @@ def fetch_data(ticker):
         return None, None
 
 # Train Prophet model and forecast
-def predict_future(ticker):
+def predict_future(df):
     # Get the stock data for Prophet
     df = get_stock_data(ticker)
 
