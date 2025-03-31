@@ -457,25 +457,6 @@ if menu == "Stock Info":
     if selected_ticker:
         data, info = fetch_data(selected_ticker)
 
-        if info and 'trailingPE' in info and 'earningsGrowth' in info:
-            pe_ratio = info.get('trailingPE', 'N/A')
-            peg_ratio = info.get('trailingPegRatio', 'N/A')
-            earnings_growth = info.get('earningsGrowth', 'N/A')
-            forward_pe = info.get('forwardPE', 'N/A')
-            freecash_flow = info.get('freeCashflow', 'N/A')
-            netincome = info.get('netIncomeToCommon', 'N/A')
-            grossmargin = info.get('grossMargins', 'N/A')
-            operatingmargin = info.get('operatingMargins', 'N/A')
-            profit_margin = info.get('profitMargins', 'N/A')
-            institutional_ownership = info.get('heldPercentInstitutions', 'N/A')
-            insider_ownership = info.get('heldPercentInsiders', 'N/A')
-            trailingeps = info.get('trailingEps', 'N/A')
-            forwardeps = info.get('forwardEps', 'N/A')
-            revenue = info.get('totalRevenue', 'N/A')
-            totaldebt = info.get('totalDebt', 'N/A')
-            totalcash = info.get('totalCash', 'N/A')
-            revenuegrowth = info.get('revenueGrowth', 'N/A')
-
         # Display stock information
         with st.expander("Stock Overview", expanded=True):
             col1, col2, col3 = st.columns(3)
@@ -511,6 +492,25 @@ if menu == "Stock Info":
             col1, col2, col3 = st.columns(3)
 
         with col1:
+            if info and 'trailingPE' in info and 'earningsGrowth' in info:
+                pe_ratio = info.get('trailingPE', 'N/A')
+                peg_ratio = info.get('trailingPegRatio', 'N/A')
+                earnings_growth = info.get('earningsGrowth', 'N/A')
+                forward_pe = info.get('forwardPE', 'N/A')
+                freecash_flow = info.get('freeCashflow', 'N/A')
+                netincome = info.get('netIncomeToCommon', 'N/A')
+                grossmargin = info.get('grossMargins', 'N/A')
+                operatingmargin = info.get('operatingMargins', 'N/A')
+                profit_margin = info.get('profitMargins', 'N/A')
+                institutional_ownership = info.get('heldPercentInstitutions', 'N/A')
+                insider_ownership = info.get('heldPercentInsiders', 'N/A')
+                trailingeps = info.get('trailingEps', 'N/A')
+                forwardeps = info.get('forwardEps', 'N/A')
+                revenue = info.get('totalRevenue', 'N/A')
+                totaldebt = info.get('totalDebt', 'N/A')
+                totalcash = info.get('totalCash', 'N/A')
+                revenuegrowth = info.get('revenueGrowth', 'N/A')    
+
             st.metric(label="📈 Market Cap", value=safe_metric(info.get('marketCap'), 1e9, "B"))
             st.metric(label="📈 Free Cash Flow", value=safe_metric(freecash_flow, 1e9, "B"))
             st.metric(label="📈 Net Income", value=safe_metric(netincome, 1e9, "B"))
