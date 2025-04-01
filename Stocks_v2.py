@@ -445,14 +445,14 @@ if menu == "Stock Info":
         # Dynamically fetch matching tickers
         ticker_options = get_ticker_from_name(search_input)
 
-        if ticker_options:
-            with st.expander("### Matching Companies:"):
+        with st.expander("### Matching Companies:"):
+            if ticker_options:
                 for company_name, ticker in ticker_options.items():
                     if st.button(f"{ticker} - {company_name}"):
                         st.session_state.selected_ticker = ticker  # Store in session state
                         st.rerun()  # Rerun script to update display immediately
-        else:
-            st.warning("No matching stocks found. Please refine your search.")
+            else:
+                st.warning("No matching stocks found. Please refine your search.")
     else:
         st.info("Please enter a stock name or ticker to search.")
 
