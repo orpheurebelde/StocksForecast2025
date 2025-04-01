@@ -590,14 +590,17 @@ if menu == "Stock Info":
             st.metric(label="📈 Institutional Ownership", value=f"{institutional_ownership:.2%}")
             st.metric(label="📈 Insider Ownership", value=f"{insider_ownership:.2%}")
     
+        
+        
         #Using AI to analyse the stock based on the uper metrics
         st.markdown("📊 AI-Powered Stock Analysis", )
-        with st.expander("Stock Analysis", expanded=True):
 
-            # Stock selection (this should be outside the button scope)
-            # Display selected ticker
-            ticker = st.session_state.selected_ticker
-            st.write(f"**Selected Ticker:** {ticker}")
+        # Stock selection (this should be outside the button scope)
+        # Display selected ticker
+        ticker = st.session_state.selected_ticker
+        st.write(f"**Selected Ticker:** {ticker}")
+
+        with st.expander("Stock Analysis", expanded=True):
 
             # Button to analyze stock
             if st.button("Analyze Stock"):
