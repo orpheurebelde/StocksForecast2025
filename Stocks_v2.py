@@ -441,7 +441,7 @@ if menu == "Stock Info":
     if "selected_ticker" not in st.session_state:
         st.session_state.selected_ticker = None
 
-if search_input:
+    if search_input:
         # Dynamically fetch matching tickers
         ticker_options = get_ticker_from_name(search_input)
 
@@ -453,8 +453,8 @@ if search_input:
                     st.rerun()  # Rerun script to update display immediately
         else:
             st.warning("No matching stocks found. Please refine your search.")
-else:
-    st.info("Please enter a stock name or ticker to search.")
+    else:
+        st.info("Please enter a stock name or ticker to search.")
 
     # Display stock information
     with st.expander("Stock Overview", expanded=True):
