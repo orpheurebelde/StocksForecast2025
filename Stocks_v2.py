@@ -17,7 +17,6 @@ from prophet import Prophet  # Predictive modeling
 from sklearn.preprocessing import StandardScaler
 from bs4 import BeautifulSoup
 from sklearn.ensemble import RandomForestRegressor  # Alternative ML Model
-from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 # Set app to wide mode
 st.set_page_config(layout="wide")
@@ -589,9 +588,17 @@ if menu == "Stock Info":
         st.markdown("📊 AI-Powered Stock Analysis", )
         with st.expander("Stock Analysis", expanded=True):
 
+            if st.button("Analyze Stock"):
+                df = get_stock_data(ticker)  # Get stock data
+                news = get_news_sentiment(ticker)  # Get news headlines
+                analysis = analyze_stock_with_gpt(ticker, df, news)  # Get GPT analysis
 
+                st.subheader("📢 GPT Stock Analysis")
+                st.write(analysis)
 
-
+                # Display historical price chart
+                st.subheader("📈 Stock Price History")
+                st.line_chart(df["Close"])
 
 # Historical Analysis Section
 if menu == "Historical Analysis":
