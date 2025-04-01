@@ -30,35 +30,41 @@ def compute_rsi(data, window=14):
     rsi = 100 - (100 / (1 + rs))
     return rsi
 
+# Function to fetch stock news
 def get_news_sentiment(ticker):
     stock = yf.Ticker(ticker)
-    news = stock.news[:5]  # Get the latest 5 news articles
+    news = stock.news[:5] if stock.news else []  # Get the latest 5 news articles
     return news
 
+# Function to analyze stock using GPT
 def analyze_stock_with_gpt(ticker, stock_data, news):
-    openai.api_key = "your-openai-api-key"  # Set your GPT API key
+    openai.api_key = "your-openai-api-key"
 
-    # Create a prompt for GPT analysis
     prompt = f"""
     Analyze the stock {ticker} based on the following data:
-    - Stock performance in the last 30 days: {stock_data['Close'].tail(30).tolist()}
-    - RSI values: {compute_rsi(stock_data).tail(5).tolist()}
-    - Latest news headlines:
-        {news}
+    - Last 30-day closing prices: {stock_data['Close'].tail(30).tolist()}
+    - Latest news headlines: {news}
     
     Provide an analysis including:
     - General sentiment (bullish, bearish, or neutral).
-    - Technical insights (e.g., if RSI is overbought or oversold).
-    - A short prediction based on recent trends.
+    - Technical insights based on price trends.
+    - A short forecast for the stock.
     """
 
-    # Call OpenAI GPT API
     response = openai.ChatCompletion.create(
         model="gpt-4",
         messages=[{"role": "user", "content": prompt}]
     )
 
     return response["choices"][0]["message"]["content"]
+
+# Initialize session state variables
+if "selected_ticker" not in st.session_state:
+    st.session_state.selected_ticker = None
+if "stock_analysis" not in st.session_state:
+    st.session_state.stock_analysis = None
+if "stock_data" not in st.session_state:
+    st.session_state.stock_data = None
 
 
 # Function to get stock ticker from company name
@@ -588,20 +594,30 @@ if menu == "Stock Info":
         st.markdown("📊 AI-Powered Stock Analysis", )
         with st.expander("Stock Analysis", expanded=True):
 
-            # User inputs the stock ticker
-            ticker = selected_ticker
+            # Stock selection (this should be outside the button scope)
+            # Display selected ticker
+            ticker = st.session_state.selected_ticker
+            st.write(f"**Selected Ticker:** {ticker}")
 
+            # Button to analyze stock
             if st.button("Analyze Stock"):
-                df = get_stock_data(ticker)  # Get stock data
-                news = get_news_sentiment(ticker)  # Get news headlines
-                analysis = analyze_stock_with_gpt(ticker, df, news)  # Get GPT analysis
+                # Fetch and store stock data
+                stock_data = get_stock_data(ticker)
+                news = get_news_sentiment(ticker)
 
+                # Store results in session state
+                st.session_state.stock_data = stock_data
+                st.session_state.stock_analysis = analyze_stock_with_gpt(ticker, stock_data, news)
+
+            # Display GPT analysis if available
+            if st.session_state.stock_analysis:
                 st.subheader("📢 GPT Stock Analysis")
-                st.write(analysis)
+                st.write(st.session_state.stock_analysis)
 
-                # Display historical price chart
+            # Display historical stock price chart if available
+            if st.session_state.stock_data is not None:
                 st.subheader("📈 Stock Price History")
-                st.line_chart(df["Close"])
+                st.line_chart(st.session_state.stock_data["Close"])
 
 # Historical Analysis Section
 if menu == "Historical Analysis":
