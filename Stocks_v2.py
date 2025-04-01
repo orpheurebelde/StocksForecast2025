@@ -465,7 +465,7 @@ if menu == "Stock Info":
             st.warning("No stock selected. Please choose a ticker.")
 
         col1, col2, col3 = st.columns(3)  # Initialize columns
-        
+
         with col1:
             if st.session_state.selected_ticker:
                 _, info = fetch_data(st.session_state.selected_ticker)
@@ -479,11 +479,12 @@ if menu == "Stock Info":
             st.markdown(f"<h4>Sector: {info.get('sector', 'Sector Not Found')}</h4>", unsafe_allow_html=True)
         with col3:
             st.markdown(f"<h4>Industry: {info.get('industry', 'Industry Not Found')}</h4>", unsafe_allow_html=True)
-        with st.expander("Company Info", expanded=False):
+        
+    with st.expander("Company Info", expanded=False):
             st.write(info)
 
-        # Check if key exists and value is valid before using it
-        def safe_metric(value, divisor=1, suffix="", percentage=False):
+    # Check if key exists and value is valid before using it
+    def safe_metric(value, divisor=1, suffix="", percentage=False):
             """Safely formats a metric value for Streamlit display."""
             try:
                 if value is None:
@@ -498,19 +499,19 @@ if menu == "Stock Info":
             except Exception as e:
                 return f"Error: {e}"  # Return error message instead of crashing
 
-        freecash_flow = info.get('freeCashflow', 'N/A')
-        pe_ratio = info.get('trailingPE', 'N/A')
-        peg_ratio = info.get('trailingPegRatio', 'N/A')
-        earnings_growth = info.get('earningsGrowth', 'N/A')
-        forward_pe = info.get('forwardPE', 'N/A')
-        freecash_flow = info.get('freeCashflow', 'N/A')
-        netincome = info.get('netIncomeToCommon', 'N/A')
-        grossmargin = info.get('grossMargins', 'N/A')
-        operatingmargin = info.get('operatingMargins', 'N/A')
-        profit_margin = info.get('profitMargins', 'N/A')
-        institutional_ownership = info.get('heldPercentInstitutions', 'N/A')
-        insider_ownership = info.get('heldPercentInsiders', 'N/A')
-        if info:
+    freecash_flow = info.get('freeCashflow', 'N/A')
+    pe_ratio = info.get('trailingPE', 'N/A')
+    peg_ratio = info.get('trailingPegRatio', 'N/A')
+    earnings_growth = info.get('earningsGrowth', 'N/A')
+    forward_pe = info.get('forwardPE', 'N/A')
+    freecash_flow = info.get('freeCashflow', 'N/A')
+    netincome = info.get('netIncomeToCommon', 'N/A')
+    grossmargin = info.get('grossMargins', 'N/A')
+    operatingmargin = info.get('operatingMargins', 'N/A')
+    profit_margin = info.get('profitMargins', 'N/A')
+    institutional_ownership = info.get('heldPercentInstitutions', 'N/A')
+    insider_ownership = info.get('heldPercentInsiders', 'N/A')
+    if info:
             pe_ratio = info.get('trailingPE', 'N/A')
             peg_ratio = info.get('trailingPegRatio', 'N/A')
             earnings_growth = info.get('earningsGrowth', 'N/A')
@@ -528,7 +529,7 @@ if menu == "Stock Info":
             totaldebt = info.get('totalDebt', 'N/A')
             totalcash = info.get('totalCash', 'N/A')
             revenuegrowth = info.get('revenueGrowth', 'N/A')
-        else:
+    else:
             st.warning("Stock information not found.")
             insider_ownership = info.get('heldPercentInsiders', 'N/A')
             trailingeps = info.get('trailingEps', 'N/A')
@@ -539,12 +540,12 @@ if menu == "Stock Info":
             revenuegrowth = info.get('revenueGrowth', 'N/A')
 
         # Calculate DCF Value
-        dcf_value = dcf_valuation(ticker)
+    dcf_value = dcf_valuation(ticker)
 
-        with st.expander("Stock Overview", expanded=True):
+    with st.expander("Stock Overview", expanded=True):
             col1, col2, col3 = st.columns(3)
 
-        with col1:
+    with col1:
             st.metric(label="📈 Market Cap", value=safe_metric(info.get('marketCap'), 1e9, "B"))
             st.metric(label="📈 Free Cash Flow", value=safe_metric(freecash_flow, 1e9, "B"))
             st.metric(label="📈 Net Income", value=safe_metric(netincome, 1e9, "B"))
@@ -554,7 +555,7 @@ if menu == "Stock Info":
             st.metric(label="📈 Earnings Growth", value=safe_metric(earnings_growth, percentage=True))
             st.metric(label="📈 Dividend Yield", value=safe_metric(info.get('dividendYield'), percentage=True))
 
-        with col2:
+    with col2:
             st.metric(label="📊 Current Price", value=f"${info['currentPrice']:.2f}")
             try:
                 peg_ratio = float(peg_ratio)  # Convert to float if possible
@@ -594,7 +595,7 @@ if menu == "Stock Info":
             st.metric(label="📈 Total Debt", value=f"${totaldebt / 1e9:.2f}B" if totaldebt and isinstance(totaldebt, (int, float)) else "N/A")
             st.metric(label="📈 Total Cash", value=f"${totalcash / 1e9:.2f}B" if totalcash and isinstance(totalcash, (int, float)) else "N/A")
             st.metric(label="📉 DCF Valuation", value=f"${dcf_value:,.2f}")
-        with col3:
+    with col3:
             st.metric(label="📈 Trailing EPS", value=f"${trailingeps:.2f}")
             st.metric(label="📈 Forward EPS", value=f"${forwardeps:.2f}")
             st.metric(label="📈 Revenue", value=f"${revenue / 1e9:.2f}B" if revenue and isinstance(revenue, (int, float)) else "N/A")
@@ -604,15 +605,15 @@ if menu == "Stock Info":
     
         
         
-        #Using AI to analyse the stock based on the uper metrics
-        st.markdown("📊 AI-Powered Stock Analysis", )
+    #Using AI to analyse the stock based on the uper metrics
+    st.markdown("📊 AI-Powered Stock Analysis", )
 
-        # Fetch and display stock data if a ticker is selected
-        if st.session_state.selected_ticker:
+    # Fetch and display stock data if a ticker is selected
+    if st.session_state.selected_ticker:
             data, info = fetch_data(st.session_state.selected_ticker)
             st.write(f"**Selected Ticker:** {st.session_state.selected_ticker}")
 
-        with st.expander("Stock Analysis", expanded=True):
+    with st.expander("Stock Analysis", expanded=True):
 
             # Button to analyze stock
             if st.button("Analyze Stock"):
