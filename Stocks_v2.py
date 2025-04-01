@@ -4,7 +4,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import streamlit as st
-import math 
+import math
+import openai
 from textblob import TextBlob
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
@@ -21,47 +22,44 @@ from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 # Set app to wide mode
 st.set_page_config(layout="wide")
 
-# -------------------------------
-# 1️⃣ SENTIMENT ANALYSIS (FinBERT)
-# -------------------------------
+# Function to compute RSI
+def compute_rsi(data, window=14):
+    delta = data["Close"].diff()
+    gain = (delta.where(delta > 0, 0)).rolling(window=window).mean()
+    loss = (-delta.where(delta < 0, 0)).rolling(window=window).mean()
+    rs = gain / loss
+    rsi = 100 - (100 / (1 + rs))
+    return rsi
 
-# Fetch stock news headlines
-def get_stock_news(ticker):
-    url = f"https://www.cnbc.com/quotes/{ticker}"
-    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
+def get_news_sentiment(ticker):
+    stock = yf.Ticker(ticker)
+    news = stock.news[:5]  # Get the latest 5 news articles
+    return news
 
-    response = requests.get(url, headers=headers)
-    if response.status_code != 200:
-        return ["Error: Unable to fetch news."]
+def analyze_stock_with_gpt(ticker, stock_data, news):
+    openai.api_key = "your-openai-api-key"  # Set your GPT API key
 
-    soup = BeautifulSoup(response.text, "html.parser")
+    # Create a prompt for GPT analysis
+    prompt = f"""
+    Analyze the stock {ticker} based on the following data:
+    - Stock performance in the last 30 days: {stock_data['Close'].tail(30).tolist()}
+    - RSI values: {compute_rsi(stock_data).tail(5).tolist()}
+    - Latest news headlines:
+        {news}
+    
+    Provide an analysis including:
+    - General sentiment (bullish, bearish, or neutral).
+    - Technical insights (e.g., if RSI is overbought or oversold).
+    - A short prediction based on recent trends.
+    """
 
-    # Find news headlines (adjust selector if needed)
-    articles = soup.select("div.QuickLinks-primary a")  
-    headlines = [article.get_text(strip=True) for article in articles[:10]]  # Get top 10
+    # Call OpenAI GPT API
+    response = openai.ChatCompletion.create(
+        model="gpt-4",
+        messages=[{"role": "user", "content": prompt}]
+    )
 
-    return headlines if headlines else ["No recent news found."]
-
-# Perform sentiment analysis
-def analyze_sentiment(headlines):
-    try:
-        analyzer = SentimentIntensityAnalyzer()
-        sentiments = []
-
-        for headline in headlines:
-            sentiment_score = analyzer.polarity_scores(headline)
-            label = (
-                "Positive" if sentiment_score["compound"] > 0 
-                else "Negative" if sentiment_score["compound"] < 0 
-                else "Neutral"
-            )
-            sentiments.append({"headline": headline, "label": label, "score": sentiment_score["compound"]})
-
-        return sentiments
-    except Exception as e:
-        st.error(f"Error performing sentiment analysis: {e}")
-        return [{"headline": "Error", "label": "Error", "score": 0.0}]
-
+    return response["choices"][0]["message"]["content"]
 
 
 # Function to get stock ticker from company name
@@ -591,32 +589,9 @@ if menu == "Stock Info":
         st.markdown("📊 AI-Powered Stock Analysis", )
         with st.expander("Stock Analysis", expanded=True):
 
-            if ticker:
-                news = get_stock_news(ticker)  # Replace "AAPL" with the desired stock ticker
 
-                # Perform sentiment analysis
-                sentiment_results = analyze_sentiment(news)
-                for result in sentiment_results:
-                    print(f"{result['label']}: {result['headline']} ({result['score']})")
-        
-        # Predictive Analysis
-        st.subheader("📈 AI Stock Price Prediction")
-        with st.expander("Stock Price Prediction", expanded=True):        
-            df = get_stock_data(ticker)
-            forecast = predict_future(ticker)
 
-            st.line_chart(forecast[["ds", "yhat"]].set_index("ds"))  # Show predictions
 
-            # Fundamental & Technical Analysis
-            st.subheader("📊 Fundamental Analysis")
-            fundamentals = analyze_fundamentals(ticker)
-
-            for key, value in fundamentals.items():
-                st.write(f"**{key}:** {value}")
-
-            # Final AI Verdict
-            st.subheader("🧠 AI Verdict")
-            st.write(f"📌 **Valuation Based on P/E Ratio:** {fundamentals['Valuation']}")        
 
 # Historical Analysis Section
 if menu == "Historical Analysis":
