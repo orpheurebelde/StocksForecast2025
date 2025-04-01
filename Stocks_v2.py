@@ -588,6 +588,9 @@ if menu == "Stock Info":
         st.markdown("📊 AI-Powered Stock Analysis", )
         with st.expander("Stock Analysis", expanded=True):
 
+            # User inputs the stock ticker
+            ticker = selected_ticker
+
             if st.button("Analyze Stock"):
                 df = get_stock_data(ticker)  # Get stock data
                 news = get_news_sentiment(ticker)  # Get news headlines
