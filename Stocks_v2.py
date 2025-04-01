@@ -36,27 +36,38 @@ def get_news_sentiment(ticker):
     news = stock.news[:5] if stock.news else []  # Get the latest 5 news articles
     return news
 
+import openai
+
 # Function to analyze stock using GPT
 def analyze_stock_with_gpt(ticker, stock_data, news):
-    openai.api_key = "your-openai-api-key"
+    if stock_data is None or stock_data.empty:
+        return "Error: No stock data available."
 
+    if "Close" not in stock_data.columns:
+        return f"Error: 'Close' column not found. Available columns: {list(stock_data.columns)}"
+
+    # Generate prompt for GPT
     prompt = f"""
-    Analyze the stock {ticker} based on the following data:
+    Stock: {ticker}
     - Last 30-day closing prices: {stock_data['Close'].tail(30).tolist()}
-    - Latest news headlines: {news}
-    
+    - News Sentiment: {news}
+
     Provide an analysis including:
     - General sentiment (bullish, bearish, or neutral).
     - Technical insights based on price trends.
     - A short forecast for the stock.
     """
 
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=[{"role": "user", "content": prompt}]
-    )
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[{"role": "user", "content": prompt}]
+        )
 
-    return response["choices"][0]["message"]["content"]
+        return response["choices"][0]["message"]["content"]
+    
+    except Exception as e:
+        return f"Error: {str(e)}"  # Return error message if API call fails
 
 # Initialize session state variables
 if "selected_ticker" not in st.session_state:
