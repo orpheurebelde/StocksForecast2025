@@ -49,7 +49,7 @@ def analyze_stock_with_gpt(ticker, stock_data, news):
     # Generate prompt for GPT
     prompt = f"""
     Stock: {ticker}
-    - Last 30-day closing prices: {stock_data['Close'].tail(30).tolist()}
+    - Last 30-day closing prices: {stock_data['y'].tail(30).tolist()}
     - News Sentiment: {news}
 
     Provide an analysis including:
