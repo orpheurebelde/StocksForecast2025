@@ -644,7 +644,7 @@ if menu == "Stock Info":
             # Display historical stock price chart if available
             if st.session_state.stock_data is not None:
                 st.subheader("📈 Stock Price History")
-                st.line_chart(st.session_state.stock_data["Close"])
+                st.line_chart(st.session_state.stock_data["y"])
 
 # Historical Analysis Section
 if menu == "Historical Analysis":
