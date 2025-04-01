@@ -606,10 +606,10 @@ if menu == "Stock Info":
         #Using AI to analyse the stock based on the uper metrics
         st.markdown("📊 AI-Powered Stock Analysis", )
 
-        # Stock selection (this should be outside the button scope)
-        # Display selected ticker
-        ticker = st.session_state.selected_ticker
-        st.write(f"**Selected Ticker:** {ticker}")
+        # Fetch and display stock data if a ticker is selected
+        if st.session_state.selected_ticker:
+            data, info = fetch_data(st.session_state.selected_ticker)
+            st.write(f"**Selected Ticker:** {st.session_state.selected_ticker}")
 
         with st.expander("Stock Analysis", expanded=True):
 
