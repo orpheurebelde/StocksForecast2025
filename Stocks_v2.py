@@ -43,7 +43,7 @@ def analyze_stock_with_gpt(ticker, stock_data, news):
     if stock_data is None or stock_data.empty:
         return "Error: No stock data available."
 
-    if "Close" not in stock_data.columns:
+    if "y" not in stock_data.columns:
         return f"Error: 'Close' column not found. Available columns: {list(stock_data.columns)}"
 
     # Generate prompt for GPT
