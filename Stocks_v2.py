@@ -464,7 +464,8 @@ if menu == "Stock Info":
         else:
             st.warning("No stock selected. Please choose a ticker.")
 
-            col1, col2, col3 = st.columns(3)
+        col1, col2, col3 = st.columns(3)  # Initialize columns
+        
         with col1:
             if st.session_state.selected_ticker:
                 _, info = fetch_data(st.session_state.selected_ticker)
