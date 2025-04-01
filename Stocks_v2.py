@@ -38,17 +38,18 @@ def get_news_sentiment(ticker):
 
 import openai
 
-# Function to analyze stock using GPT
-def analyze_stock_with_gpt(ticker, stock_data, news):
+# Load a LLaMA 2 model (you can replace with Mistral if preferred)
+llama = pipeline("text-generation", model="meta-llama/Llama-2-7b-chat-hf")
+
+def analyze_stock_with_llama(ticker, stock_data, news):
     if stock_data is None or stock_data.empty:
         return "Error: No stock data available."
 
-    if "y" not in stock_data.columns:
-        return f"Error: 'Close' column not found. Available columns: {list(stock_data.columns)}"
+    if "y" not in stock_data.columns:  # 'Close' is renamed to 'y'
+        return f"Error: 'y' column not found. Available columns: {list(stock_data.columns)}"
 
-    # Generate prompt for GPT
     prompt = f"""
-    Stock: {ticker}
+    - Stock: {ticker}
     - Last 30-day closing prices: {stock_data['y'].tail(30).tolist()}
     - News Sentiment: {news}
 
@@ -58,24 +59,8 @@ def analyze_stock_with_gpt(ticker, stock_data, news):
     - A short forecast for the stock.
     """
 
-    try:
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
-            messages=[{"role": "user", "content": prompt}]
-        )
-
-        return response["choices"][0]["message"]["content"]
-    
-    except Exception as e:
-        return f"Error: {str(e)}"  # Return error message if API call fails
-
-# Initialize session state variables
-if "selected_ticker" not in st.session_state:
-    st.session_state.selected_ticker = None
-if "stock_analysis" not in st.session_state:
-    st.session_state.stock_analysis = None
-if "stock_data" not in st.session_state:
-    st.session_state.stock_data = None
+    result = llama(prompt, max_length=500)[0]["generated_text"]
+    return result
 
 
 # Function to get stock ticker from company name
@@ -634,7 +619,7 @@ if menu == "Stock Info":
 
                 # Store results in session state
                 st.session_state.stock_data = stock_data
-                st.session_state.stock_analysis = analyze_stock_with_gpt(ticker, stock_data, news)
+                st.session_state.stock_analysis = analyze_stock_with_llama(ticker, stock_data, news)
 
             # Display GPT analysis if available
             if st.session_state.stock_analysis:
