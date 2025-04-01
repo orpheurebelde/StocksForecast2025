@@ -437,34 +437,43 @@ if menu == "Stock Info":
     # Input box for user to type the stock name, with a default value
     search_input = st.text_input("Enter Stock Ticker or Name", "Apple")
 
-    # Initialize selected ticker
-    selected_ticker = None
+    # Ensure session state is initialized for selected_ticker
+    if "selected_ticker" not in st.session_state:
+        st.session_state.selected_ticker = None
 
     if search_input:
         # Dynamically fetch matching tickers
         ticker_options = get_ticker_from_name(search_input)
 
         if ticker_options:
-            # Display matching options as clickable buttons
             st.markdown("### Matching Companies:")
             for company_name, ticker in ticker_options.items():
                 if st.button(f"{ticker} - {company_name}"):
-                    selected_ticker = ticker
-                    break
+                    st.session_state.selected_ticker = ticker  # Store in session state
+                    st.rerun()  # Rerun script to update display immediately
         else:
             st.warning("No matching stocks found. Please refine your search.")
     else:
         st.info("Please enter a stock name or ticker to search.")
 
-    # Fetch and display stock data if a ticker is selected
-    if selected_ticker:
-        data, info = fetch_data(selected_ticker)
+    # Display stock information
+    with st.expander("Stock Overview", expanded=True):
+        if st.session_state.selected_ticker:
+            st.write(f"**Selected Ticker:** {st.session_state.selected_ticker}")
+            # Here you can fetch stock data and display additional information
+        else:
+            st.warning("No stock selected. Please choose a ticker.")
 
-        # Display stock information
-        with st.expander("Stock Overview", expanded=True):
             col1, col2, col3 = st.columns(3)
         with col1:
-            st.markdown(f"<h4>Name: {selected_ticker} - {info.get('longName', 'Company Name Not Found')}</h4>", unsafe_allow_html=True)
+            if st.session_state.selected_ticker:
+                _, info = fetch_data(st.session_state.selected_ticker)
+                if info:
+                    st.markdown(f"<h4>Name: {st.session_state.selected_ticker} - {info.get('longName', 'Company Name Not Found')}</h4>", unsafe_allow_html=True)
+                else:
+                    st.warning("Stock information not found.")
+            else:
+                st.warning("No stock selected.")
         with col2:
             st.markdown(f"<h4>Sector: {info.get('sector', 'Sector Not Found')}</h4>", unsafe_allow_html=True)
         with col3:
@@ -500,14 +509,7 @@ if menu == "Stock Info":
         profit_margin = info.get('profitMargins', 'N/A')
         institutional_ownership = info.get('heldPercentInstitutions', 'N/A')
         insider_ownership = info.get('heldPercentInsiders', 'N/A')
-        trailingeps = info.get('trailingEps', 'N/A')
-        forwardeps = info.get('forwardEps', 'N/A')
-        revenue = info.get('totalRevenue', 'N/A')
-        totaldebt = info.get('totalDebt', 'N/A')
-        totalcash = info.get('totalCash', 'N/A')
-        revenuegrowth = info.get('revenueGrowth', 'N/A')
-
-        if info and 'trailingPE' in info and 'earningsGrowth' in info:
+        if info:
             pe_ratio = info.get('trailingPE', 'N/A')
             peg_ratio = info.get('trailingPegRatio', 'N/A')
             earnings_growth = info.get('earningsGrowth', 'N/A')
@@ -518,6 +520,15 @@ if menu == "Stock Info":
             operatingmargin = info.get('operatingMargins', 'N/A')
             profit_margin = info.get('profitMargins', 'N/A')
             institutional_ownership = info.get('heldPercentInstitutions', 'N/A')
+            insider_ownership = info.get('heldPercentInsiders', 'N/A')
+            trailingeps = info.get('trailingEps', 'N/A')
+            forwardeps = info.get('forwardEps', 'N/A')
+            revenue = info.get('totalRevenue', 'N/A')
+            totaldebt = info.get('totalDebt', 'N/A')
+            totalcash = info.get('totalCash', 'N/A')
+            revenuegrowth = info.get('revenueGrowth', 'N/A')
+        else:
+            st.warning("Stock information not found.")
             insider_ownership = info.get('heldPercentInsiders', 'N/A')
             trailingeps = info.get('trailingEps', 'N/A')
             forwardeps = info.get('forwardEps', 'N/A')
