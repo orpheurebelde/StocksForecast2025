@@ -581,7 +581,7 @@ if menu == "Stock Info":
             st.metric(label="📈 Dividend Yield", value=safe_metric(info.get('dividendYield'), percentage=True) if isinstance(info, dict) and 'marketCap' in info else "N/A")
 
     with col2:
-            st.metric(label="📊 Current Price", value=f"${info['currentPrice']:.2f}")
+            st.metric(label="📊 Current Price", value=f"${info['currentPrice']:.2f}" if isinstance(info, dict) and 'marketCap' in info else "N/A")
             try:
                 peg_ratio = float(peg_ratio)  # Convert to float if possible
                 peg_color = "green" if peg_ratio < 1 else "orange" if 1 <= peg_ratio <= 2 else "red"
