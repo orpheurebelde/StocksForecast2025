@@ -655,14 +655,14 @@ if menu == "Stock Info":
         else:
             st.metric(label="📈 Debt to Equity Ratio", value="N/A")
 
-st.write("")  # Empty line
+        st.write("")  # Empty line
 
-# Display Total Debt & Total Cash
-st.metric(label="📈 Total Debt", value=f"${totaldebt / 1e9:.2f}B" if isinstance(totaldebt, (int, float)) else "N/A")
-st.metric(label="📈 Total Cash", value=f"${totalcash / 1e9:.2f}B" if isinstance(totalcash, (int, float)) else "N/A")
+        # Display Total Debt & Total Cash
+        st.metric(label="📈 Total Debt", value=f"${totaldebt / 1e9:.2f}B" if isinstance(totaldebt, (int, float)) else "N/A")
+        st.metric(label="📈 Total Cash", value=f"${totalcash / 1e9:.2f}B" if isinstance(totalcash, (int, float)) else "N/A")
 
-# Display DCF Valuation
-st.metric(label="📉 DCF Valuation", value=f"${dcf_value:,.2f}" if isinstance(dcf_value, (int, float)) else "N/A")
+        # Display DCF Valuation
+        st.metric(label="📉 DCF Valuation", value=f"${dcf_value:,.2f}" if isinstance(dcf_value, (int, float)) else "N/A")
 
 
     with col3:
