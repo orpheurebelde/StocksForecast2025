@@ -493,7 +493,12 @@ if menu == "Stock Info":
                 else:
                     st.warning("No stock selected.")
         with col3:
-            st.markdown(f"<h4>Industry: {info.get('industry', 'Industry Not Found')}</h4>", unsafe_allow_html=True)
+            if st.session_state.selected_ticker:
+                _, info = fetch_data(st.session_state.selected_ticker)
+                if info:
+                    st.markdown(f"<h4>Industry: {info.get('industry', 'Industry Not Found')}</h4>", unsafe_allow_html=True)
+                else:
+                    st.warning("No stock selected.")
         
     with st.expander("Company Info", expanded=False):
             st.write(info)
