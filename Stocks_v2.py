@@ -207,7 +207,7 @@ def analyze_fundamentals(ticker):
         # Prepare the prompt for GPT-3.5
         prompt = f"""
         - Stock: {ticker}
-        - Last 30-day closing prices: {data['y'].tail(30).tolist()}
+        - Last 30-day closing prices: {data['Close'].tail(30).tolist()}
         - Market Cap: {info.get('marketCap', 'N/A')}
         - P/E Ratio: {info.get('trailingPE', 'N/A')}
         - PEG Ratio: {info.get('pegRatio', 'N/A')}
