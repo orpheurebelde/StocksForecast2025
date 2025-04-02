@@ -36,17 +36,15 @@ def get_news_sentiment(ticker):
     news = stock.news[:5] if stock.news else []  # Get the latest 5 news articles
     return news
 
-import openai
+# Load API key from secrets
+openai.api_key = st.secrets["openai"]["api_key"]
 
-# Load a LLaMA 2 model (you can replace with Mistral if preferred)
-llama = pipeline("text-generation", model="meta-llama/Llama-2-7b-chat-hf")
-
-def analyze_stock_with_llama(ticker, stock_data, news):
+def analyze_stock_with_gpt(ticker, stock_data, news):
     if stock_data is None or stock_data.empty:
         return "Error: No stock data available."
 
-    if "y" not in stock_data.columns:  # 'Close' is renamed to 'y'
-        return f"Error: 'y' column not found. Available columns: {list(stock_data.columns)}"
+    if "Close" not in stock_data.columns:
+        return f"Error: 'Close' column not found. Available columns: {list(stock_data.columns)}"
 
     prompt = f"""
     - Stock: {ticker}
@@ -59,8 +57,12 @@ def analyze_stock_with_llama(ticker, stock_data, news):
     - A short forecast for the stock.
     """
 
-    result = llama(prompt, max_length=500)[0]["generated_text"]
-    return result
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",  # ✅ Use GPT-3.5
+        messages=[{"role": "user", "content": prompt}]
+    )
+
+    return response["choices"][0]["message"]["content"]
 
 
 # Function to get stock ticker from company name
