@@ -194,74 +194,47 @@ def predict_future(ticker):
 # 3️⃣ FUNDAMENTAL & TECHNICAL AI ANALYSIS
 # -------------------------------
 
-# Compare stock fundamentals against industry benchmarks
+# Analyse fundamentals and technicals and score the stock using AI
 def analyze_fundamentals(ticker):
-    stock = yf.Ticker(ticker)
-    info = stock.info
-    industry = None  # Initialize variable before use
-    
-    # Extract key metrics
-    pe_ratio = info.get("trailingPE", "N/A")  # P/E Ratio
-    eps = info.get("trailingEps", "N/A")  # Earnings Per Share
-    peg_ratio = info.get("pegRatio", "N/A")  # PEG Ratio
-    #Dinamically fetch the industry average P/E ratio
-    # Fetch industry average P/E ratio dynamically
-    # Ensure `info` is a dictionary before accessing its keys
-    if isinstance(info, dict):
-        industry = info.get("industry")
-    else:
-        industry = None
+    try:
+        # Fetch stock data
+        data, info = fetch_data(ticker)
 
-    if industry:
-        try:
-            # Fetch the webpage content
-            response = requests.get("https://fullratio.com/pe-ratio-by-industry", timeout=5)
-            response.raise_for_status()  # Raise an error for HTTP issues
+        # Check if data is valid
+        if data is None or info is None:
+            return "Error: Unable to fetch stock data."
 
-            # Parse the HTML content
-            soup = BeautifulSoup(response.text, 'html.parser')
+        # Prepare the prompt for GPT-3.5
+        prompt = f"""
+        - Stock: {ticker}
+        - Last 30-day closing prices: {data['y'].tail(30).tolist()}
+        - Market Cap: {info.get('marketCap', 'N/A')}
+        - P/E Ratio: {info.get('trailingPE', 'N/A')}
+        - PEG Ratio: {info.get('pegRatio', 'N/A')}
+        - Forward P/E Ratio: {info.get('forwardPE', 'N/A')}
+        - Free Cash Flow: {info.get('freeCashflow', 'N/A')}
+        
+        Provide an analysis including:
+        - General sentiment (bullish, bearish, or neutral).
+        - Technical insights based on price trends.
+        - A short forecast for the stock.
+        """
+        # Initialize OpenAI client
+        client = openai.OpenAI(api_key=api_key)
 
-            # Find the table row corresponding to the industry
-            table = soup.find('table')
-            rows = table.find_all('tr')
-            industry_pe = None
-
-            for row in rows:
-                columns = row.find_all('td')
-                if len(columns) >= 2 and industry.lower() in columns[0].text.lower():
-                    industry_pe = float(columns[1].text.strip())
-                    break
-
-            industry_pe = None  # Initialize variable before use
-
-            if industry_pe is None:
-                st.warning("Industry P/E ratio not found on the page. Using default value.")
-                industry_pe = st.number_input(
-                "Industry P/E ratio not available. Please input the Industry P/E ratio:",
-                min_value=0.0,
-                value=20.0,
-                step=0.1
-            )
-
-        except Exception as e:
-            st.warning(f"Error fetching industry P/E ratio: {e}. Using default value.")
-            industry_pe = st.number_input(
-            "Industry P/E ratio not available. Please input the Industry P/E ratio:",
-            min_value=0.0,
-            value=20.0,
-            step=0.1
+        # Call OpenAI API for analysis
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": prompt}]
         )
 
-    # AI Valuation
-    valuation = "Undervalued" if pe_ratio != "N/A" and pe_ratio < industry_pe else "Overvalued"
+        return response.choices[0].message.content  # Extract text response correctly
+
+    except Exception as e:
+        st.error(f"Error analyzing fundamentals for {ticker}: {e}")
+        return "Error: Unable to analyze fundamentals."
     
-    return {
-        "P/E Ratio": pe_ratio,
-        "EPS": eps,
-        "PEG Ratio": peg_ratio,
-        #"Industry Avg P/E": industry_pe,
-        "Valuation": valuation
-    }
+    
 
 def dcf_valuation(ticker, years=10, manual_growth=None, manual_terminal_growth=None):
     try:
