@@ -502,7 +502,7 @@ if menu == "Stock Info":
     # Initialize info with a default value
     info = None  
 
-    with st.expander("Company Info", expanded=False):
+    with st.expander("Company Info", expanded=True):
         if st.session_state.selected_ticker:
             _, info = fetch_data(st.session_state.selected_ticker)
             if info:
