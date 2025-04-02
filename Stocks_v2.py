@@ -259,7 +259,7 @@ def analyze_fundamentals(ticker):
         "P/E Ratio": pe_ratio,
         "EPS": eps,
         "PEG Ratio": peg_ratio,
-        "Industry Avg P/E": industry_pe,
+        #"Industry Avg P/E": industry_pe,
         "Valuation": valuation
     }
 
