@@ -47,12 +47,12 @@ def analyze_stock_with_gpt(ticker, stock_data, news):
     if stock_data is None or stock_data.empty:
         return "Error: No stock data available."
 
-    if "Close" not in stock_data.columns:
+    if "y" not in stock_data.columns:
         return f"Error: 'Close' column not found. Available columns: {list(stock_data.columns)}"
 
     prompt = f"""
     - Stock: {ticker}
-    - Last 30-day closing prices: {stock_data['Close'].tail(30).tolist()}
+    - Last 30-day closing prices: {stock_data['y'].tail(30).tolist()}
     - News Sentiment: {news}
     
     Provide an analysis including:
