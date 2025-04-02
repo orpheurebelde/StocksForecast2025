@@ -30,22 +30,51 @@ def compute_rsi(data, window=14):
     rsi = 100 - (100 / (1 + rs))
     return rsi
 
-# Function to fetch stock news from tradingview and analyse sentiment
+# Function to fetch stock news from TradingView
 def fetch_tradingview_news(ticker):
     url = f"https://www.tradingview.com/symbols/{ticker}/news/"
-    response = requests.get(url)
-    soup = BeautifulSoup(response.text, 'html.parser')
-    news_items = soup.find_all('div', class_='tv-screener__description')
-    news_list = [item.text for item in news_items]
-    return news_list
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+    }
+    
+    try:
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()  # Raises an HTTPError if status is not 200
+        
+        soup = BeautifulSoup(response.text, 'html.parser')
+        news_items = soup.find_all('div', class_='tv-screener__description')
 
-#Analyze sentiment of news articles using FinBERT
+        if not news_items:
+            return ["No news found or TradingView changed its structure."]
+
+        return [item.get_text(strip=True) for item in news_items]
+
+    except requests.exceptions.RequestException as e:
+        return [f"Error fetching news: {e}"]
+
+# Function to analyze sentiment using FinBERT
+@st.cache_resource  # Cache the model to avoid repeated downloads
+def load_sentiment_model():
+    try:
+        return pipeline("sentiment-analysis", model="yiyanghkust/finbert-tone", device=-1)
+    except Exception as e:
+        st.error(f"Error loading sentiment model: {e}")
+        return None
+
 def analyze_sentiment(news_list):
-    sentiment_pipeline = pipeline("sentiment-analysis", model="yiyanghkust/finbert-tone")
+    sentiment_pipeline = load_sentiment_model()
+    
+    if sentiment_pipeline is None:
+        return ["Error loading FinBERT model."]
+    
     sentiments = []
     for news in news_list:
-        sentiment = sentiment_pipeline(news)[0]
-        sentiments.append(sentiment['label'])
+        try:
+            sentiment = sentiment_pipeline(news)[0]
+            sentiments.append(sentiment['label'])
+        except Exception as e:
+            sentiments.append(f"Error analyzing sentiment: {e}")
+    
     return sentiments
 
 # Load API key from secrets
