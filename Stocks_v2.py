@@ -634,20 +634,6 @@ if menu == "Stock Info":
         else:
             st.markdown("<span style='color:gray; font-size:25px;'>📈 Forward P/E Ratio: N/A</span>", unsafe_allow_html=True)
 
-        # Categorize P/S Ratio
-        if isinstance(ps_ratio, (int, float)) and ps_ratio is not None and not math.isnan(ps_ratio):
-            ps_color = "green" if ps_ratio < 1 else "orange" if 1 <= ps_ratio <= 2 else "red"
-            st.markdown(f"<span style='color:{ps_color}; font-size:25px;'>📈 P/S Ratio: {ps_ratio:.2f}</span>", unsafe_allow_html=True)
-        else:
-            st.markdown("<span style='color:gray; font-size:25px;'>📈 P/S Ratio: N/A</span>", unsafe_allow_html=True)
-
-        # Categorize P/B Ratio
-        if isinstance(pb_ratio, (int, float)) and pb_ratio is not None and not math.isnan(pb_ratio):
-            pb_color = "green" if pb_ratio < 1 else "orange" if 1 <= pb_ratio <= 2 else "red"
-            st.markdown(f"<span style='color:{pb_color}; font-size:25px;'>📈 P/B Ratio: {pb_ratio:.2f}</span>", unsafe_allow_html=True)
-        else:
-            st.markdown("<span style='color:gray; font-size:25px;'>📈 P/B Ratio: N/A</span>", unsafe_allow_html=True)
-
         # Categorize Debt to Equity Ratio
         if isinstance(totaldebt, (int, float)) and isinstance(totalcash, (int, float)) and totaldebt > 0 and totalcash > 0:
             debt_to_equity = totaldebt / totalcash
@@ -669,6 +655,20 @@ if menu == "Stock Info":
         st.write("Error: 'info' object is not properly initialized or is None.")
 
     with col3:
+                # Categorize P/S Ratio
+        if isinstance(ps_ratio, (int, float)) and ps_ratio is not None and not math.isnan(ps_ratio):
+            ps_color = "green" if ps_ratio < 1 else "orange" if 1 <= ps_ratio <= 2 else "red"
+            st.markdown(f"<span style='color:{ps_color}; font-size:25px;'>📈 P/S Ratio: {ps_ratio:.2f}</span>", unsafe_allow_html=True)
+        else:
+            st.markdown("<span style='color:gray; font-size:25px;'>📈 P/S Ratio: N/A</span>", unsafe_allow_html=True)
+
+        # Categorize P/B Ratio
+        if isinstance(pb_ratio, (int, float)) and pb_ratio is not None and not math.isnan(pb_ratio):
+            pb_color = "green" if pb_ratio < 1 else "orange" if 1 <= pb_ratio <= 2 else "red"
+            st.markdown(f"<span style='color:{pb_color}; font-size:25px;'>📈 P/B Ratio: {pb_ratio:.2f}</span>", unsafe_allow_html=True)
+        else:
+            st.markdown("<span style='color:gray; font-size:25px;'>📈 P/B Ratio: N/A</span>", unsafe_allow_html=True)
+            
         st.metric(label="📈 Trailing EPS", value=f"${trailingeps:.2f}" if isinstance(info, dict) and 'marketCap' in info else "N/A")
         st.metric(label="📈 Forward EPS", value=f"${forwardeps:.2f}" if isinstance(info, dict) and 'marketCap' in info else "N/A")
         st.metric(label="📈 Revenue", value=f"${revenue / 1e9:.2f}B" if revenue and isinstance(revenue, (int, float)) else "N/A")
