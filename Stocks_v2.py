@@ -42,6 +42,10 @@ api_key = st.secrets["openai"]["api_key"]
 # Set API key for OpenAI
 openai.api_key = api_key
 
+# Ensure session_state variable is initialized
+if "stock_analysis" not in st.session_state:
+    st.session_state.stock_analysis = None  # or some default value
+
 # Function to analyze stock using GPT
 def analyze_stock_with_gpt(ticker, stock_data, news):
     if stock_data is None or stock_data.empty:
