@@ -500,6 +500,9 @@ if menu == "Stock Info":
                 else:
                     st.warning("No stock selected.")
         
+    # Initialize info with a default value
+    info = None  
+
     with st.expander("Company Info", expanded=False):
         if st.session_state.selected_ticker:
             _, info = fetch_data(st.session_state.selected_ticker)
@@ -539,7 +542,7 @@ if menu == "Stock Info":
         insider_ownership = info.get('heldPercentInsiders', 'N/A')
     else:
         st.warning("Stock information not found.")
-        
+
     if isinstance(info, dict) and info:  # Ensure 'info' is a dictionary and not empty
         pe_ratio = info.get('trailingPE', 'N/A')
         peg_ratio = info.get('trailingPegRatio', 'N/A')
