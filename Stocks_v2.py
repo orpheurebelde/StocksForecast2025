@@ -581,44 +581,20 @@ if menu == "Stock Info":
         st.metric(label="📈 Dividend Yield", value=safe_metric(info.get('dividendYield'), percentage=True) if isinstance(info, dict) and 'marketCap' in info else "N/A")
 
     with col2:
-        if isinstance(info, dict) and info:  # Ensure 'info' is a dictionary and not empty
-            freecash_flow = info.get('freeCashflow', 'N/A')
-            pe_ratio = info.get('trailingPE', 'N/A')
-            peg_ratio = info.get('trailingPegRatio', 'N/A')
-            earnings_growth = info.get('earningsGrowth', 'N/A')
-            forward_pe = info.get('forwardPE', 'N/A')
-            freecash_flow = info.get('freeCashflow', 'N/A')
-            netincome = info.get('netIncomeToCommon', 'N/A')
-            grossmargin = info.get('grossMargins', 'N/A')
-            operatingmargin = info.get('operatingMargins', 'N/A')
-            profit_margin = info.get('profitMargins', 'N/A')
-            institutional_ownership = info.get('heldPercentInstitutions', 'N/A')
-            insider_ownership = info.get('heldPercentInsiders', 'N/A')
-        else:
-            st.warning("Stock information not found.")
-
-        if isinstance(info, dict) and info:  # Ensure 'info' is a dictionary and not empty
-            pe_ratio = info.get('trailingPE', 'N/A')
-            peg_ratio = info.get('trailingPegRatio', 'N/A')
-            earnings_growth = info.get('earningsGrowth', 'N/A')
-            forward_pe = info.get('forwardPE', 'N/A')
-            freecash_flow = info.get('freeCashflow', 'N/A')
-            netincome = info.get('netIncomeToCommon', 'N/A')
-            grossmargin = info.get('grossMargins', 'N/A')
-            operatingmargin = info.get('operatingMargins', 'N/A')
-            profit_margin = info.get('profitMargins', 'N/A')
-            institutional_ownership = info.get('heldPercentInstitutions', 'N/A')
-            insider_ownership = info.get('heldPercentInsiders', 'N/A')
-            trailingeps = info.get('trailingEps', 'N/A')
-            forwardeps = info.get('forwardEps', 'N/A')
-            revenue = info.get('totalRevenue', 'N/A')
-            totaldebt = info.get('totalDebt', 'N/A')
-            totalcash = info.get('totalCash', 'N/A')
-            revenuegrowth = info.get('revenueGrowth', 'N/A')
-        else:
-            st.warning("Stock information not found.")
-
-        st.metric(label="📊 Current Price", value=f"${info.get('currentPrice', 0):.2f}" if isinstance(info, dict) else "N/A")
+        # Safe conversion function to handle None and invalid values
+        def safe_float(value):
+            try:
+                return float(value) if value not in [None, 'N/A', '', 'NaN'] else None
+            except (ValueError, TypeError):
+                return None
+                st.metric(label="📊 Current Price", value=f"${info.get('currentPrice', 0):.2f}" if isinstance(info, dict) else "N/A")
+        
+        # Fetch and safely convert values from `info`
+        pe_ratio = safe_float(info.get('trailingPE', None))
+        forward_pe = safe_float(info.get('forwardPE', None))
+        totaldebt = safe_float(info.get('totalDebt', None))
+        totalcash = safe_float(info.get('totalCash', None))
+        dcf_value = safe_float(info.get('dcf', None))
 
         # Ensure info is a dictionary
         if isinstance(info, dict):
