@@ -571,14 +571,14 @@ if menu == "Stock Info":
             col1, col2, col3 = st.columns(3)
 
     with col1:
-            st.metric(label="📈 Market Cap", value=safe_metric(info.get('marketCap'), 1e9, "B"))
-            st.metric(label="📈 Free Cash Flow", value=safe_metric(freecash_flow, 1e9, "B"))
-            st.metric(label="📈 Net Income", value=safe_metric(netincome, 1e9, "B"))
-            st.metric(label="📈 Gross Margin", value=safe_metric(grossmargin, percentage=True))
-            st.metric(label="📈 Operating Margin", value=safe_metric(operatingmargin, percentage=True))
-            st.metric(label="📈 Profit Margin", value=safe_metric(profit_margin, percentage=True))
-            st.metric(label="📈 Earnings Growth", value=safe_metric(earnings_growth, percentage=True))
-            st.metric(label="📈 Dividend Yield", value=safe_metric(info.get('dividendYield'), percentage=True))
+            st.metric(label="📈 Market Cap", value=safe_metric(info['marketCap'], 1e9, "B") if isinstance(info, dict) and 'marketCap' in info else "N/A")
+            st.metric(label="📈 Free Cash Flow", value=safe_metric(freecash_flow, 1e9, "B") if isinstance(info, dict) and 'marketCap' in info else "N/A")
+            st.metric(label="📈 Net Income", value=safe_metric(netincome, 1e9, "B") if isinstance(info, dict) and 'marketCap' in info else "N/A")
+            st.metric(label="📈 Gross Margin", value=safe_metric(grossmargin, percentage=True) if isinstance(info, dict) and 'marketCap' in info else "N/A")
+            st.metric(label="📈 Operating Margin", value=safe_metric(operatingmargin, percentage=True) if isinstance(info, dict) and 'marketCap' in info else "N/A")
+            st.metric(label="📈 Profit Margin", value=safe_metric(profit_margin, percentage=True) if isinstance(info, dict) and 'marketCap' in info else "N/A")
+            st.metric(label="📈 Earnings Growth", value=safe_metric(earnings_growth, percentage=True) if isinstance(info, dict) and 'marketCap' in info else "N/A")
+            st.metric(label="📈 Dividend Yield", value=safe_metric(info.get('dividendYield'), percentage=True) if isinstance(info, dict) and 'marketCap' in info else "N/A")
 
     with col2:
             st.metric(label="📊 Current Price", value=f"${info['currentPrice']:.2f}")
