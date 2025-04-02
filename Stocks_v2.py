@@ -501,7 +501,12 @@ if menu == "Stock Info":
                     st.warning("No stock selected.")
         
     with st.expander("Company Info", expanded=False):
-            st.write(info)
+            if st.session_state.selected_ticker:
+                _, info = fetch_data(st.session_state.selected_ticker)
+                if info:
+                    st.write(info)
+                else:
+                    st.warning("No stock selected.")
 
     # Check if key exists and value is valid before using it
     def safe_metric(value, divisor=1, suffix="", percentage=False):
