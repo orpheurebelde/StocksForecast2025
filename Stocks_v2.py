@@ -619,20 +619,6 @@ if menu == "Stock Info":
             except (ValueError, TypeError):
                 return None
 
-        # Fetch and safely convert values
-        pe_ratio = safe_float(info.get('trailingPE', None))
-        forward_pe = safe_float(info.get('forwardPE', None))
-        totaldebt = safe_float(info.get('totalDebt', None))
-        totalcash = safe_float(info.get('totalCash', None))
-        dcf_value = safe_float(info.get('dcf', None))
-
-        # Debugging output
-        st.write(f"Debug - pe_ratio: {pe_ratio}, type: {type(pe_ratio)}")
-        st.write(f"Debug - forward_pe: {forward_pe}, type: {type(forward_pe)}")
-        st.write(f"Debug - totaldebt: {totaldebt}, type: {type(totaldebt)}")
-        st.write(f"Debug - totalcash: {totalcash}, type: {type(totalcash)}")
-        st.write(f"Debug - dcf_value: {dcf_value}, type: {type(dcf_value)}")
-
         # Categorize P/E Ratio
         if isinstance(pe_ratio, (int, float)) and not math.isnan(pe_ratio):
             pe_color = "green" if pe_ratio < 15 else "orange" if 15 <= pe_ratio <= 25 else "red"
