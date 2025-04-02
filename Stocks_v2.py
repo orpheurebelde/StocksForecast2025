@@ -537,6 +537,8 @@ if menu == "Stock Info":
         profit_margin = info.get('profitMargins', 'N/A')
         institutional_ownership = info.get('heldPercentInstitutions', 'N/A')
         insider_ownership = info.get('heldPercentInsiders', 'N/A')
+    else:
+        st.warning("Stock information not found.")
     if info:
         pe_ratio = info.get('trailingPE', 'N/A')
         peg_ratio = info.get('trailingPegRatio', 'N/A')
@@ -557,13 +559,6 @@ if menu == "Stock Info":
         revenuegrowth = info.get('revenueGrowth', 'N/A')
     else:
         st.warning("Stock information not found.")
-        insider_ownership = info.get('heldPercentInsiders', 'N/A')
-        trailingeps = info.get('trailingEps', 'N/A')
-        forwardeps = info.get('forwardEps', 'N/A')
-        revenue = info.get('totalRevenue', 'N/A')
-        totaldebt = info.get('totalDebt', 'N/A')
-        totalcash = info.get('totalCash', 'N/A')
-        revenuegrowth = info.get('revenueGrowth', 'N/A')
 
         # Calculate DCF Value
     dcf_value = dcf_valuation(ticker)
