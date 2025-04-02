@@ -701,7 +701,7 @@ if menu == "Stock Info":
 
                 # Store results in session state
                 st.session_state.stock_data = stock_data
-                st.session_state.stock_analysis = analyze_stock_with_gpt(ticker, stock_data, news)
+                #st.session_state.stock_analysis = analyze_stock_with_gpt(ticker, stock_data, news)
                 st.session_state.news_sentiment = news
                 st.session_state.stock_analysis = analyze_fundamentals(ticker)
 
