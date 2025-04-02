@@ -583,12 +583,29 @@ if menu == "Stock Info":
     with col2:
         st.metric(label="📊 Current Price", value=f"${info.get('currentPrice', 0):.2f}" if isinstance(info, dict) else "N/A")
 
+        # Ensure info is a dictionary
+        if isinstance(info, dict):
+            peg_ratio = info.get('pegRatio', None)  # Fetch pegRatio safely
+        else:
+            peg_ratio = None  # Default to None if info is invalid
+
+        # Convert safely
         try:
-            peg_ratio = float(peg_ratio) if peg_ratio not in [None, 'N/A'] else "N/A"
-            peg_color = "green" if isinstance(peg_ratio, (int, float)) and peg_ratio < 1 else \
-                        "orange" if isinstance(peg_ratio, (int, float)) and 1 <= peg_ratio <= 2 else "red"
+            peg_ratio = float(peg_ratio) if peg_ratio not in [None, 'N/A', '', 'NaN'] else "N/A"
         except (ValueError, TypeError):
+            peg_ratio = "N/A"  # If conversion fails, set as "N/A"
+
+        # Assign color based on value
+        if isinstance(peg_ratio, (int, float)):
+            peg_color = "green" if peg_ratio < 1 else "orange" if 1 <= peg_ratio <= 2 else "red"
+        else:
             peg_color = "gray"
+
+        # Display PEG Ratio in Streamlit
+        if isinstance(peg_ratio, (int, float)):
+            st.markdown(f'<div style="color: {peg_color}; font-size: 25px;"><b>📈 PEG Ratio: {peg_ratio:.2f}</b></div>', unsafe_allow_html=True)
+        else:
+            st.markdown('<div style="color: gray; font-size: 25px;"><b>📈 PEG Ratio: N/A</b></div>', unsafe_allow_html=True)
 
         if isinstance(peg_ratio, (int, float)):
             st.markdown(f'<div style="color: {peg_color}; font-size: 25px;"><b>📈 PEG Ratio: {peg_ratio:.2f}</b></div>', unsafe_allow_html=True)
