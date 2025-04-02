@@ -587,8 +587,8 @@ if menu == "Stock Info":
                 return float(value) if value not in [None, 'N/A', '', 'NaN'] else None
             except (ValueError, TypeError):
                 return None
-                st.metric(label="📊 Current Price", value=f"${info.get('currentPrice', 0):.2f}" if isinstance(info, dict) else "N/A")
-        
+
+    if info is not None:    
         # Fetch and safely convert values from `info`
         pe_ratio = safe_float(info.get('trailingPE', None))
         forward_pe = safe_float(info.get('forwardPE', None))
@@ -644,7 +644,9 @@ if menu == "Stock Info":
 
         # Display DCF Valuation
         st.metric(label="📉 DCF Valuation", value=f"${dcf_value:,.2f}" if isinstance(dcf_value, (int, float)) else "N/A")
-
+    else:
+        # Handle the case where info is None
+        st.write("Error: 'info' object is not properly initialized or is None.")
 
     with col3:
         st.metric(label="📈 Trailing EPS", value=f"${trailingeps:.2f}" if isinstance(info, dict) and 'marketCap' in info else "N/A")
