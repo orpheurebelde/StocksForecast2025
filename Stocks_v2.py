@@ -570,107 +570,107 @@ if menu == "Stock Info":
     with st.expander("Stock Overview", expanded=True):
         col1, col2, col3 = st.columns(3)
 
-    with col1:
-        st.metric(label="📈 Market Cap", value=safe_metric(info['marketCap'], 1e9, "B") if isinstance(info, dict) and 'marketCap' in info else "N/A")
-        st.metric(label="📈 Free Cash Flow", value=safe_metric(freecash_flow, 1e9, "B") if isinstance(info, dict) and 'marketCap' in info else "N/A")
-        st.metric(label="📈 Net Income", value=safe_metric(netincome, 1e9, "B") if isinstance(info, dict) and 'marketCap' in info else "N/A")
-        st.metric(label="📈 Gross Margin", value=safe_metric(grossmargin, percentage=True) if isinstance(info, dict) and 'marketCap' in info else "N/A")
-        st.metric(label="📈 Operating Margin", value=safe_metric(operatingmargin, percentage=True) if isinstance(info, dict) and 'marketCap' in info else "N/A")
-        st.metric(label="📈 Profit Margin", value=safe_metric(profit_margin, percentage=True) if isinstance(info, dict) and 'marketCap' in info else "N/A")
-        st.metric(label="📈 Earnings Growth", value=safe_metric(earnings_growth, percentage=True) if isinstance(info, dict) and 'marketCap' in info else "N/A")
-        st.metric(label="📈 Dividend Yield", value=safe_metric(info.get('dividendYield'), percentage=True) if isinstance(info, dict) and 'marketCap' in info else "N/A")
+        with col1:
+            st.metric(label="📈 Market Cap", value=safe_metric(info['marketCap'], 1e9, "B") if isinstance(info, dict) and 'marketCap' in info else "N/A")
+            st.metric(label="📈 Free Cash Flow", value=safe_metric(freecash_flow, 1e9, "B") if isinstance(info, dict) and 'marketCap' in info else "N/A")
+            st.metric(label="📈 Net Income", value=safe_metric(netincome, 1e9, "B") if isinstance(info, dict) and 'marketCap' in info else "N/A")
+            st.metric(label="📈 Gross Margin", value=safe_metric(grossmargin, percentage=True) if isinstance(info, dict) and 'marketCap' in info else "N/A")
+            st.metric(label="📈 Operating Margin", value=safe_metric(operatingmargin, percentage=True) if isinstance(info, dict) and 'marketCap' in info else "N/A")
+            st.metric(label="📈 Profit Margin", value=safe_metric(profit_margin, percentage=True) if isinstance(info, dict) and 'marketCap' in info else "N/A")
+            st.metric(label="📈 Earnings Growth", value=safe_metric(earnings_growth, percentage=True) if isinstance(info, dict) and 'marketCap' in info else "N/A")
+            st.metric(label="📈 Dividend Yield", value=safe_metric(info.get('dividendYield'), percentage=True) if isinstance(info, dict) and 'marketCap' in info else "N/A")
 
-    with col2:
-        # Safe conversion function to handle None and invalid values
-        def safe_float(value):
+        with col2:
+            # Safe conversion function to handle None and invalid values
+            def safe_float(value):
+                try:
+                    return float(value) if value not in [None, 'N/A', '', 'NaN'] else None
+                except (ValueError, TypeError):
+                    return None
+
+        if info is not None:    
+            # Fetch and safely convert values from `info`
+            pe_ratio = safe_float(info.get('trailingPE', None))
+            pb_ratio = safe_float(info.get('priceToBook', None))
+            ps_ratio = safe_float(info.get('priceToSalesTrailing12Months', None))
+            forward_pe = safe_float(info.get('forwardPE', None))
+            totaldebt = safe_float(info.get('totalDebt', None))
+            totalcash = safe_float(info.get('totalCash', None))
+            dcf_value = safe_float(info.get('dcf', None))
+
+            # Ensure info is a dictionary
+            if isinstance(info, dict):
+                peg_ratio = info.get('pegRatio', None)  # Fetch pegRatio safely
+            else:
+                peg_ratio = None  # Default to None if info is invalid
+
+            # Convert safely
             try:
-                return float(value) if value not in [None, 'N/A', '', 'NaN'] else None
+                peg_ratio = float(peg_ratio) if peg_ratio not in [None, 'N/A', '', 'NaN'] else "N/A"
             except (ValueError, TypeError):
-                return None
+                peg_ratio = "N/A"  # If conversion fails, set as "N/A"
 
-    if info is not None:    
-        # Fetch and safely convert values from `info`
-        pe_ratio = safe_float(info.get('trailingPE', None))
-        pb_ratio = safe_float(info.get('priceToBook', None))
-        ps_ratio = safe_float(info.get('priceToSalesTrailing12Months', None))
-        forward_pe = safe_float(info.get('forwardPE', None))
-        totaldebt = safe_float(info.get('totalDebt', None))
-        totalcash = safe_float(info.get('totalCash', None))
-        dcf_value = safe_float(info.get('dcf', None))
+            # Assign color based on value
+            if isinstance(peg_ratio, (int, float)):
+                peg_color = "green" if peg_ratio < 1 else "orange" if 1 <= peg_ratio <= 2 else "red"
+            else:
+                peg_color = "gray"
 
-        # Ensure info is a dictionary
-        if isinstance(info, dict):
-            peg_ratio = info.get('pegRatio', None)  # Fetch pegRatio safely
+            # Categorize P/E Ratio
+            if isinstance(pe_ratio, (int, float)) and pe_ratio is not None and not math.isnan(pe_ratio):
+                pe_color = "green" if pe_ratio < 15 else "orange" if 15 <= pe_ratio <= 25 else "red"
+                st.markdown(f"<span style='color:{pe_color}; font-size:25px;'>📈 P/E Ratio: {pe_ratio:.2f}</span>", unsafe_allow_html=True)
+            else:
+                st.markdown("<span style='color:gray; font-size:25px;'>📈 P/E Ratio: N/A</span>", unsafe_allow_html=True)
+
+            # Categorize Forward P/E Ratio
+            if isinstance(forward_pe, (int, float)) and forward_pe is not None and not math.isnan(forward_pe):
+                pe_color = "green" if forward_pe < 15 else "orange" if 15 <= forward_pe <= 25 else "red"
+                st.markdown(f"<span style='color:{pe_color}; font-size:25px;'>📈 Forward P/E Ratio: {forward_pe:.2f}</span>", unsafe_allow_html=True)
+            else:
+                st.markdown("<span style='color:gray; font-size:25px;'>📈 Forward P/E Ratio: N/A</span>", unsafe_allow_html=True)
+
+            # Categorize Debt to Equity Ratio
+            if isinstance(totaldebt, (int, float)) and isinstance(totalcash, (int, float)) and totaldebt > 0 and totalcash > 0:
+                debt_to_equity = totaldebt / totalcash
+                debt_color = "green" if debt_to_equity < 1 else "orange" if 1 <= debt_to_equity <= 2 else "red"
+                st.markdown(f"<span style='color:{debt_color}; font-size:25px;'>📈 Debt to Equity Ratio: {debt_to_equity:.2f}</span>", unsafe_allow_html=True)
+            else:
+                st.metric(label="📈 Debt to Equity Ratio", value="N/A")
+
+            st.write("")  # Empty line
+
+            # Display Total Debt & Total Cash
+            st.metric(label="📈 Total Debt", value=f"${totaldebt / 1e9:.2f}B" if isinstance(totaldebt, (int, float)) else "N/A")
+            st.metric(label="📈 Total Cash", value=f"${totalcash / 1e9:.2f}B" if isinstance(totalcash, (int, float)) else "N/A")
+
+            # Display DCF Valuation
+            st.metric(label="📉 DCF Valuation", value=f"${dcf_value:,.2f}" if isinstance(dcf_value, (int, float)) else "N/A")
         else:
-            peg_ratio = None  # Default to None if info is invalid
+            # Handle the case where info is None
+            st.write("Error: 'info' object is not properly initialized or is None.")
 
-        # Convert safely
-        try:
-            peg_ratio = float(peg_ratio) if peg_ratio not in [None, 'N/A', '', 'NaN'] else "N/A"
-        except (ValueError, TypeError):
-            peg_ratio = "N/A"  # If conversion fails, set as "N/A"
+        with col3:
+                    # Categorize P/S Ratio
+            if isinstance(ps_ratio, (int, float)) and ps_ratio is not None and not math.isnan(ps_ratio):
+                ps_color = "green" if ps_ratio < 1 else "orange" if 1 <= ps_ratio <= 2 else "red"
+                st.markdown(f"<span style='color:{ps_color}; font-size:25px;'>📈 P/S Ratio: {ps_ratio:.2f}</span>", unsafe_allow_html=True)
+            else:
+                st.markdown("<span style='color:gray; font-size:25px;'>📈 P/S Ratio: N/A</span>", unsafe_allow_html=True)
 
-        # Assign color based on value
-        if isinstance(peg_ratio, (int, float)):
-            peg_color = "green" if peg_ratio < 1 else "orange" if 1 <= peg_ratio <= 2 else "red"
-        else:
-            peg_color = "gray"
+            # Categorize P/B Ratio
+            if isinstance(pb_ratio, (int, float)) and pb_ratio is not None and not math.isnan(pb_ratio):
+                pb_color = "green" if pb_ratio < 1 else "orange" if 1 <= pb_ratio <= 2 else "red"
+                st.markdown(f"<span style='color:{pb_color}; font-size:25px;'>📈 P/B Ratio: {pb_ratio:.2f}</span>", unsafe_allow_html=True)
+            else:
+                st.markdown("<span style='color:gray; font-size:25px;'>📈 P/B Ratio: N/A</span>", unsafe_allow_html=True)
 
-        # Categorize P/E Ratio
-        if isinstance(pe_ratio, (int, float)) and pe_ratio is not None and not math.isnan(pe_ratio):
-            pe_color = "green" if pe_ratio < 15 else "orange" if 15 <= pe_ratio <= 25 else "red"
-            st.markdown(f"<span style='color:{pe_color}; font-size:25px;'>📈 P/E Ratio: {pe_ratio:.2f}</span>", unsafe_allow_html=True)
-        else:
-            st.markdown("<span style='color:gray; font-size:25px;'>📈 P/E Ratio: N/A</span>", unsafe_allow_html=True)
-
-        # Categorize Forward P/E Ratio
-        if isinstance(forward_pe, (int, float)) and forward_pe is not None and not math.isnan(forward_pe):
-            pe_color = "green" if forward_pe < 15 else "orange" if 15 <= forward_pe <= 25 else "red"
-            st.markdown(f"<span style='color:{pe_color}; font-size:25px;'>📈 Forward P/E Ratio: {forward_pe:.2f}</span>", unsafe_allow_html=True)
-        else:
-            st.markdown("<span style='color:gray; font-size:25px;'>📈 Forward P/E Ratio: N/A</span>", unsafe_allow_html=True)
-
-        # Categorize Debt to Equity Ratio
-        if isinstance(totaldebt, (int, float)) and isinstance(totalcash, (int, float)) and totaldebt > 0 and totalcash > 0:
-            debt_to_equity = totaldebt / totalcash
-            debt_color = "green" if debt_to_equity < 1 else "orange" if 1 <= debt_to_equity <= 2 else "red"
-            st.markdown(f"<span style='color:{debt_color}; font-size:25px;'>📈 Debt to Equity Ratio: {debt_to_equity:.2f}</span>", unsafe_allow_html=True)
-        else:
-            st.metric(label="📈 Debt to Equity Ratio", value="N/A")
-
-        st.write("")  # Empty line
-
-        # Display Total Debt & Total Cash
-        st.metric(label="📈 Total Debt", value=f"${totaldebt / 1e9:.2f}B" if isinstance(totaldebt, (int, float)) else "N/A")
-        st.metric(label="📈 Total Cash", value=f"${totalcash / 1e9:.2f}B" if isinstance(totalcash, (int, float)) else "N/A")
-
-        # Display DCF Valuation
-        st.metric(label="📉 DCF Valuation", value=f"${dcf_value:,.2f}" if isinstance(dcf_value, (int, float)) else "N/A")
-    else:
-        # Handle the case where info is None
-        st.write("Error: 'info' object is not properly initialized or is None.")
-
-    with col3:
-                # Categorize P/S Ratio
-        if isinstance(ps_ratio, (int, float)) and ps_ratio is not None and not math.isnan(ps_ratio):
-            ps_color = "green" if ps_ratio < 1 else "orange" if 1 <= ps_ratio <= 2 else "red"
-            st.markdown(f"<span style='color:{ps_color}; font-size:25px;'>📈 P/S Ratio: {ps_ratio:.2f}</span>", unsafe_allow_html=True)
-        else:
-            st.markdown("<span style='color:gray; font-size:25px;'>📈 P/S Ratio: N/A</span>", unsafe_allow_html=True)
-
-        # Categorize P/B Ratio
-        if isinstance(pb_ratio, (int, float)) and pb_ratio is not None and not math.isnan(pb_ratio):
-            pb_color = "green" if pb_ratio < 1 else "orange" if 1 <= pb_ratio <= 2 else "red"
-            st.markdown(f"<span style='color:{pb_color}; font-size:25px;'>📈 P/B Ratio: {pb_ratio:.2f}</span>", unsafe_allow_html=True)
-        else:
-            st.markdown("<span style='color:gray; font-size:25px;'>📈 P/B Ratio: N/A</span>", unsafe_allow_html=True)
-
-        st.metric(label="📈 Trailing EPS", value=f"${trailingeps:.2f}" if isinstance(info, dict) and 'marketCap' in info else "N/A")
-        st.metric(label="📈 Forward EPS", value=f"${forwardeps:.2f}" if isinstance(info, dict) and 'marketCap' in info else "N/A")
-        st.metric(label="📈 Revenue", value=f"${revenue / 1e9:.2f}B" if revenue and isinstance(revenue, (int, float)) else "N/A")
-        st.metric(label="📈 Revenue Growth", value=f"{revenuegrowth:.2%}" if revenuegrowth and isinstance(revenuegrowth, (int, float)) else "N/A")
-        st.metric(label="📈 Institutional Ownership", value=f"{institutional_ownership:.2%}" if isinstance(info, dict) and 'marketCap' in info else "N/A")
-        st.metric(label="📈 Insider Ownership", value=f"{insider_ownership:.2%}" if isinstance(info, dict) and 'marketCap' in info else "N/A")
+            st.metric(label="📈 Trailing EPS", value=f"${trailingeps:.2f}" if isinstance(info, dict) and 'marketCap' in info else "N/A")
+            st.metric(label="📈 Forward EPS", value=f"${forwardeps:.2f}" if isinstance(info, dict) and 'marketCap' in info else "N/A")
+            st.metric(label="📈 Revenue", value=f"${revenue / 1e9:.2f}B" if revenue and isinstance(revenue, (int, float)) else "N/A")
+            st.metric(label="📈 Revenue Growth", value=f"{revenuegrowth:.2%}" if revenuegrowth and isinstance(revenuegrowth, (int, float)) else "N/A")
+            st.metric(label="📈 Institutional Ownership", value=f"{institutional_ownership:.2%}" if isinstance(info, dict) and 'marketCap' in info else "N/A")
+            st.metric(label="📈 Insider Ownership", value=f"{insider_ownership:.2%}" if isinstance(info, dict) and 'marketCap' in info else "N/A")
     
         
         
