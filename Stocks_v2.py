@@ -524,7 +524,7 @@ if menu == "Stock Info":
             except Exception as e:
                 return f"Error: {e}"  # Return error message instead of crashing
 
-    if info:
+    if isinstance(info, dict) and info:  # Ensure 'info' is a dictionary and not empty
         freecash_flow = info.get('freeCashflow', 'N/A')
         pe_ratio = info.get('trailingPE', 'N/A')
         peg_ratio = info.get('trailingPegRatio', 'N/A')
@@ -539,7 +539,8 @@ if menu == "Stock Info":
         insider_ownership = info.get('heldPercentInsiders', 'N/A')
     else:
         st.warning("Stock information not found.")
-    if info:
+        
+    if isinstance(info, dict) and info:  # Ensure 'info' is a dictionary and not empty
         pe_ratio = info.get('trailingPE', 'N/A')
         peg_ratio = info.get('trailingPegRatio', 'N/A')
         earnings_growth = info.get('earningsGrowth', 'N/A')
