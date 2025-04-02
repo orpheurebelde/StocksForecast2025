@@ -37,7 +37,7 @@ def get_news_sentiment(ticker):
     return news
 
 # Load API key from secrets
-#openai.api_key = st.secrets["openai"]["api_key"]
+api_key = st.secrets["openai"]["api_key"]
 
 def analyze_stock_with_gpt(ticker, stock_data, news):
     if stock_data is None or stock_data.empty:
