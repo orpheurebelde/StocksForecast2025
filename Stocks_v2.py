@@ -232,9 +232,16 @@ def analyze_fundamentals(ticker):
                     industry_pe = float(columns[1].text.strip())
                     break
 
+            industry_pe = None  # Initialize variable before use
+
             if industry_pe is None:
                 st.warning("Industry P/E ratio not found on the page. Using default value.")
-                industry_pe = 20
+                industry_pe = st.number_input(
+                "Industry P/E ratio not available. Please input the Industry P/E ratio:",
+                min_value=0.0,
+                value=20.0,
+                step=0.1
+            )
 
         except Exception as e:
             st.warning(f"Error fetching industry P/E ratio: {e}. Using default value.")
