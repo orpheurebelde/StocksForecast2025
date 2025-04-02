@@ -42,6 +42,7 @@ api_key = st.secrets["openai"]["api_key"]
 # Set API key for OpenAI
 openai.api_key = api_key
 
+# Function to analyze stock using GPT
 def analyze_stock_with_gpt(ticker, stock_data, news):
     if stock_data is None or stock_data.empty:
         return "Error: No stock data available."
@@ -53,15 +54,16 @@ def analyze_stock_with_gpt(ticker, stock_data, news):
     - Stock: {ticker}
     - Last 30-day closing prices: {stock_data['y'].tail(30).tolist()}
     - News Sentiment: {news}
-
+    
     Provide an analysis including:
     - General sentiment (bullish, bearish, or neutral).
     - Technical insights based on price trends.
     - A short forecast for the stock.
     """
 
+    # Use the updated OpenAI API method for ChatGPT
     response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",  # ✅ Use GPT-3.5
+        model="gpt-3.5-turbo",  # Use GPT-3.5 for cost efficiency or GPT-4
         messages=[{"role": "user", "content": prompt}]
     )
 
