@@ -39,8 +39,8 @@ def get_news_sentiment(ticker):
 # Load API key from secrets
 api_key = st.secrets["openai"]["api_key"]
 
-# Set API key for OpenAI
-openai.api_key = api_key
+# Initialize OpenAI client
+client = openai.OpenAI(api_key=api_key)
 
 # Ensure session_state variable is initialized
 if "stock_analysis" not in st.session_state:
@@ -65,8 +65,8 @@ def analyze_stock_with_gpt(ticker, stock_data, news):
     - A short forecast for the stock.
     """
 
-    # Ensure you're using the correct method for the latest OpenAI API version
-    response = openai.ChatCompletion.create(
+    # Updated API call with OpenAI's latest version
+    response = client.chat.completions.create(
         model="gpt-3.5-turbo",  # Use "gpt-3.5-turbo" or "gpt-4" based on your preference
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
@@ -74,8 +74,7 @@ def analyze_stock_with_gpt(ticker, stock_data, news):
         ]
     )
 
-    return response['choices'][0]['message']['content']
-
+    return response.choices[0].message.content  # Extract text response correctly
 
 # Function to get stock ticker from company name
 def get_ticker_from_name(search_input):
