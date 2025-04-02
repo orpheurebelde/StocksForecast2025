@@ -593,6 +593,7 @@ if menu == "Stock Info":
                 pe_ratio = safe_float(info.get('trailingPE', None))
                 pb_ratio = safe_float(info.get('priceToBook', None))
                 ps_ratio = safe_float(info.get('priceToSalesTrailing12Months', None))
+                roe = safe_float(info.get('returnOnEquity', None))
                 forward_pe = safe_float(info.get('forwardPE', None))
                 totaldebt = safe_float(info.get('totalDebt', None))
                 totalcash = safe_float(info.get('totalCash', None))
@@ -643,6 +644,13 @@ if menu == "Stock Info":
                     st.markdown(f"<span style='color:{pb_color}; font-size:25px;'>📈 P/B Ratio: {pb_ratio:.2f}</span>", unsafe_allow_html=True)
                 else:
                     st.markdown("<span style='color:gray; font-size:25px;'>📈 P/B Ratio: N/A</span>", unsafe_allow_html=True)
+
+                #Categorize ROE Ratio
+                if isinstance(roe, (int, float)) and roe is not None and not math.isnan(roe):
+                    roe_color = "green" if roe > 0.15 else "orange" if 0.05 <= roe <= 0.15 else "red"
+                    st.markdown(f"<span style='color:{roe_color}; font-size:25px;'>📈 ROE Ratio: {roe:.2%}</span>", unsafe_allow_html=True)
+                else:
+                    st.markdown("<span style='color:gray; font-size:25px;'>📈 ROE Ratio: N/A</span>", unsafe_allow_html=True)
 
                 # Categorize Debt to Equity Ratio
                 if isinstance(totaldebt, (int, float)) and isinstance(totalcash, (int, float)) and totaldebt > 0 and totalcash > 0:
