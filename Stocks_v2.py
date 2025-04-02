@@ -588,67 +588,67 @@ if menu == "Stock Info":
                 except (ValueError, TypeError):
                     return None
 
-        if info is not None:    
-            # Fetch and safely convert values from `info`
-            pe_ratio = safe_float(info.get('trailingPE', None))
-            pb_ratio = safe_float(info.get('priceToBook', None))
-            ps_ratio = safe_float(info.get('priceToSalesTrailing12Months', None))
-            forward_pe = safe_float(info.get('forwardPE', None))
-            totaldebt = safe_float(info.get('totalDebt', None))
-            totalcash = safe_float(info.get('totalCash', None))
-            dcf_value = safe_float(info.get('dcf', None))
+            if info is not None:    
+                # Fetch and safely convert values from `info`
+                pe_ratio = safe_float(info.get('trailingPE', None))
+                pb_ratio = safe_float(info.get('priceToBook', None))
+                ps_ratio = safe_float(info.get('priceToSalesTrailing12Months', None))
+                forward_pe = safe_float(info.get('forwardPE', None))
+                totaldebt = safe_float(info.get('totalDebt', None))
+                totalcash = safe_float(info.get('totalCash', None))
+                dcf_value = safe_float(info.get('dcf', None))
 
-            # Ensure info is a dictionary
-            if isinstance(info, dict):
-                peg_ratio = info.get('pegRatio', None)  # Fetch pegRatio safely
+                # Ensure info is a dictionary
+                if isinstance(info, dict):
+                    peg_ratio = info.get('pegRatio', None)  # Fetch pegRatio safely
+                else:
+                    peg_ratio = None  # Default to None if info is invalid
+
+                # Convert safely
+                try:
+                    peg_ratio = float(peg_ratio) if peg_ratio not in [None, 'N/A', '', 'NaN'] else "N/A"
+                except (ValueError, TypeError):
+                    peg_ratio = "N/A"  # If conversion fails, set as "N/A"
+
+                # Assign color based on value
+                if isinstance(peg_ratio, (int, float)):
+                    peg_color = "green" if peg_ratio < 1 else "orange" if 1 <= peg_ratio <= 2 else "red"
+                else:
+                    peg_color = "gray"
+
+                # Categorize P/E Ratio
+                if isinstance(pe_ratio, (int, float)) and pe_ratio is not None and not math.isnan(pe_ratio):
+                    pe_color = "green" if pe_ratio < 15 else "orange" if 15 <= pe_ratio <= 25 else "red"
+                    st.markdown(f"<span style='color:{pe_color}; font-size:25px;'>📈 P/E Ratio: {pe_ratio:.2f}</span>", unsafe_allow_html=True)
+                else:
+                    st.markdown("<span style='color:gray; font-size:25px;'>📈 P/E Ratio: N/A</span>", unsafe_allow_html=True)
+
+                # Categorize Forward P/E Ratio
+                if isinstance(forward_pe, (int, float)) and forward_pe is not None and not math.isnan(forward_pe):
+                    pe_color = "green" if forward_pe < 15 else "orange" if 15 <= forward_pe <= 25 else "red"
+                    st.markdown(f"<span style='color:{pe_color}; font-size:25px;'>📈 Forward P/E Ratio: {forward_pe:.2f}</span>", unsafe_allow_html=True)
+                else:
+                    st.markdown("<span style='color:gray; font-size:25px;'>📈 Forward P/E Ratio: N/A</span>", unsafe_allow_html=True)
+
+                # Categorize Debt to Equity Ratio
+                if isinstance(totaldebt, (int, float)) and isinstance(totalcash, (int, float)) and totaldebt > 0 and totalcash > 0:
+                    debt_to_equity = totaldebt / totalcash
+                    debt_color = "green" if debt_to_equity < 1 else "orange" if 1 <= debt_to_equity <= 2 else "red"
+                    st.markdown(f"<span style='color:{debt_color}; font-size:25px;'>📈 Debt to Equity Ratio: {debt_to_equity:.2f}</span>", unsafe_allow_html=True)
+                else:
+                    st.metric(label="📈 Debt to Equity Ratio", value="N/A")
+
+                st.write("")  # Empty line
+
+                # Display Total Debt & Total Cash
+                st.metric(label="📈 Total Debt", value=f"${totaldebt / 1e9:.2f}B" if isinstance(totaldebt, (int, float)) else "N/A")
+                st.metric(label="📈 Total Cash", value=f"${totalcash / 1e9:.2f}B" if isinstance(totalcash, (int, float)) else "N/A")
+
+                # Display DCF Valuation
+                st.metric(label="📉 DCF Valuation", value=f"${dcf_value:,.2f}" if isinstance(dcf_value, (int, float)) else "N/A")
             else:
-                peg_ratio = None  # Default to None if info is invalid
-
-            # Convert safely
-            try:
-                peg_ratio = float(peg_ratio) if peg_ratio not in [None, 'N/A', '', 'NaN'] else "N/A"
-            except (ValueError, TypeError):
-                peg_ratio = "N/A"  # If conversion fails, set as "N/A"
-
-            # Assign color based on value
-            if isinstance(peg_ratio, (int, float)):
-                peg_color = "green" if peg_ratio < 1 else "orange" if 1 <= peg_ratio <= 2 else "red"
-            else:
-                peg_color = "gray"
-
-            # Categorize P/E Ratio
-            if isinstance(pe_ratio, (int, float)) and pe_ratio is not None and not math.isnan(pe_ratio):
-                pe_color = "green" if pe_ratio < 15 else "orange" if 15 <= pe_ratio <= 25 else "red"
-                st.markdown(f"<span style='color:{pe_color}; font-size:25px;'>📈 P/E Ratio: {pe_ratio:.2f}</span>", unsafe_allow_html=True)
-            else:
-                st.markdown("<span style='color:gray; font-size:25px;'>📈 P/E Ratio: N/A</span>", unsafe_allow_html=True)
-
-            # Categorize Forward P/E Ratio
-            if isinstance(forward_pe, (int, float)) and forward_pe is not None and not math.isnan(forward_pe):
-                pe_color = "green" if forward_pe < 15 else "orange" if 15 <= forward_pe <= 25 else "red"
-                st.markdown(f"<span style='color:{pe_color}; font-size:25px;'>📈 Forward P/E Ratio: {forward_pe:.2f}</span>", unsafe_allow_html=True)
-            else:
-                st.markdown("<span style='color:gray; font-size:25px;'>📈 Forward P/E Ratio: N/A</span>", unsafe_allow_html=True)
-
-            # Categorize Debt to Equity Ratio
-            if isinstance(totaldebt, (int, float)) and isinstance(totalcash, (int, float)) and totaldebt > 0 and totalcash > 0:
-                debt_to_equity = totaldebt / totalcash
-                debt_color = "green" if debt_to_equity < 1 else "orange" if 1 <= debt_to_equity <= 2 else "red"
-                st.markdown(f"<span style='color:{debt_color}; font-size:25px;'>📈 Debt to Equity Ratio: {debt_to_equity:.2f}</span>", unsafe_allow_html=True)
-            else:
-                st.metric(label="📈 Debt to Equity Ratio", value="N/A")
-
-            st.write("")  # Empty line
-
-            # Display Total Debt & Total Cash
-            st.metric(label="📈 Total Debt", value=f"${totaldebt / 1e9:.2f}B" if isinstance(totaldebt, (int, float)) else "N/A")
-            st.metric(label="📈 Total Cash", value=f"${totalcash / 1e9:.2f}B" if isinstance(totalcash, (int, float)) else "N/A")
-
-            # Display DCF Valuation
-            st.metric(label="📉 DCF Valuation", value=f"${dcf_value:,.2f}" if isinstance(dcf_value, (int, float)) else "N/A")
-        else:
-            # Handle the case where info is None
-            st.write("Error: 'info' object is not properly initialized or is None.")
+                # Handle the case where info is None
+                st.write("Error: 'info' object is not properly initialized or is None.")
 
         with col3:
                     # Categorize P/S Ratio
