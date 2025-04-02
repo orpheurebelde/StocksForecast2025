@@ -690,7 +690,10 @@ if menu == "Stock Info":
             st.write(f"**Selected Ticker:** {st.session_state.selected_ticker}")
 
     with st.expander("Stock Analysis", expanded=True):
-
+            
+            if "stock_data" not in st.session_state:
+                st.session_state.stock_data = None  # Default to None or an empty DataFrame
+            
             # Button to analyze stock
             if st.button("Analyze Stock"):
                 # Fetch and store stock data
