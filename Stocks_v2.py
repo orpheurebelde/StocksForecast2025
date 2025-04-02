@@ -198,6 +198,7 @@ def predict_future(ticker):
 def analyze_fundamentals(ticker):
     stock = yf.Ticker(ticker)
     info = stock.info
+    industry = None  # Initialize variable before use
     
     # Extract key metrics
     pe_ratio = info.get("trailingPE", "N/A")  # P/E Ratio
