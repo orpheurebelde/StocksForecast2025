@@ -47,12 +47,12 @@ def analyze_stock_with_gpt(ticker, stock_data, news):
     if stock_data is None or stock_data.empty:
         return "Error: No stock data available."
 
-    if "y" not in stock_data.columns:
+    if "Close" not in stock_data.columns:
         return f"Error: 'Close' column not found. Available columns: {list(stock_data.columns)}"
 
     prompt = f"""
     - Stock: {ticker}
-    - Last 30-day closing prices: {stock_data['y'].tail(30).tolist()}
+    - Last 30-day closing prices: {stock_data['Close'].tail(30).tolist()}
     - News Sentiment: {news}
     
     Provide an analysis including:
@@ -61,9 +61,9 @@ def analyze_stock_with_gpt(ticker, stock_data, news):
     - A short forecast for the stock.
     """
 
-    # Updated API call using correct parameters
+    # Ensure you're using the correct method for the latest OpenAI API version
     response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",  # Use GPT-3.5 or GPT-4, depending on your preference
+        model="gpt-3.5-turbo",  # Use "gpt-3.5-turbo" or "gpt-4" based on your preference
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": prompt}
