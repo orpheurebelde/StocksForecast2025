@@ -466,7 +466,7 @@ if menu == "Stock Info":
         st.info("Please enter a stock name or ticker to search.")
 
     # Display stock information
-    with st.expander("Name | Sector | Industry", expanded=True):
+    with st.expander("Sector and Industry", expanded=False):
         if st.session_state.selected_ticker:
             st.write(f"**Selected Ticker:** {st.session_state.selected_ticker}")
             # Here you can fetch stock data and display additional information
@@ -502,7 +502,7 @@ if menu == "Stock Info":
     # Initialize info with a default value
     info = None  
 
-    with st.expander("Company Info", expanded=True):
+    with st.expander("Company Info", expanded=False):
         if st.session_state.selected_ticker:
             _, info = fetch_data(st.session_state.selected_ticker)
             if info:
