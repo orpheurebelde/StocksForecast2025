@@ -124,7 +124,7 @@ def get_stock_data(ticker):
     try:
         # Fetch stock data from Yahoo Finance
         stock = yf.Ticker(ticker)
-        data = stock.history(period="1y")  # Retrieve 1 year of stock data
+        data = stock.history(period="5y")  # Retrieve 5 year of stock data
         data = data.reset_index()[["Date", "Close"]]  # Keep Date and Close columns
         data.rename(columns={"Date": "ds", "Close": "y"}, inplace=True)  # Prophet expects 'ds' for dates and 'y' for values
 
@@ -702,6 +702,8 @@ if menu == "Stock Info":
                 # Store results in session state
                 st.session_state.stock_data = stock_data
                 st.session_state.stock_analysis = analyze_stock_with_gpt(ticker, stock_data, news)
+                st.session_state.news_sentiment = news
+                st.session_state.stock_analysis = analyze_fundamentals(ticker)
 
             # Display GPT analysis if available
             if st.session_state.stock_analysis:
@@ -712,6 +714,7 @@ if menu == "Stock Info":
             if st.session_state.stock_data is not None:
                 st.subheader("📈 Stock Price History")
                 st.bar_chart(st.session_state.stock_data["y"])
+
 
 
 # Historical Analysis Section
