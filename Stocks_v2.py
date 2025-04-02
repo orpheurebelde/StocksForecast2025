@@ -530,8 +530,6 @@ if menu == "Stock Info":
     if isinstance(info, dict) and info:  # Ensure 'info' is a dictionary and not empty
         freecash_flow = info.get('freeCashflow', 'N/A')
         pe_ratio = info.get('trailingPE', 'N/A')
-        pb_ratio = info.get('priceToBook', 'N/A')
-        ps_ratio = info.get('priceToSalesTrailing12Months', 'N/A')
         peg_ratio = info.get('trailingPegRatio', 'N/A')
         earnings_growth = info.get('earningsGrowth', 'N/A')
         forward_pe = info.get('forwardPE', 'N/A')
@@ -547,8 +545,6 @@ if menu == "Stock Info":
 
     if isinstance(info, dict) and info:  # Ensure 'info' is a dictionary and not empty
         pe_ratio = info.get('trailingPE', 'N/A')
-        pb_ratio = info.get('priceToBook', 'N/A')
-        ps_ratio = info.get('priceToSalesTrailing12Months', 'N/A')
         peg_ratio = info.get('trailingPegRatio', 'N/A')
         earnings_growth = info.get('earningsGrowth', 'N/A')
         forward_pe = info.get('forwardPE', 'N/A')
@@ -668,7 +664,7 @@ if menu == "Stock Info":
             st.markdown(f"<span style='color:{pb_color}; font-size:25px;'>📈 P/B Ratio: {pb_ratio:.2f}</span>", unsafe_allow_html=True)
         else:
             st.markdown("<span style='color:gray; font-size:25px;'>📈 P/B Ratio: N/A</span>", unsafe_allow_html=True)
-            
+
         st.metric(label="📈 Trailing EPS", value=f"${trailingeps:.2f}" if isinstance(info, dict) and 'marketCap' in info else "N/A")
         st.metric(label="📈 Forward EPS", value=f"${forwardeps:.2f}" if isinstance(info, dict) and 'marketCap' in info else "N/A")
         st.metric(label="📈 Revenue", value=f"${revenue / 1e9:.2f}B" if revenue and isinstance(revenue, (int, float)) else "N/A")
