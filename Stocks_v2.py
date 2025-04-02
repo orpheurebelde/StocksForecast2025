@@ -172,7 +172,7 @@ def predict_future(ticker):
         raise ValueError(f"Error fitting the Prophet model: {str(e)}")
 
     # Make future predictions (e.g., next 30 days)
-    future = model.make_future_dataframe(df, periods=30)  # Predict next 30 days
+    future = model.make_future_dataframe(periods=60)  # Correct usage
     forecast = model.predict(future)
 
     # Check if forecast contains necessary columns
