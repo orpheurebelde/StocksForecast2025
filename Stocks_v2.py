@@ -684,12 +684,11 @@ if menu == "Stock Info":
     #Using AI to analyse the stock based on the uper metrics
     st.markdown("📊 AI-Powered Stock Analysis", )
 
-    # Fetch and display stock data if a ticker is selected
-    if st.session_state.selected_ticker:
-            data, info = fetch_data(st.session_state.selected_ticker)
-            st.write(f"**Selected Ticker:** {st.session_state.selected_ticker}")
-
     with st.expander("Stock Analysis", expanded=True):
+            # Fetch and display stock data if a ticker is selected
+            if st.session_state.selected_ticker:
+                    data, info = fetch_data(st.session_state.selected_ticker)
+                    st.write(f"**Selected Ticker:** {st.session_state.selected_ticker}")
             
             if "stock_data" not in st.session_state:
                 st.session_state.stock_data = None  # Default to None or an empty DataFrame
