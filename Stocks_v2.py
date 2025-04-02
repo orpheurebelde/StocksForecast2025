@@ -614,33 +614,15 @@ if menu == "Stock Info":
         else:
             peg_color = "gray"
 
-        # Display PEG Ratio in Streamlit
-        if isinstance(peg_ratio, (int, float)):
-            st.markdown(f'<div style="color: {peg_color}; font-size: 25px;"><b>📈 PEG Ratio: {peg_ratio:.2f}</b></div>', unsafe_allow_html=True)
-        else:
-            st.markdown('<div style="color: gray; font-size: 25px;"><b>📈 PEG Ratio: N/A</b></div>', unsafe_allow_html=True)
-
-        if isinstance(peg_ratio, (int, float)):
-            st.markdown(f'<div style="color: {peg_color}; font-size: 25px;"><b>📈 PEG Ratio: {peg_ratio:.2f}</b></div>', unsafe_allow_html=True)
-        else:
-            st.markdown('<div style="color: gray; font-size: 25px;"><b>📈 PEG Ratio: N/A</b></div>', unsafe_allow_html=True)
-
-        # Safe conversion function
-        def safe_float(value):
-            try:
-                return float(value) if value not in [None, 'N/A', '', 'NaN'] else None
-            except (ValueError, TypeError):
-                return None
-
         # Categorize P/E Ratio
-        if isinstance(pe_ratio, (int, float)) and not math.isnan(pe_ratio):
+        if isinstance(pe_ratio, (int, float)) and pe_ratio is not None and not math.isnan(pe_ratio):
             pe_color = "green" if pe_ratio < 15 else "orange" if 15 <= pe_ratio <= 25 else "red"
             st.markdown(f"<span style='color:{pe_color}; font-size:25px;'>📈 P/E Ratio: {pe_ratio:.2f}</span>", unsafe_allow_html=True)
         else:
             st.markdown("<span style='color:gray; font-size:25px;'>📈 P/E Ratio: N/A</span>", unsafe_allow_html=True)
 
         # Categorize Forward P/E Ratio
-        if isinstance(forward_pe, (int, float)) and not math.isnan(forward_pe):
+        if isinstance(forward_pe, (int, float)) and forward_pe is not None and not math.isnan(forward_pe):
             pe_color = "green" if forward_pe < 15 else "orange" if 15 <= forward_pe <= 25 else "red"
             st.markdown(f"<span style='color:{pe_color}; font-size:25px;'>📈 Forward P/E Ratio: {forward_pe:.2f}</span>", unsafe_allow_html=True)
         else:
