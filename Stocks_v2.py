@@ -486,8 +486,7 @@ if menu == "Stock Info":
             else:
                 st.warning("No stock selected.")
         with col2:
-            if not info:
-                st.warning("Stock information not found.")
+            sector = info.get('sector') if isinstance(info, dict) else 'Sector Not Found'
             st.markdown(f"<h4>Sector: {info.get('sector', 'Sector Not Found')}</h4>", unsafe_allow_html=True)
         with col3:
             st.markdown(f"<h4>Industry: {info.get('industry', 'Industry Not Found')}</h4>", unsafe_allow_html=True)
