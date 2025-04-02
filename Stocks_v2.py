@@ -194,45 +194,25 @@ def predict_future(ticker):
 # 3️⃣ FUNDAMENTAL & TECHNICAL AI ANALYSIS
 # -------------------------------
 
-# Analyse fundamentals and technicals and score the stock using AI
+# Analyse fundamentals and technicals and score the stock using prophet
 def analyze_fundamentals(ticker):
     try:
         # Fetch stock data
         data, info = fetch_data(ticker)
 
-        # Check if data is valid
         if data is None or info is None:
-            return "Error: Unable to fetch stock data."
+            return "Error: Unable to fetch stock data or information."
 
-        # Prepare the prompt for GPT-3.5
-        prompt = f"""
-        - Stock: {ticker}
-        - Last 30-day closing prices: {data['Close'].tail(30).tolist()}
-        - Market Cap: {info.get('marketCap', 'N/A')}
-        - P/E Ratio: {info.get('trailingPE', 'N/A')}
-        - PEG Ratio: {info.get('pegRatio', 'N/A')}
-        - Forward P/E Ratio: {info.get('forwardPE', 'N/A')}
-        - Free Cash Flow: {info.get('freeCashflow', 'N/A')}
-        
-        Provide an analysis including:
-        - General sentiment (bullish, bearish, or neutral).
-        - Technical insights based on price trends.
-        - A short forecast for the stock.
-        """
-        # Initialize OpenAI client
-        client = openai.OpenAI(api_key=api_key)
+        # Predict future prices using Prophet
+        forecast = predict_future(ticker)
 
-        # Call OpenAI API for analysis
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": prompt}]
-        )
-
-        return response.choices[0].message.content  # Extract text response correctly
+        # Define or compute the 'analysis' variable
+        analysis = f"Forecast generated for {ticker}. Predicted future prices and trends are available."
+        return analysis
 
     except Exception as e:
-        st.error(f"Error analyzing fundamentals for {ticker}: {e}")
-        return "Error: Unable to analyze fundamentals."
+        st.error(f"Error analyzing fundamentals: {e}")
+        return None
     
     
 
