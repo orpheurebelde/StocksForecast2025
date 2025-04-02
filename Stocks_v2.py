@@ -30,11 +30,23 @@ def compute_rsi(data, window=14):
     rsi = 100 - (100 / (1 + rs))
     return rsi
 
-# Function to fetch stock news
-def get_news_sentiment(ticker):
-    stock = yf.Ticker(ticker)
-    news = stock.news[:5] if stock.news else []  # Get the latest 5 news articles
-    return news
+# Function to fetch stock news from tradingview and analyse sentiment
+def fetch_tradingview_news(ticker):
+    url = f"https://www.tradingview.com/symbols/{ticker}/news/"
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    news_items = soup.find_all('div', class_='tv-screener__description')
+    news_list = [item.text for item in news_items]
+    return news_list
+
+#Analyze sentiment of news articles using FinBERT
+def analyze_sentiment(news_list):
+    sentiment_pipeline = pipeline("sentiment-analysis", model="yiyanghkust/finbert-tone")
+    sentiments = []
+    for news in news_list:
+        sentiment = sentiment_pipeline(news)[0]
+        sentiments.append(sentiment['label'])
+    return sentiments
 
 # Load API key from secrets
 api_key = st.secrets["openai"]["api_key"]
@@ -658,18 +670,13 @@ if menu == "Stock Info":
             if st.button("Analyze Stock"):
                 # Fetch and store stock data
                 stock_data = get_stock_data(ticker)
-                news = get_news_sentiment(ticker)
+                news = analyze_sentiment(ticker)
 
                 # Store results in session state
                 st.session_state.stock_data = stock_data
                 #st.session_state.stock_analysis = analyze_stock_with_gpt(ticker, stock_data, news)
                 st.session_state.news_sentiment = news
                 st.session_state.stock_analysis = analyze_fundamentals(ticker)
-
-            # Display GPT analysis if available
-            if st.session_state.stock_analysis:
-                st.subheader("📢 GPT Stock Analysis")
-                st.write(st.session_state.stock_analysis)
 
             # Display historical stock price chart if available
             if st.session_state.stock_data is not None:
