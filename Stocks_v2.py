@@ -1047,32 +1047,37 @@ with st.expander("📈 Historical Data Plot"):
         if data.empty:
             return None
 
-        # Compute daily returns
-        data['Daily Return'] = data['Close'].pct_change()
-
-        # Add year and month columns for grouping by month
-        data['Year'] = data.index.year
+        # Calculate monthly returns based on first and last closing prices for the month
         data['Month'] = data.index.month
+        data['Year'] = data.index.year
+        
+        # Resample to monthly data and calculate returns (using first and last closing prices)
+        monthly_data = data.resample('M').agg({'Close': ['first', 'last']})
+        
+        # Calculate the monthly return as (last - first) / first
+        monthly_data['Return'] = (monthly_data[('Close', 'last')] - monthly_data[('Close', 'first')]) / monthly_data[('Close', 'first')]
+        
+        # Reset the index and flatten the column multi-index for easier access
+        monthly_data = monthly_data.reset_index()
+        monthly_data.columns = ['Date', 'First Close', 'Last Close', 'Return']
+        
+        # Add 'Year' and 'Month' columns for grouping
+        monthly_data['Year'] = monthly_data['Date'].dt.year
+        monthly_data['Month'] = monthly_data['Date'].dt.month
+        
+        # Group by Year and classify returns as drawdown or drawup
+        drawdown = monthly_data[monthly_data['Return'] < 0].groupby('Year')['Return'].sum() * 100  # Negative returns as Drawdown
+        drawup = monthly_data[monthly_data['Return'] > 0].groupby('Year')['Return'].sum() * 100   # Positive returns as Drawup
 
-        # Group by year and month to calculate monthly returns
-        monthly_returns = data.groupby(['Year', 'Month'])['Daily Return'].sum()
-
-        # Now we calculate yearly gains and losses by summing monthly returns
-        yearly_returns = monthly_returns.groupby('Year').sum()
-
-        # Separate the positive and negative returns for drawup and drawdown
-        yearly_drawdown = yearly_returns[yearly_returns < 0].sum() * 100
-        yearly_drawup = yearly_returns[yearly_returns > 0].sum() * 100
-
-        # Combine into a DataFrame
+        # Combine into a single DataFrame
         result = pd.DataFrame({
-            'Year': yearly_returns.index,
-            'Drawdown': yearly_drawdown,
-            'Drawup': yearly_drawup
+            'Year': drawdown.index,
+            'Drawdown': drawdown.values,
+            'Drawup': drawup.reindex(drawdown.index, fill_value=0).values,
         })
 
-        # Calculate Yearly % Change (can also use total return if needed)
-        result['Yearly % Change'] = result['Drawup'] + result['Drawdown']  # since drawdown is negative
+        # Calculate the yearly percent change as the sum of drawup and drawdown
+        result['Yearly % Change'] = result['Drawup'] + result['Drawdown']  # drawdown is negative, so it subtracts
 
         return result
 
@@ -1082,18 +1087,24 @@ with st.expander("📈 Historical Data Plot"):
             st.error(f"Could not fetch data for {ticker}")
             return
 
+        # Format values as percentages with 2 decimal places
+        df['Drawdown'] = df['Drawdown'].map(lambda x: f"{x:.2f}%")
+        df['Drawup'] = df['Drawup'].map(lambda x: f"{x:.2f}%")
+        df['Yearly % Change'] = df['Yearly % Change'].map(lambda x: f"{x:.2f}%")
+
+        # Display table with formatted values (but keep real values)
         st.subheader(title)
         st.write("Yearly Drawdown, Drawup, and % Change")
 
-        # Display table with styled formatting (values still float)
         formatter_dict = {
             "Drawdown": "{:.2f}%",
             "Drawup": "{:.2f}%",
             "Yearly % Change": "{:.2f}%"
         }
+
         st.dataframe(df.style.format(formatter_dict), hide_index=True)
 
-        # Plotting
+        # Plotting the data
         fig, ax = plt.subplots(figsize=(10, 6))
         ax.bar(df['Year'], df['Drawup'], label='Drawup', color='green')
         ax.bar(df['Year'], df['Drawdown'], label='Drawdown', color='red')
