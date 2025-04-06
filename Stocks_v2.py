@@ -976,7 +976,7 @@ if menu == "Market Analysis | Buy Signals":
                 if isinstance(vix_value, float):
                     category, color = vix_indicator(vix_value)
                     cols[i].write(f"**{name}**: {vix_value:.2f} - {category}", unsafe_allow_html=True)
-                    cols[i].markdown(f'<p style="color:{color}">{category}</p>', unsafe_allow_html=True)
+                    #cols[i].markdown(f'<p style="color:{color}">{category}</p>', unsafe_allow_html=True)
                 else:
                     cols[i].write(f"**{name}**: {current_price}")
             else:
