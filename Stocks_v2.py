@@ -1084,10 +1084,13 @@ if menu == "Market Analysis | Buy Signals":
             st.subheader(title)
             st.write("Yearly Drawdown, Drawup, and % Change")
             # Drop only the first column by position (not by name)
-            st.dataframe(df.style.hide(axis="index").set_table_attributes('style="width: 100%;"').format({
-                'Drawdown': lambda x: f"{x:.2f}%",
-                'Drawup': lambda x: f"{x:.2f}%",
-                'Yearly % Change': lambda x: f"{x:.2f}%"
+            df_to_display = df.iloc[:, 1:]
+
+            # Show the DataFrame with all formatting, keeping 'Year' visible
+            st.dataframe(df_to_display.style.format({
+                "Drawdown": "{:.2f}%",
+                "Drawup": "{:.2f}%",
+                "% Change": "{:.2f}%"
             }))
 
             # Plot the data
