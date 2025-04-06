@@ -974,9 +974,9 @@ if menu == "Market Analysis | Buy Signals":
                 vix_value = current_price
                 # Categorize the VIX and apply color
                 if isinstance(vix_value, float):
-                    category, trend = vix_indicator(vix_value)
-                    delta = None  # Set delta as None if you don't want any percentage change
-                    cols[i].metric(label=name, value=f"{vix_value:.2f}", help=f"VIX is {category}", delta=delta, delta_color=trend)
+                    category, color = vix_indicator(vix_value)
+                    cols[i].metric(label=name, value=f"{vix_value:.2f}", help=category)
+                    cols[i].markdown(f'<p style="color:{color}">{category}</p>', unsafe_allow_html=True)
                 else:
                     cols[i].metric(label=name, value=current_price)
             else:
