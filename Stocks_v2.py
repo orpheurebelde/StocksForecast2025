@@ -1130,12 +1130,81 @@ with st.expander("📈 Historical Data Plot"):
 
         st.pyplot(fig)
 
+    # Function to calculate monthly returns and compare with historical performance
+    def get_monthly_performance(ticker):
+        data = yf.Ticker(ticker).history(period="10y")
+        if data.empty:
+            return None
+
+        # Calculate monthly returns based on first and last closing prices for the month
+        data['Month'] = data.index.month
+        data['Year'] = data.index.year
+
+        # Resample to monthly data and calculate returns (using first and last closing prices)
+        monthly_data = data.resample('M').agg({'Close': ['first', 'last']})
+
+        # Calculate the monthly return as (last - first) / first
+        monthly_data['Return'] = (monthly_data[('Close', 'last')] - monthly_data[('Close', 'first')]) / monthly_data[('Close', 'first')]
+
+        # Reset the index and flatten the column multi-index for easier access
+        monthly_data = monthly_data.reset_index()
+        monthly_data.columns = ['Date', 'First Close', 'Last Close', 'Return']
+
+        # Get the last month performance
+        last_month_data = monthly_data.iloc[-1]
+
+        # Compare the current month performance with the highest and lowest historical performance
+        max_performance = monthly_data['Return'].max()
+        min_performance = monthly_data['Return'].min()
+
+        # Get the current month's return
+        current_month_performance = last_month_data['Return']
+
+        # Determine the category based on comparison
+        if current_month_performance == max_performance:
+            category = "green"  # Highest value
+        elif current_month_performance == min_performance:
+            category = "red"    # Lowest value
+        else:
+            category = "neutral"  # Not the highest or lowest
+
+        return current_month_performance, category, max_performance, min_performance
+
+    # Function to display current month performance and compare it with historical data
+    def display_monthly_performance(ticker, title):
+        performance, category, max_performance, min_performance = get_monthly_performance(ticker)
+        if performance is None:
+            st.error(f"Could not fetch data for {ticker}")
+            return
+
+        # Display result under the subheader
+        st.subheader(f"{title} ({ticker})")
+        
+        # Categorize the result color
+        if category == "green":
+            st.markdown(f"**Current Month Gain**: {performance * 100:.2f}% - **Best Performance** (Highest) of the last 10 years!", unsafe_allow_html=True)
+            st.markdown('<span style="color:green;">🔼 Highest Gain</span>', unsafe_allow_html=True)
+        elif category == "red":
+            st.markdown(f"**Current Month Loss**: {performance * 100:.2f}% - **Worst Performance** (Lowest) of the last 10 years!", unsafe_allow_html=True)
+            st.markdown('<span style="color:red;">🔽 Lowest Loss</span>', unsafe_allow_html=True)
+        else:
+            st.markdown(f"**Current Month Performance**: {performance * 100:.2f}% - Within Historical Range", unsafe_allow_html=True)
+            st.markdown('<span style="color:gray;">⏺ Neutral</span>', unsafe_allow_html=True)
+
+        # Display the historical performance comparison
+        st.write(f"**Highest Performance**: {max_performance * 100:.2f}%")
+        st.write(f"**Lowest Performance**: {min_performance * 100:.2f}%")
+
     # Use containers to organize expanders
     with st.container():
         st.subheader("📉 S&P 500 Yearly Drawdown/Drawup %")
+        display_monthly_performance("^GSPC", "S&P 500 Monthly Performance")
+        st.write("")  # Empty line
         display_cumulative_drawdown_drawup("^GSPC", "S&P 500 Yearly Drawdown/Drawup %")
 
         st.subheader("📉 Nasdaq 100 Yearly Drawdown/Drawup %")
+        display_monthly_performance("^NDX", "Nasdaq 100 Monthly Performance")
+        st.write("")  # Empty line
         display_cumulative_drawdown_drawup("^NDX", "Nasdaq 100 Yearly Drawdown/Drawup %")
 
 # Export Data Section
