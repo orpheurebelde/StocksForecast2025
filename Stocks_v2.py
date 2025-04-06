@@ -1083,19 +1083,22 @@ if menu == "Market Analysis | Buy Signals":
             # Display table with the index hidden (but keep 'Year' visible)
             st.subheader(title)
             st.write("Yearly Drawdown, Drawup, and % Change")
-            # Step 1: Drop first column (index column)
-            df_to_display = df.iloc[:, 1:]
+            # Detect and remove the unnamed column by position if it exists
+            if df.columns[0] == "":
+                df_to_display = df.drop(df.columns[0], axis=1)
+            else:
+                df_to_display = df
 
-            # Step 2: Format only numeric columns that should show % (and handle NaNs)
-            percent_columns = ["Drawdown", "Drawup", "% Change"]
-
-            # Ensure formatting only applies to columns that exist and are numeric
+            # Format columns with percentage values
             formatter_dict = {
-                col: "{:.2f}%" for col in percent_columns if col in df_to_display.columns and pd.api.types.is_numeric_dtype(df_to_display[col])
+                "Drawdown": "{:.2f}%",
+                "Drawup": "{:.2f}%",
+                "% Change": "{:.2f}%"
             }
 
-            # Step 3: Display with formatting
-            st.dataframe(df_to_display.style.format(formatter_dict))
+            # Display in Streamlit with formatting and index hidden
+            st.dataframe(df_to_display.style.format(formatter_dict).hide(axis="index"))
+
 
             # Plot the data
             # Convert back to float for plotting
