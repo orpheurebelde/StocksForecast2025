@@ -1004,7 +1004,9 @@ if menu == "Market Analysis | Buy Signals":
         avg_gain = gain.rolling(window=period).mean()
         avg_loss = loss.rolling(window=period).mean()
         rs = avg_gain / avg_loss
-        return 100 - (100 / (1 + rs)).iloc[-1]
+        rsi = 100 - (100 / (1 + rs))
+        return rsi.iloc[-1]
+
 
     def compute_macd(series, fast=12, slow=26, signal=9):
         ema_fast = series.ewm(span=fast, adjust=False).mean()
