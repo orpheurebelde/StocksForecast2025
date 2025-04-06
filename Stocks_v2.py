@@ -969,16 +969,16 @@ if menu == "Market Analysis | Buy Signals":
             data = yf.Ticker(symbol).history(period="1d")
             current_price = data["Close"].iloc[-1] if not data.empty else "N/A"
 
-            # If it's the VIX, we need to handle it differently
+            # If it's the VIX, handle it differently
             if symbol == "^VIX":
                 vix_value = current_price
                 # Categorize the VIX and apply color
                 if isinstance(vix_value, float):
                     category, color = vix_indicator(vix_value)
-                    cols[i].metric(label=name, value=f"{vix_value:.2f}", help=category)
+                    cols[i].write(f"**{name}**: {vix_value:.2f} - {category}", unsafe_allow_html=True)
                     cols[i].markdown(f'<p style="color:{color}">{category}</p>', unsafe_allow_html=True)
                 else:
-                    cols[i].metric(label=name, value=current_price)
+                    cols[i].write(f"**{name}**: {current_price}")
             else:
                 # Format the S&P 500 and Nasdaq 100 as usual
                 cols[i].metric(label=name, value=f"${current_price:,.2f}" if isinstance(current_price, float) else current_price)
