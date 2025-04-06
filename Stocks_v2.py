@@ -985,7 +985,8 @@ if menu == "Market Analysis | Buy Signals":
             close = data["Close"]
             rsi = compute_rsi(close)  # where close is: close = df['Close']
             macd, signal = compute_macd(close)
-            ytd = ((close[-1] / close[close.index.get_loc(pd.Timestamp(f"{pd.Timestamp.now().year}-01-01"), method='pad')]) - 1) * 100
+            start_of_year = close[close.index >= pd.Timestamp(f"{pd.Timestamp.now().year}-01-01")].iloc[0]
+            ytd = ((close.iloc[-1] / start_of_year) - 1) * 100
             fib_level = compute_fibonacci_level(close)
 
             st.subheader(title)
