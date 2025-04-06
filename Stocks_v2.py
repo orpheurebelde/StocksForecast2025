@@ -1076,12 +1076,15 @@ if menu == "Market Analysis | Buy Signals":
 
         #Display the data in a Expander 2 columns
         col1, col2 = st.columns(2)
+
+        # Add expanders inside each column
         with col1:
-            with st.expander("📈 S&P 500 Yearly High/Low % Change"):
-                display_historical_high_low("^GSPC", "S&P 500 Yearly High/Low % Change")
+            st.subheader("📈 S&P 500 Yearly High/Low % Change")
+            display_historical_high_low("^GSPC", "S&P 500 Yearly High/Low % Change")
+
         with col2:
-            with st.expander("📈 Nasdaq 100 Yearly High/Low % Change"):
-                display_historical_high_low("^NDX", "Nasdaq 100 Yearly High/Low % Change")
+            st.subheader("📈 Nasdaq 100 Yearly High/Low % Change")
+            display_historical_high_low("^NDX", "Nasdaq 100 Yearly High/Low % Change")
 
 # Export Data Section
 if menu == "Export Data":
