@@ -985,8 +985,19 @@ if menu == "Market Analysis | Buy Signals":
             close = data["Close"]
             rsi = compute_rsi(close)  # where close is: close = df['Close']
             macd, signal = compute_macd(close)
-            start_of_year = close[close.index >= pd.Timestamp(f"{pd.Timestamp.now().year}-01-01")].iloc[0]
-            ytd = ((close.iloc[-1] / start_of_year) - 1) * 100
+            
+            # Ensure the index is a datetime index (if it's not already)
+            close.index = pd.to_datetime(close.index)
+
+            # Get the start of the year as a timestamp
+            start_of_year = pd.Timestamp(f"{pd.Timestamp.now().year}-01-01")
+
+            # Find the first available trading day of the year
+            start_price = close[close.index >= start_of_year].iloc[0] if not close[close.index >= start_of_year].empty else close.iloc[0]
+
+            # Calculate YTD % return
+            ytd = ((close.iloc[-1] / start_price) - 1) * 100
+
             fib_level = compute_fibonacci_level(close)
 
             st.subheader(title)
