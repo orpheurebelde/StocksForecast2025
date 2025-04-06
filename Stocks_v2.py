@@ -363,9 +363,18 @@ def vix_indicator(vix_value):
     else:
         return "🔴 SELL - High Volatility (Bearish)", "red"
 
-# Sidebar Menu
-st.sidebar.title("📈 Stock Info Dashboard")
-menu = st.sidebar.radio("Select a Section", ["Stock Info", "Historical Analysis", "Monte Carlo Simulations", "Export Data", "Sector Map", "Refined Strategy (RSI with Trend)"])
+menu = st.sidebar.radio(
+    "Select a Section",
+    [
+        "Stock Info",
+        "Historical Analysis",
+        "Monte Carlo Simulations",
+        "Export Data",
+        "Sector Map",
+        "Refined Strategy (RSI with Trend)",
+        "Market Analysis | Buy Signals"  # ✅ New menu item
+    ]
+)
 
 # Exit App Button
 if st.sidebar.button("❌ Exit App"):
