@@ -1087,19 +1087,14 @@ with st.expander("📈 Historical Data Plot"):
             st.error(f"Could not fetch data for {ticker}")
             return
 
-        # Ensure that the 'Drawdown', 'Drawup', and 'Yearly % Change' columns are numeric
+        # Ensure that 'Drawdown', 'Drawup', and 'Yearly % Change' columns are numeric and handle NaN values
         df['Drawdown'] = pd.to_numeric(df['Drawdown'], errors='coerce').fillna(0)
         df['Drawup'] = pd.to_numeric(df['Drawup'], errors='coerce').fillna(0)
         df['Yearly % Change'] = pd.to_numeric(df['Yearly % Change'], errors='coerce').fillna(0)
 
-        # Format values as percentages with 2 decimal places
-        df['Drawdown'] = df['Drawdown'].map(lambda x: f"{x:.2f}%")
-        df['Drawup'] = df['Drawup'].map(lambda x: f"{x:.2f}%")
-        df['Yearly % Change'] = df['Yearly % Change'].map(lambda x: f"{x:.2f}%")
-
-        # Display table with formatted values (but keep real values)
-        st.subheader(title)
-        st.write("Yearly Drawdown, Drawup, and % Change")
+        # Check if the data is numeric and print the data to debug
+        st.write("Data for debugging:")
+        st.write(df)
 
         # Create formatter dictionary for percentage formatting
         formatter_dict = {
@@ -1108,8 +1103,21 @@ with st.expander("📈 Historical Data Plot"):
             "Yearly % Change": "{:.2f}%"  # Add format for Yearly % Change
         }
 
+        # Check if the columns we want to format actually exist
+        for col in formatter_dict.keys():
+            if col not in df.columns:
+                st.error(f"Column '{col}' not found in DataFrame.")
+                return
+
         # Display the DataFrame with style applied (ensure proper formatting)
-        st.dataframe(df.style.format(formatter_dict), hide_index=True)
+        st.subheader(title)
+        st.write("Yearly Drawdown, Drawup, and % Change")
+
+        # Apply the style formatting
+        try:
+            st.dataframe(df.style.format(formatter_dict), hide_index=True)
+        except Exception as e:
+            st.error(f"Error during DataFrame formatting: {e}")
 
         # Plotting the data
         fig, ax = plt.subplots(figsize=(10, 6))
@@ -1125,6 +1133,7 @@ with st.expander("📈 Historical Data Plot"):
         ax.grid(True)
 
         st.pyplot(fig)
+
 
     # Use containers to organize expanders
     with st.container():
