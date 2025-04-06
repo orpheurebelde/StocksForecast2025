@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 import streamlit as st
 import math
 import openai
-import datetime
 from textblob import TextBlob
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
@@ -1082,68 +1081,57 @@ with st.expander("📈 Historical Data Plot"):
 
         return result
 
-    # Function to get cumulative drawdown and drawup, including current year data and yearly performance
-    def get_cumulative_drawdown_drawup(ticker):
-        data = yf.Ticker(ticker).history(period="10y")
-        if data.empty:
-            return None
+    def display_cumulative_drawdown_drawup(ticker, title):
+        df = get_cumulative_drawdown_drawup(ticker)
+        if df is None:
+            st.error(f"Could not fetch data for {ticker}")
+            return
 
-        # Calculate monthly returns based on first and last closing prices for the month
-        data['Month'] = data.index.month
-        data['Year'] = data.index.year
+        # Ensure that 'Drawdown', 'Drawup', and 'Yearly % Change' columns are numeric and handle NaN values
+        df['Drawdown'] = pd.to_numeric(df['Drawdown'], errors='coerce').fillna(0)
+        df['Drawup'] = pd.to_numeric(df['Drawup'], errors='coerce').fillna(0)
+        df['Yearly % Change'] = pd.to_numeric(df['Yearly % Change'], errors='coerce').fillna(0)
 
-        # Resample to monthly data and calculate returns (using first and last closing prices)
-        monthly_data = data.resample('M').agg({'Close': ['first', 'last']})
+        # Create formatter dictionary for percentage formatting
+        formatter_dict = {
+            "Drawdown": "{:.2f}%",
+            "Drawup": "{:.2f}%",
+            "Yearly % Change": "{:.2f}%"  # Add format for Yearly % Change
+        }
 
-        # Calculate the monthly return as (last - first) / first
-        monthly_data['Return'] = (monthly_data[('Close', 'last')] - monthly_data[('Close', 'first')]) / monthly_data[('Close', 'first')]
+        # Check if the columns we want to format actually exist
+        for col in formatter_dict.keys():
+            if col not in df.columns:
+                st.error(f"Column '{col}' not found in DataFrame.")
+                return
 
-        # Reset the index and flatten the column multi-index for easier access
-        monthly_data = monthly_data.reset_index()
-        monthly_data.columns = ['Date', 'First Close', 'Last Close', 'Return']
+        # Display the DataFrame with style applied (ensure proper formatting)
+        st.subheader(title)
+        st.write("Yearly Drawdown, Drawup, and % Change")
 
-        # Add 'Year' and 'Month' columns for grouping
-        monthly_data['Year'] = monthly_data['Date'].dt.year
-        monthly_data['Month'] = monthly_data['Date'].dt.month
+        # Apply the style formatting
+        try:
+            st.dataframe(df.style.format(formatter_dict), hide_index=True)  # Only show this table
+        except Exception as e:
+            st.error(f"Error during DataFrame formatting: {e}")
 
-        # Calculate the current year's data separately
-        current_year = datetime.datetime.now().year
-        current_year_data = monthly_data[monthly_data['Year'] == current_year]
-        if not current_year_data.empty:
-            # Calculate cumulative drawup and drawdown for the current year
-            current_year_drawdown = current_year_data[current_year_data['Return'] < 0]['Return'].sum() * 100
-            current_year_drawup = current_year_data[current_year_data['Return'] > 0]['Return'].sum() * 100
-            # Yearly performance for the current year
-            start_of_year = data[data.index.month == 1].iloc[0]['Close']  # Price at the start of the year
-            current_year_performance = (data.iloc[-1]['Close'] - start_of_year) / start_of_year * 100
-        else:
-            current_year_drawdown = 0
-            current_year_drawup = 0
-            current_year_performance = 0
+        # Plotting the data
+        fig, ax = plt.subplots(figsize=(10, 6))
+        ax.bar(df['Year'], df['Drawup'], label='Drawup', color='green')
+        ax.bar(df['Year'], df['Drawdown'], label='Drawdown', color='red')
+        ax.plot(df['Year'], df['Yearly % Change'], label='Yearly % Change', color='blue', marker='o')
 
-        # Group by Year and classify returns as drawdown or drawup for previous years
-        drawdown = monthly_data[monthly_data['Return'] < 0].groupby('Year')['Return'].sum() * 100  # Negative returns as Drawdown
-        drawup = monthly_data[monthly_data['Return'] > 0].groupby('Year')['Return'].sum() * 100   # Positive returns as Drawup
+        ax.set_title(f"{title} - Yearly Drawup, Drawdown, and % Change")
+        ax.set_ylabel('Percentage (%)')
+        ax.set_xlabel('Year')
+        ax.axhline(0, color='black', linewidth=0.5)
+        ax.legend()
+        ax.grid(True)
 
-        # Combine into a single DataFrame
-        result = pd.DataFrame({
-            'Year': drawdown.index,
-            'Drawdown': drawdown.values,
-            'Drawup': drawup.reindex(drawdown.index, fill_value=0).values,
-        })
+        st.pyplot(fig)
 
-        # Add the current year's drawdown, drawup, and performance to the result DataFrame
-        result = result.append({
-            'Year': current_year,
-            'Drawdown': current_year_drawdown,
-            'Drawup': current_year_drawup,
-        }, ignore_index=True)
-
-        # Calculate the yearly percent change as the sum of drawup and drawdown
-        result['Yearly % Change'] = result['Drawup'] + result['Drawdown']  # drawdown is negative, so it subtracts
-
-        return result, current_year_performance
-
+    
+    
     # Function to calculate monthly returns and compare with historical performance
     def get_monthly_performance(ticker):
         data = yf.Ticker(ticker).history(period="10y")
@@ -1243,14 +1231,14 @@ with st.expander("📈 Historical Data Plot"):
         st.write("")  # Empty line
         display_yearly_performance("^GSPC", "S&P 500 Yearly Performance")
         st.write("")  # Empty line
-        get_cumulative_drawdown_drawup("^GSPC", "S&P 500 Yearly Drawdown/Drawup %")
+        display_cumulative_drawdown_drawup("^GSPC", "S&P 500 Yearly Drawdown/Drawup %")
 
         #st.subheader("📉 Nasdaq 100 Yearly Drawdown/Drawup %")
         display_monthly_performance("^NDX", "Nasdaq 100 Monthly Performance")
         st.write("")  # Empty line
         display_yearly_performance("^NDX", "Nasdaq 100 Yearly Performance")
         st.write("")  # Empty line
-        get_cumulative_drawdown_drawup("^NDX", "Nasdaq 100 Yearly Drawdown/Drawup %")
+        display_cumulative_drawdown_drawup("^NDX", "Nasdaq 100 Yearly Drawdown/Drawup %")
 
 # Export Data Section
 if menu == "Export Data":
