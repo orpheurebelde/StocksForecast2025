@@ -1069,6 +1069,11 @@ if menu == "Market Analysis | Buy Signals":
                 'Low % Change': low_pct_change.values
             })
 
+            # Display the DataFrame as a table
+            st.subheader(title)
+            st.write("Yearly High and Low % Change")
+            st.write(df)
+
         display_historical_high_low("^GSPC", "S&P 500 Yearly High/Low % Change")
         display_historical_high_low("^NDX", "Nasdaq 100 Yearly High/Low % Change")
 
