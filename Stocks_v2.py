@@ -1170,6 +1170,33 @@ with st.expander("📈 Historical Data Plot"):
 
         return current_month_performance, category, max_performance, min_performance
 
+    # Function to display the yearly performance and compare it to historical data
+    def display_yearly_performance(ticker, title):
+        df, current_year_performance = get_cumulative_drawdown_drawup(ticker)
+        if df is None:
+            st.error(f"Could not fetch data for {ticker}")
+            return
+
+        # Get the highest and lowest yearly performance from the historical data
+        highest_year_performance = df['Yearly % Change'].max()
+        lowest_year_performance = df['Yearly % Change'].min()
+
+        # Display the results with color coding
+        st.subheader(f"{title} - Yearly Performance")
+        if current_year_performance == highest_year_performance:
+            st.markdown(f"**Current Year Performance**: {current_year_performance:.2f}% - **Best Performance** of the last 10 years!", unsafe_allow_html=True)
+            st.markdown('<span style="color:green;">🔼 Best Year</span>', unsafe_allow_html=True)
+        elif current_year_performance == lowest_year_performance:
+            st.markdown(f"**Current Year Performance**: {current_year_performance:.2f}% - **Worst Performance** of the last 10 years!", unsafe_allow_html=True)
+            st.markdown('<span style="color:red;">🔽 Worst Year</span>', unsafe_allow_html=True)
+        else:
+            st.markdown(f"**Current Year Performance**: {current_year_performance:.2f}% - Within Historical Range", unsafe_allow_html=True)
+            st.markdown('<span style="color:gray;">⏺ Neutral</span>', unsafe_allow_html=True)
+
+        # Display the highest and lowest performance in the last 10 years
+        st.write(f"**Highest Performance in Last 10 Years**: {highest_year_performance:.2f}%")
+        st.write(f"**Lowest Performance in Last 10 Years**: {lowest_year_performance:.2f}%")
+    
     # Function to display current month performance and compare it with historical data
     def display_monthly_performance(ticker, title):
         performance, category, max_performance, min_performance = get_monthly_performance(ticker)
@@ -1200,10 +1227,14 @@ with st.expander("📈 Historical Data Plot"):
         #st.subheader("📉 S&P 500 Yearly Drawdown/Drawup %")
         display_monthly_performance("^GSPC", "S&P 500 Monthly Performance")
         st.write("")  # Empty line
+        display_yearly_performance("^GSPC", "S&P 500 Yearly Performance")
+        st.write("")  # Empty line
         display_cumulative_drawdown_drawup("^GSPC", "S&P 500 Yearly Drawdown/Drawup %")
 
         #st.subheader("📉 Nasdaq 100 Yearly Drawdown/Drawup %")
         display_monthly_performance("^NDX", "Nasdaq 100 Monthly Performance")
+        st.write("")  # Empty line
+        display_yearly_performance("^NDX", "Nasdaq 100 Yearly Performance")
         st.write("")  # Empty line
         display_cumulative_drawdown_drawup("^NDX", "Nasdaq 100 Yearly Drawdown/Drawup %")
 
