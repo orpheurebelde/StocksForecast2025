@@ -366,7 +366,7 @@ def vix_indicator(vix_value):
 menu = st.sidebar.radio(
     "Select a Section",
     [
-        "Market Analysis | Buy Signals"
+        "Market Analysis | Buy Signals",
         "Stock Info",
         "Historical Analysis",
         "Monte Carlo Simulations",
