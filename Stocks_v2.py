@@ -1047,21 +1047,28 @@ with st.expander("📈 Historical Data Plot"):
         if data.empty:
             return None
 
+        # Compute daily returns
         data['Daily Return'] = data['Close'].pct_change()
+
+        # Add year and month columns for grouping by month
         data['Year'] = data.index.year
+        data['Month'] = data.index.month
 
-        # Group all returns by year
-        yearly_returns = data.groupby('Year')['Daily Return']
+        # Group by year and month to calculate monthly returns
+        monthly_returns = data.groupby(['Year', 'Month'])['Daily Return'].sum()
 
-        # Calculate sum of negative and positive returns per year
-        yearly_drawdown = yearly_returns.apply(lambda x: x[x < 0].sum() * 100)
-        yearly_drawup = yearly_returns.apply(lambda x: x[x > 0].sum() * 100)
+        # Now we calculate yearly gains and losses by summing monthly returns
+        yearly_returns = monthly_returns.groupby('Year').sum()
+
+        # Separate the positive and negative returns for drawup and drawdown
+        yearly_drawdown = yearly_returns[yearly_returns < 0].sum() * 100
+        yearly_drawup = yearly_returns[yearly_returns > 0].sum() * 100
 
         # Combine into a DataFrame
         result = pd.DataFrame({
-            'Year': yearly_returns.groups.keys(),
-            'Drawdown': yearly_drawdown.values,
-            'Drawup': yearly_drawup.values
+            'Year': yearly_returns.index,
+            'Drawdown': yearly_drawdown,
+            'Drawup': yearly_drawup
         })
 
         # Calculate Yearly % Change (can also use total return if needed)
@@ -1108,7 +1115,6 @@ with st.expander("📈 Historical Data Plot"):
 
         st.subheader("📉 Nasdaq 100 Yearly Drawdown/Drawup %")
         display_cumulative_drawdown_drawup("^NDX", "Nasdaq 100 Yearly Drawdown/Drawup %")
-
 
 # Export Data Section
 if menu == "Export Data":
