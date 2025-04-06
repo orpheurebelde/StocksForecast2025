@@ -1101,12 +1101,14 @@ with st.expander("📈 Historical Data Plot"):
         st.subheader(title)
         st.write("Yearly Drawdown, Drawup, and % Change")
 
+        # Create formatter dictionary for percentage formatting
         formatter_dict = {
             "Drawdown": "{:.2f}%",
             "Drawup": "{:.2f}%",
-            "Yearly % Change": "{:.2f}%"
+            "Yearly % Change": "{:.2f}%"  # Add format for Yearly % Change
         }
 
+        # Display the DataFrame with style applied (ensure proper formatting)
         st.dataframe(df.style.format(formatter_dict), hide_index=True)
 
         # Plotting the data
