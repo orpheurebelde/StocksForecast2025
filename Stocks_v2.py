@@ -1029,11 +1029,11 @@ with st.expander("📈 Market Indicators (S&P 500 & Nasdaq 100)"):
         - **Fibonacci Level (10Y Range)**: {fib_level:.2f}%
         """)
 
-        with col1:
-            show_indicators("^GSPC", "S&P 500 Indicators")
+with col1:
+    show_indicators("^GSPC", "S&P 500 Indicators")
 
-        with col2:
-            show_indicators("^NDX", "Nasdaq 100 Indicators")
+with col2:
+    show_indicators("^NDX", "Nasdaq 100 Indicators")
 
 # Export Data Section
 if menu == "Export Data":
