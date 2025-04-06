@@ -1039,48 +1039,72 @@ if menu == "Market Analysis | Buy Signals":
         with col2:
             show_indicators("^NDX", "Nasdaq 100 Indicators")
 
-    # Historical data plot
-    with st.expander("📈 Historical Data Plot"):
-        def get_historical_high_low(ticker):
-            data = yf.Ticker(ticker).history(period="10y")
-            if data.empty:
-                return None, None
+    import yfinance as yf
+import streamlit as st
+import pandas as pd
+import matplotlib.pyplot as plt
 
-            # Calculate yearly high and low
-            yearly_high = data['Close'].resample('Y').max()
-            yearly_low = data['Close'].resample('Y').min()
+# Historical data plot
+with st.expander("📈 Historical Data Plot"):
 
-            # Calculate percentage change from the previous year
-            high_pct_change = yearly_high.pct_change() * 100
-            low_pct_change = yearly_low.pct_change() * 100
+    def get_historical_high_low(ticker):
+        data = yf.Ticker(ticker).history(period="10y")
+        if data.empty:
+            return None, None
 
-            return high_pct_change, low_pct_change
+        # Calculate yearly high and low
+        yearly_high = data['Close'].resample('Y').max()
+        yearly_low = data['Close'].resample('Y').min()
 
-        def display_historical_high_low(ticker, title):
-            high_pct_change, low_pct_change = get_historical_high_low(ticker)
-            if high_pct_change is None or low_pct_change is None:
-                st.error(f"Could not fetch data for {ticker}")
-                return
+        # Calculate percentage change from the previous year
+        high_pct_change = yearly_high.pct_change() * 100
+        low_pct_change = yearly_low.pct_change() * 100
 
-            # Create a DataFrame for display
-            df = pd.DataFrame({
-                'Year': high_pct_change.index.year,
-                'High % Change': high_pct_change.values,
-                'Low % Change': low_pct_change.values
-            })
+        return high_pct_change, low_pct_change
 
-            # Display the DataFrame as a table
-            st.subheader(title)
-            st.write("Yearly High and Low % Change")
-            st.write(df)
+    def display_historical_high_low(ticker, title):
+        high_pct_change, low_pct_change = get_historical_high_low(ticker)
+        if high_pct_change is None or low_pct_change is None:
+            st.error(f"Could not fetch data for {ticker}")
+            return
 
-    # Use containers to organize expanders
-    with st.container():
-        with st.expander("📈 S&P 500 Yearly High/Low % Change"):
-            display_historical_high_low("^GSPC", "S&P 500 Yearly High/Low % Change")
+        # Create a DataFrame for display
+        df = pd.DataFrame({
+            'Year': high_pct_change.index.year,
+            'High % Change': high_pct_change.values,
+            'Low % Change': low_pct_change.values
+        })
 
-        with st.expander("📈 Nasdaq 100 Yearly High/Low % Change"):
-            display_historical_high_low("^NDX", "Nasdaq 100 Yearly High/Low % Change")
+        # Display the DataFrame as a table
+        st.subheader(title)
+        st.write("Yearly High and Low % Change")
+        st.write(df)
+
+        # Plot the data
+        fig, ax = plt.subplots(figsize=(10, 6))
+
+        ax.plot(df['Year'], df['High % Change'], label='High % Change', color='green', marker='o')
+        ax.plot(df['Year'], df['Low % Change'], label='Low % Change', color='red', marker='o')
+
+        # Add labels and title
+        ax.set_xlabel('Year')
+        ax.set_ylabel('% Change')
+        ax.set_title(f'{title} - Yearly High/Low % Change')
+
+        # Add grid and legend
+        ax.grid(True)
+        ax.legend()
+
+        # Display the plot
+        st.pyplot(fig)
+
+# Use containers to organize expanders
+with st.container():
+    with st.expander("📈 S&P 500 Yearly High/Low % Change"):
+        display_historical_high_low("^GSPC", "S&P 500 Yearly High/Low % Change")
+
+    with st.expander("📈 Nasdaq 100 Yearly High/Low % Change"):
+        display_historical_high_low("^NDX", "Nasdaq 100 Yearly High/Low % Change")
 
 # Export Data Section
 if menu == "Export Data":
