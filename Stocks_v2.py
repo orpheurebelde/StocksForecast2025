@@ -366,13 +366,13 @@ def vix_indicator(vix_value):
 menu = st.sidebar.radio(
     "Select a Section",
     [
+        "Market Analysis | Buy Signals"
         "Stock Info",
         "Historical Analysis",
         "Monte Carlo Simulations",
         "Export Data",
         "Sector Map",
         "Refined Strategy (RSI with Trend)",
-        "Market Analysis | Buy Signals"
     ]
 )
 
@@ -937,6 +937,87 @@ if menu == "Monte Carlo Simulations":
     # Pass figure to Streamlit
     with st.expander("📊 Click to Expand Simulation Chart"):
         st.pyplot(fig)
+
+if menu == "Market Analysis | Buy Signals":
+    st.title("📈 Market Analysis | Buy Signals")
+
+    import yfinance as yf
+    import pandas as pd
+
+    # Define tickers
+    tickers = {
+        "S&P 500": "^GSPC",
+        "Nasdaq 100": "^NDX",
+        "VIX": "^VIX"
+    }
+
+    with st.expander("📊 Current Market Prices", expanded=True):
+        cols = st.columns(3)
+        for i, (name, symbol) in enumerate(tickers.items()):
+            data = yf.Ticker(symbol).history(period="1d")
+            current_price = data["Close"].iloc[-1] if not data.empty else "N/A"
+            cols[i].metric(label=name, value=f"${current_price:,.2f}" if isinstance(current_price, float) else current_price)
+
+    with st.expander("📈 Market Indicators (S&P 500 & Nasdaq 100)"):
+        col1, col2 = st.columns(2)
+
+        def show_indicators(ticker, title):
+            data = yf.Ticker(ticker).history(period="10y")
+            if data.empty:
+                st.error(f"Could not fetch data for {ticker}")
+                return
+
+            close = data["Close"]
+            rsi = compute_rsi(close)
+            macd, signal = compute_macd(close)
+            ytd = ((close[-1] / close[close.index.get_loc(pd.Timestamp(f"{pd.Timestamp.now().year}-01-01"), method='pad')]) - 1) * 100
+            fib_level = compute_fibonacci_level(close)
+
+            st.subheader(title)
+            st.markdown(f"""
+            - **52 Week High**: ${close[-252:].max():,.2f}
+            - **52 Week Low**: ${close[-252:].min():,.2f}
+            - **RSI**: {rsi:.2f}
+            - **MACD**: {macd[-1]:.2f}
+            - **MACD Signal**: {signal[-1]:.2f}
+            - **YTD %**: {ytd:.2f}%
+            - **1D %**: {close.pct_change().iloc[-1]*100:.2f}%
+            - **5D %**: {close.pct_change(5).iloc[-1]*100:.2f}%
+            - **1M %**: {close.pct_change(21).iloc[-1]*100:.2f}%
+            - **6M %**: {close.pct_change(126).iloc[-1]*100:.2f}%
+            - **1Y %**: {close.pct_change(252).iloc[-1]*100:.2f}%
+            - **5Y %**: {close.pct_change(1260).iloc[-1]*100:.2f}%
+            - **Fibonacci Level (10Y Range)**: {fib_level:.2f}%
+            """)
+
+        with col1:
+            show_indicators("^GSPC", "S&P 500 Indicators")
+
+        with col2:
+            show_indicators("^NDX", "Nasdaq 100 Indicators")
+
+    # ========== Technical Indicator Helpers ==========
+    def compute_rsi(series, period=14):
+        delta = series.diff()
+        gain = delta.where(delta > 0, 0)
+        loss = -delta.where(delta < 0, 0)
+        avg_gain = gain.rolling(window=period).mean()
+        avg_loss = loss.rolling(window=period).mean()
+        rs = avg_gain / avg_loss
+        return 100 - (100 / (1 + rs)).iloc[-1]
+
+    def compute_macd(series, fast=12, slow=26, signal=9):
+        ema_fast = series.ewm(span=fast, adjust=False).mean()
+        ema_slow = series.ewm(span=slow, adjust=False).mean()
+        macd = ema_fast - ema_slow
+        signal_line = macd.ewm(span=signal, adjust=False).mean()
+        return macd, signal_line
+
+    def compute_fibonacci_level(series):
+        min_price = series.min()
+        max_price = series.max()
+        current_price = series.iloc[-1]
+        return ((current_price - min_price) / (max_price - min_price)) * 100
 
 
 # Export Data Section
