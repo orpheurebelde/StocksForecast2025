@@ -45,6 +45,17 @@ def compute_fibonacci_level(series):
     current_price = series.iloc[-1]
     return ((current_price - min_price) / (max_price - min_price)) * 100
 
+# Define VIX categorization thresholds
+def categorize_vix(vix_value):
+    if vix_value < 15:
+        return "Low", "green"
+    elif 15 <= vix_value < 20:
+        return "Neutral", "yellow"
+    elif 20 <= vix_value < 30:
+        return "High", "orange"
+    else:
+        return "Very High", "red"
+
 # Function to fetch stock news from TradingView
 def fetch_tradingview_news(ticker):
     url = f"https://www.tradingview.com/symbols/{ticker}/news/"
@@ -956,9 +967,6 @@ if menu == "Monte Carlo Simulations":
 if menu == "Market Analysis | Buy Signals":
     st.title("📈 Market Analysis | Buy Signals")
 
-    import yfinance as yf
-    import pandas as pd
-
     # Define tickers
     tickers = {
         "S&P 500": "^GSPC",
@@ -971,7 +979,19 @@ if menu == "Market Analysis | Buy Signals":
         for i, (name, symbol) in enumerate(tickers.items()):
             data = yf.Ticker(symbol).history(period="1d")
             current_price = data["Close"].iloc[-1] if not data.empty else "N/A"
-            cols[i].metric(label=name, value=f"${current_price:,.2f}" if isinstance(current_price, float) else current_price)
+
+            # If it's the VIX, we need to handle it differently
+            if symbol == "^VIX":
+                vix_value = current_price
+                # Categorize the VIX and apply color
+                if isinstance(vix_value, float):
+                    category, color = categorize_vix(vix_value)
+                    cols[i].metric(label=name, value=f"{vix_value:.2f}", help=f"VIX is {category}", delta_color=color)
+                else:
+                    cols[i].metric(label=name, value=current_price)
+            else:
+                # Format the S&P 500 and Nasdaq 100 as usual
+                cols[i].metric(label=name, value=f"${current_price:,.2f}" if isinstance(current_price, float) else current_price)
 
 with st.expander("📈 Market Indicators (S&P 500 & Nasdaq 100)"):
     col1, col2 = st.columns(2)
