@@ -1092,10 +1092,6 @@ with st.expander("📈 Historical Data Plot"):
         df['Drawup'] = pd.to_numeric(df['Drawup'], errors='coerce').fillna(0)
         df['Yearly % Change'] = pd.to_numeric(df['Yearly % Change'], errors='coerce').fillna(0)
 
-        # Check if the data is numeric and print the data to debug
-        st.write("Data for debugging:")
-        st.write(df)
-
         # Create formatter dictionary for percentage formatting
         formatter_dict = {
             "Drawdown": "{:.2f}%",
@@ -1115,7 +1111,7 @@ with st.expander("📈 Historical Data Plot"):
 
         # Apply the style formatting
         try:
-            st.dataframe(df.style.format(formatter_dict), hide_index=True)
+            st.dataframe(df.style.format(formatter_dict), hide_index=True)  # Only show this table
         except Exception as e:
             st.error(f"Error during DataFrame formatting: {e}")
 
@@ -1133,7 +1129,6 @@ with st.expander("📈 Historical Data Plot"):
         ax.grid(True)
 
         st.pyplot(fig)
-
 
     # Use containers to organize expanders
     with st.container():
