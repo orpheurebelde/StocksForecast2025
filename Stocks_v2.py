@@ -994,9 +994,14 @@ with st.expander("📈 Market Indicators (S&P 500 & Nasdaq 100)"):
         # Calculate YTD % return
         ytd = ((close.iloc[-1] / start_price) - 1) * 100
 
+        # Calculate RSI, MACD, and other indicators
         rsi = compute_rsi(close)
         macd, signal = compute_macd(close)
-        fib_level = compute_fibonacci_level(close)
+
+        # Calculate Fibonacci levels for 3Y, 5Y, and 10Y ranges
+        fib_level_3y = compute_fibonacci_level(close[-252*3:])  # Last 3 years
+        fib_level_5y = compute_fibonacci_level(close[-252*5:])  # Last 5 years
+        fib_level_10y = compute_fibonacci_level(close)  # Last 10 years
 
         st.subheader(title)
         st.markdown(f"""
@@ -1012,9 +1017,9 @@ with st.expander("📈 Market Indicators (S&P 500 & Nasdaq 100)"):
         - **6M %**: {close.pct_change(126).iloc[-1]*100:.2f}%
         - **1Y %**: {close.pct_change(252).iloc[-1]*100:.2f}%
         - **5Y %**: {close.pct_change(1260).iloc[-1]*100:.2f}%
-        - **Fibonacci Level (3Y Range)**: {fib_level:.2f}%
-        - **Fibonacci Level (5Y Range)**: {fib_level:.2f}%
-        - **Fibonacci Level (10Y Range)**: {fib_level:.2f}%
+        - **Fibonacci Level (3Y Range)**: {fib_level_3y:.2f}%
+        - **Fibonacci Level (5Y Range)**: {fib_level_5y:.2f}%
+        - **Fibonacci Level (10Y Range)**: {fib_level_10y:.2f}%
         """)
 
 with col1:
