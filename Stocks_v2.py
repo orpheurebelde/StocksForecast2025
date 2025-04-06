@@ -1127,7 +1127,6 @@ with st.expander("📈 Historical Data Plot"):
 
         st.pyplot(fig)
 
-
     def get_cumulative_drawdown_drawup(ticker):
         data = yf.Ticker(ticker).history(period="10y")
         if data.empty:
@@ -1155,20 +1154,16 @@ with st.expander("📈 Historical Data Plot"):
         current_year = datetime.datetime.now().year
         current_year_data = monthly_data[monthly_data['Year'] == current_year]
         if not current_year_data.empty:
-            # Calculate cumulative drawup and drawdown for the current year
-            current_year_data['Cumulative Drawdown'] = (1 + current_year_data['Return'][current_year_data['Return'] < 0]).cumprod() - 1
-            current_year_data['Cumulative Drawup'] = (1 + current_year_data['Return'][current_year_data['Return'] > 0]).cumprod() - 1
-            
-            current_year_drawdown = current_year_data['Cumulative Drawdown'].iloc[-1] * 100
-            current_year_drawup = current_year_data['Cumulative Drawup'].iloc[-1] * 100
+            # Cumulative return for the current year (compounded monthly)
+            current_year_data['Cumulative Return'] = (1 + current_year_data['Return']).cumprod() - 1
+            current_year_performance = current_year_data['Cumulative Return'].iloc[-1] * 100
 
-            # Yearly performance for the current year
+            # Yearly performance for the current year (start of the year to current close)
             start_of_year = data[data.index.month == 1].iloc[0]['Close']  # Price at the start of the year
-            current_year_performance = (data.iloc[-1]['Close'] - start_of_year) / start_of_year * 100
+            simple_year_performance = (data.iloc[-1]['Close'] - start_of_year) / start_of_year * 100
         else:
-            current_year_drawdown = 0
-            current_year_drawup = 0
             current_year_performance = 0
+            simple_year_performance = 0
 
         # Cumulative returns for previous years
         monthly_data['Cumulative Return'] = (1 + monthly_data['Return']).cumprod() - 1
@@ -1185,8 +1180,8 @@ with st.expander("📈 Historical Data Plot"):
         # Add the current year data
         current_year_data = pd.DataFrame({
             'Year': [current_year],
-            'Drawdown': [current_year_drawdown],
-            'Drawup': [current_year_drawup]
+            'Drawdown': [current_year_data['Cumulative Return'].min() * 100],  # Cumulative drawdown for current year
+            'Drawup': [current_year_data['Cumulative Return'].max() * 100]  # Cumulative drawup for current year
         })
 
         result = pd.concat([result, current_year_data], ignore_index=True)
@@ -1194,7 +1189,7 @@ with st.expander("📈 Historical Data Plot"):
         # Calculate the yearly percent change as the sum of drawup and drawdown
         result['Yearly % Change'] = result['Drawup'] + result['Drawdown']  # drawdown is negative, so it subtracts
 
-        return result, current_year_performance
+        return result, current_year_performance, simple_year_performance
     
     # Function to calculate monthly returns and compare with historical performance
     def get_monthly_performance(ticker):
