@@ -1060,8 +1060,8 @@ if menu == "Market Analysis | Buy Signals":
             # Combine into one DataFrame
             result = pd.DataFrame({
                 'Year': drawdown.index,
-                'Drawdown': drawdown.values * 100,
-                'Drawup': drawup.reindex(drawdown.index, fill_value=0).values * 100,
+                'Drawdown': drawdown.values * 1,
+                'Drawup': drawup.reindex(drawdown.index, fill_value=0).values * 1,
             })
 
             # Calculate yearly % change: difference between drawup and drawdown
