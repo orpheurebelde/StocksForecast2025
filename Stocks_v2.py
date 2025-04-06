@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import streamlit as st
 import math
 import openai
+import datetime
 from textblob import TextBlob
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
@@ -1130,7 +1131,67 @@ with st.expander("📈 Historical Data Plot"):
 
         st.pyplot(fig)
 
-    
+    # Function to get cumulative drawdown and drawup, including current year data and yearly performance
+    def get_cumulative_drawdown_drawup(ticker):
+        data = yf.Ticker(ticker).history(period="10y")
+        if data.empty:
+            return None
+
+        # Calculate monthly returns based on first and last closing prices for the month
+        data['Month'] = data.index.month
+        data['Year'] = data.index.year
+
+        # Resample to monthly data and calculate returns (using first and last closing prices)
+        monthly_data = data.resample('M').agg({'Close': ['first', 'last']})
+
+        # Calculate the monthly return as (last - first) / first
+        monthly_data['Return'] = (monthly_data[('Close', 'last')] - monthly_data[('Close', 'first')]) / monthly_data[('Close', 'first')]
+
+        # Reset the index and flatten the column multi-index for easier access
+        monthly_data = monthly_data.reset_index()
+        monthly_data.columns = ['Date', 'First Close', 'Last Close', 'Return']
+
+        # Add 'Year' and 'Month' columns for grouping
+        monthly_data['Year'] = monthly_data['Date'].dt.year
+        monthly_data['Month'] = monthly_data['Date'].dt.month
+
+        # Calculate the current year's data separately
+        current_year = datetime.datetime.now().year
+        current_year_data = monthly_data[monthly_data['Year'] == current_year]
+        if not current_year_data.empty:
+            # Calculate cumulative drawup and drawdown for the current year
+            current_year_drawdown = current_year_data[current_year_data['Return'] < 0]['Return'].sum() * 100
+            current_year_drawup = current_year_data[current_year_data['Return'] > 0]['Return'].sum() * 100
+            # Yearly performance for the current year
+            start_of_year = data[data.index.month == 1].iloc[0]['Close']  # Price at the start of the year
+            current_year_performance = (data.iloc[-1]['Close'] - start_of_year) / start_of_year * 100
+        else:
+            current_year_drawdown = 0
+            current_year_drawup = 0
+            current_year_performance = 0
+
+        # Group by Year and classify returns as drawdown or drawup for previous years
+        drawdown = monthly_data[monthly_data['Return'] < 0].groupby('Year')['Return'].sum() * 100  # Negative returns as Drawdown
+        drawup = monthly_data[monthly_data['Return'] > 0].groupby('Year')['Return'].sum() * 100   # Positive returns as Drawup
+
+        # Combine into a single DataFrame
+        result = pd.DataFrame({
+            'Year': drawdown.index,
+            'Drawdown': drawdown.values,
+            'Drawup': drawup.reindex(drawdown.index, fill_value=0).values,
+        })
+
+        # Add the current year's drawdown, drawup, and performance to the result DataFrame
+        result = result.append({
+            'Year': current_year,
+            'Drawdown': current_year_drawdown,
+            'Drawup': current_year_drawup,
+        }, ignore_index=True)
+
+        # Calculate the yearly percent change as the sum of drawup and drawdown
+        result['Yearly % Change'] = result['Drawup'] + result['Drawdown']  # drawdown is negative, so it subtracts
+
+        return result, current_year_performance
     
     # Function to calculate monthly returns and compare with historical performance
     def get_monthly_performance(ticker):
