@@ -1083,11 +1083,11 @@ if menu == "Market Analysis | Buy Signals":
             # Display table with the index hidden (but keep 'Year' visible)
             st.subheader(title)
             st.write("Yearly Drawdown, Drawup, and % Change")
-            # Drop the first column (by position), keeping 'Year' and others
-            df_display = df.iloc[:, 1:]  # drops column 0 (assumes it's unnamed or unwanted)
+            # Ensure 'Year' is a column, not the index
+            df = df.reset_index(drop=True)
 
-            # Display table (index is hidden by default, 'Year' is preserved)
-            st.dataframe(df_display.style)
+            # Display the DataFrame with hidden row index, keeping all columns visible
+            st.dataframe(df.style.hide(axis="index"))
 
             # Plot the data
             # Convert back to float for plotting
