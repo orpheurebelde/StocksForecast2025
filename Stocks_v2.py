@@ -372,23 +372,6 @@ def train_model(data):
     # Return the model for future predictions
     return model, X_test, y_test, y_pred
 
-# Function to fetch VIX data
-def get_vix():
-    vix = yf.Ticker("^VIX")
-    vix_data = vix.history(period="1d")  # Get the latest data
-    return vix_data["Close"].iloc[-1] if not vix_data.empty else None
-
-# Function to determine VIX Indicator signal
-def vix_indicator(vix_value):
-    if vix_value is None:
-        return "No Data", "gray"
-    elif vix_value < 15:
-        return "🟢 BUY - Low Volatility (Bullish)", "green"
-    elif 15 <= vix_value <= 25:
-        return "🟡 NEUTRAL - Moderate Volatility", "yellow"
-    else:
-        return "🔴 SELL - High Volatility (Bearish)", "red"
-
 menu = st.sidebar.radio(
     "Select a Section",
     [
