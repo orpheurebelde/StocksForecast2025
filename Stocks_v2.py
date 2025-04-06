@@ -1089,12 +1089,10 @@ if menu == "Market Analysis | Buy Signals":
             else:
                 df_to_display = df.copy()
 
-            # Make sure the percentage columns are rounded and formatted as strings
-            for col in ["Drawdown", "Drawup", "% Change"]:
-                if col in df_to_display.columns:
-                    df_to_display[col] = df_to_display[col].apply(
-                        lambda x: f"{x:.2f}%" if pd.notnull(x) and isinstance(x, (int, float)) else x
-                    )
+            # Set formatting for display (but keep real values)
+            df_to_display['Drawdown'] = df['Drawdown']
+            df_to_display['Drawup'] = df['Drawup']
+            df_to_display['Yearly % Change'] = df['Yearly % Change']
 
             # Display without the index (but keeping 'Year')
             st.dataframe(df_to_display, hide_index=True)
