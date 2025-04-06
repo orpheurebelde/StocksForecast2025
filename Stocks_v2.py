@@ -973,56 +973,61 @@ if menu == "Market Analysis | Buy Signals":
             current_price = data["Close"].iloc[-1] if not data.empty else "N/A"
             cols[i].metric(label=name, value=f"${current_price:,.2f}" if isinstance(current_price, float) else current_price)
 
-    with st.expander("📈 Market Indicators (S&P 500 & Nasdaq 100)"):
-        col1, col2 = st.columns(2)
+with st.expander("📈 Market Indicators (S&P 500 & Nasdaq 100)"):
+    col1, col2 = st.columns(2)
 
-        def show_indicators(ticker, title):
-            data = yf.Ticker(ticker).history(period="10y")
-            if data.empty:
-                st.error(f"Could not fetch data for {ticker}")
-                return
+    def show_indicators(ticker, title):
+        data = yf.Ticker(ticker).history(period="10y")
+        if data.empty:
+            st.error(f"Could not fetch data for {ticker}")
+            return
 
-            close = data["Close"]
+        close = data["Close"]
 
-            # Ensure the index is a datetime index (if it's not already)
-            close.index = pd.to_datetime(close.index)
+        # Print to debug the type of the index
+        print(f"Index type: {close.index.dtype}")
+        print(f"Index: {close.index}")
 
-            # Get the start of the year as a timestamp
-            start_of_year = pd.Timestamp(f"{pd.Timestamp.now().year}-01-01")
+        # Ensure the index is a datetime index (if it's not already)
+        close.index = pd.to_datetime(close.index)
 
-            # Find the first available trading day of the year using .loc
+        # Print the index after conversion to ensure it's correct
+        print(f"Index after conversion: {close.index}")
+
+        # Get the start of the year as a timestamp
+        start_of_year = pd.Timestamp(f"{pd.Timestamp.now().year}-01-01")
+        print(f"Start of year: {start_of_year}")
+
+        # Find the first available trading day of the year using .loc
+        try:
             start_price = close.loc[close.index >= start_of_year].iloc[0] if not close.loc[close.index >= start_of_year].empty else close.iloc[0]
+        except Exception as e:
+            print(f"Error during selection: {e}")
+            start_price = close.iloc[0]
 
-            # Calculate YTD % return
-            ytd = ((close.iloc[-1] / start_price) - 1) * 100
+        # Calculate YTD % return
+        ytd = ((close.iloc[-1] / start_price) - 1) * 100
 
-            rsi = compute_rsi(close)
-            macd, signal = compute_macd(close)
-            fib_level = compute_fibonacci_level(close)
+        rsi = compute_rsi(close)
+        macd, signal = compute_macd(close)
+        fib_level = compute_fibonacci_level(close)
 
-            st.subheader(title)
-            st.markdown(f"""
-            - **52 Week High**: ${close[-252:].max():,.2f}
-            - **52 Week Low**: ${close[-252:].min():,.2f}
-            - **RSI**: {rsi:.2f}
-            - **MACD**: {macd[-1]:.2f}
-            - **MACD Signal**: {signal[-1]:.2f}
-            - **YTD %**: {ytd:.2f}%
-            - **1D %**: {close.pct_change().iloc[-1]*100:.2f}%
-            - **5D %**: {close.pct_change(5).iloc[-1]*100:.2f}%
-            - **1M %**: {close.pct_change(21).iloc[-1]*100:.2f}%
-            - **6M %**: {close.pct_change(126).iloc[-1]*100:.2f}%
-            - **1Y %**: {close.pct_change(252).iloc[-1]*100:.2f}%
-            - **5Y %**: {close.pct_change(1260).iloc[-1]*100:.2f}%
-            - **Fibonacci Level (10Y Range)**: {fib_level:.2f}%
-            """)
-
-    with col1:
-        show_indicators("^GSPC", "S&P 500 Indicators")
-
-    with col2:
-        show_indicators("^NDX", "Nasdaq 100 Indicators")
-
+        st.subheader(title)
+        st.markdown(f"""
+        - **52 Week High**: ${close[-252:].max():,.2f}
+        - **52 Week Low**: ${close[-252:].min():,.2f}
+        - **RSI**: {rsi:.2f}
+        - **MACD**: {macd[-1]:.2f}
+        - **MACD Signal**: {signal[-1]:.2f}
+        - **YTD %**: {ytd:.2f}%
+        - **1D %**: {close.pct_change().iloc[-1]*100:.2f}%
+        - **5D %**: {close.pct_change(5).iloc[-1]*100:.2f}%
+        - **1M %**: {close.pct_change(21).iloc[-1]*100:.2f}%
+        - **6M %**: {close.pct_change(126).iloc[-1]*100:.2f}%
+        - **1Y %**: {close.pct_change(252).iloc[-1]*100:.2f}%
+        - **5Y %**: {close.pct_change(1260).iloc[-1]*100:.2f}%
+        - **Fibonacci Level (10Y Range)**: {fib_level:.2f}%
+        """)
 
         with col1:
             show_indicators("^GSPC", "S&P 500 Indicators")
