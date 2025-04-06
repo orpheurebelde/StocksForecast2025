@@ -1007,7 +1007,6 @@ if menu == "Market Analysis | Buy Signals":
         rsi = 100 - (100 / (1 + rs))
         return rsi.iloc[-1]
 
-
     def compute_macd(series, fast=12, slow=26, signal=9):
         ema_fast = series.ewm(span=fast, adjust=False).mean()
         ema_slow = series.ewm(span=slow, adjust=False).mean()
