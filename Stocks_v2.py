@@ -1083,18 +1083,17 @@ with st.expander("📈 Historical Data Plot"):
         return result
 
     def display_cumulative_drawdown_drawup(ticker, title):
-        df = get_cumulative_drawdown_drawup(ticker)
-        if df is None:
+        df, current_year_performance = get_cumulative_drawdown_drawup(ticker)
+        
+        if df is None or df.empty:
             st.error(f"Could not fetch data for {ticker}")
             return
 
-        # Ensure that 'Drawdown', 'Drawup', and 'Yearly % Change' columns are numeric and handle NaN values
-        # Check and convert columns to numeric
-        for col in ['Drawdown', 'Drawup', 'Yearly % Change']:
-            if col in df.columns:
-                df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
-            else:
-                st.error(f"Column '{col}' is missing from the DataFrame.")
+        # Ensure the expected columns exist before proceeding
+        required_columns = ['Drawdown', 'Drawup', 'Yearly % Change']
+        for col in required_columns:
+            if col not in df.columns:
+                st.error(f"Column '{col}' not found in DataFrame.")
                 return
 
         # Create formatter dictionary for percentage formatting
@@ -1104,17 +1103,10 @@ with st.expander("📈 Historical Data Plot"):
             "Yearly % Change": "{:.2f}%"  # Add format for Yearly % Change
         }
 
-        # Check if the columns we want to format actually exist
-        for col in formatter_dict.keys():
-            if col not in df.columns:
-                st.error(f"Column '{col}' not found in DataFrame.")
-                return
-
         # Display the DataFrame with style applied (ensure proper formatting)
         st.subheader(title)
         st.write("Yearly Drawdown, Drawup, and % Change")
 
-        # Apply the style formatting
         try:
             st.dataframe(df.style.format(formatter_dict), hide_index=True)  # Only show this table
         except Exception as e:
@@ -1134,6 +1126,7 @@ with st.expander("📈 Historical Data Plot"):
         ax.grid(True)
 
         st.pyplot(fig)
+
 
     # In get_cumulative_drawdown_drawup function:
     def get_cumulative_drawdown_drawup(ticker):
