@@ -1074,9 +1074,9 @@ if menu == "Market Analysis | Buy Signals":
             st.write("Yearly High and Low % Change")
             st.write(df)
 
-        #Display the data in a Expander 2 columns
+    with st.expander("📈 S&P 500 Yearly High/Low % Change"):
+        # Display the data in a Expander 2 columns
         col1, col2 = st.columns(2)
-
         # Add expanders inside each column
         with col1:
             st.subheader("📈 S&P 500 Yearly High/Low % Change")
