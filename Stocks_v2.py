@@ -1243,14 +1243,14 @@ with st.expander("📈 Historical Data Plot"):
         st.write("")  # Empty line
         display_yearly_performance("^GSPC", "S&P 500 Yearly Performance")
         st.write("")  # Empty line
-        display_cumulative_drawdown_drawup("^GSPC", "S&P 500 Yearly Drawdown/Drawup %")
+        get_cumulative_drawdown_drawup("^GSPC", "S&P 500 Yearly Drawdown/Drawup %")
 
         #st.subheader("📉 Nasdaq 100 Yearly Drawdown/Drawup %")
         display_monthly_performance("^NDX", "Nasdaq 100 Monthly Performance")
         st.write("")  # Empty line
         display_yearly_performance("^NDX", "Nasdaq 100 Yearly Performance")
         st.write("")  # Empty line
-        display_cumulative_drawdown_drawup("^NDX", "Nasdaq 100 Yearly Drawdown/Drawup %")
+        get_cumulative_drawdown_drawup("^NDX", "Nasdaq 100 Yearly Drawdown/Drawup %")
 
 # Export Data Section
 if menu == "Export Data":
