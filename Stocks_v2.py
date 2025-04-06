@@ -1089,9 +1089,13 @@ with st.expander("📈 Historical Data Plot"):
             return
 
         # Ensure that 'Drawdown', 'Drawup', and 'Yearly % Change' columns are numeric and handle NaN values
-        df['Drawdown'] = pd.to_numeric(df['Drawdown'], errors='coerce').fillna(0)
-        df['Drawup'] = pd.to_numeric(df['Drawup'], errors='coerce').fillna(0)
-        df['Yearly % Change'] = pd.to_numeric(df['Yearly % Change'], errors='coerce').fillna(0)
+        # Check and convert columns to numeric
+        for col in ['Drawdown', 'Drawup', 'Yearly % Change']:
+            if col in df.columns:
+                df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
+            else:
+                st.error(f"Column '{col}' is missing from the DataFrame.")
+                return
 
         # Create formatter dictionary for percentage formatting
         formatter_dict = {
