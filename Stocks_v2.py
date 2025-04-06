@@ -45,15 +45,6 @@ def compute_fibonacci_level(series):
     current_price = series.iloc[-1]
     return ((current_price - min_price) / (max_price - min_price)) * 100
 
-# Function to compute RSI
-def compute_rsi(data, window=14):
-    delta = data["Close"].diff()
-    gain = (delta.where(delta > 0, 0)).rolling(window=window).mean()
-    loss = (-delta.where(delta < 0, 0)).rolling(window=window).mean()
-    rs = gain / loss
-    rsi = 100 - (100 / (1 + rs))
-    return rsi
-
 # Function to fetch stock news from TradingView
 def fetch_tradingview_news(ticker):
     url = f"https://www.tradingview.com/symbols/{ticker}/news/"
