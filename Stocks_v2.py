@@ -983,8 +983,8 @@ if menu == "Market Analysis | Buy Signals":
                 # Format the S&P 500 and Nasdaq 100 as usual
                 cols[i].metric(label=name, value=f"${current_price:,.2f}" if isinstance(current_price, float) else current_price)
 
-with st.expander("📈 Market Indicators (S&P 500 & Nasdaq 100)"):
-    col1, col2 = st.columns(2)
+    with st.expander("📈 Market Indicators (S&P 500 & Nasdaq 100)"):
+        col1, col2 = st.columns(2)
 
     def show_indicators(ticker, title):
         data = yf.Ticker(ticker).history(period="10y")
@@ -1038,56 +1038,58 @@ with col1:
 with col2:
     show_indicators("^NDX", "Nasdaq 100 Indicators")
 
-#Colecting Historical High and Low % for each year of SP500 and Nasdaq 100 and line chart with positive and negative values
-def get_historical_high_low(ticker):
-    data = yf.Ticker(ticker).history(period="10y")
-    if data.empty:
-        return None, None
+    with st.expander("📈 Historical Data Plot"):
 
-    # Calculate yearly high and low
-    yearly_high = data['Close'].resample('Y').max()
-    yearly_low = data['Close'].resample('Y').min()
+        #Colecting Historical High and Low % for each year of SP500 and Nasdaq 100 and line chart with positive and negative values
+        def get_historical_high_low(ticker):
+            data = yf.Ticker(ticker).history(period="10y")
+            if data.empty:
+                return None, None
 
-    # Calculate percentage change from the previous year
-    high_pct_change = yearly_high.pct_change() * 100
-    low_pct_change = yearly_low.pct_change() * 100
+            # Calculate yearly high and low
+            yearly_high = data['Close'].resample('Y').max()
+            yearly_low = data['Close'].resample('Y').min()
 
-    return high_pct_change, low_pct_change
+            # Calculate percentage change from the previous year
+            high_pct_change = yearly_high.pct_change() * 100
+            low_pct_change = yearly_low.pct_change() * 100
 
-#List the Values in a table
-def display_historical_high_low(ticker, title):
-    high_pct_change, low_pct_change = get_historical_high_low(ticker)
-    if high_pct_change is None or low_pct_change is None:
-        st.error(f"Could not fetch data for {ticker}")
-        return
-    
-#Create the Table with the values
-    st.subheader(title)
-    st.write("Yearly High and Low % Change")
-    st.write("High % Change")
-    st.write(high_pct_change)
-    st.write("Low % Change")
-    st.write(low_pct_change)
+            return high_pct_change, low_pct_change
 
-#Create the Chart with the values
-    ax.axhline(0, color='black', lw=0.5, ls='--')
-    ax.set_title(f"{ticker} Yearly High and Low % Change")
-    ax.set_xlabel("Year")
-    ax.set_ylabel("% Change")
-    ax.legend()
-    st.pyplot(fig)
+        #List the Values in a table
+        def display_historical_high_low(ticker, title):
+            high_pct_change, low_pct_change = get_historical_high_low(ticker)
+            if high_pct_change is None or low_pct_change is None:
+                st.error(f"Could not fetch data for {ticker}")
+                return
+            
+        #Create the Table with the values
+            st.subheader(title)
+            st.write("Yearly High and Low % Change")
+            st.write("High % Change")
+            st.write(high_pct_change)
+            st.write("Low % Change")
+            st.write(low_pct_change)
+
+        #Create the Chart with the values
+            ax.axhline(0, color='black', lw=0.5, ls='--')
+            ax.set_title(f"{ticker} Yearly High and Low % Change")
+            ax.set_xlabel("Year")
+            ax.set_ylabel("% Change")
+            ax.legend()
+            st.pyplot(fig)
 
 
-    # Create a DataFrame for display
-    df = pd.DataFrame({
-        'Year': high_pct_change.index.year,
-        'High % Change': high_pct_change.values,
-        'Low % Change': low_pct_change.values
-    })
+            # Create a DataFrame for display
+            df = pd.DataFrame({
+                'Year': high_pct_change.index.year,
+                'High % Change': high_pct_change.values,
+                'Low % Change': low_pct_change.values
+            })
 
-    # Display the DataFrame as a table
-    st.subheader(title)
-    st.write(df)
+            # Display the DataFrame as a table
+            st.subheader(title)
+            st.write(df)
 
 # Export Data Section
 if menu == "Export Data":
