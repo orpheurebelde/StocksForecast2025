@@ -1128,7 +1128,6 @@ with st.expander("📈 Historical Data Plot"):
         st.pyplot(fig)
 
 
-    # In get_cumulative_drawdown_drawup function:
     def get_cumulative_drawdown_drawup(ticker):
         data = yf.Ticker(ticker).history(period="10y")
         if data.empty:
@@ -1157,8 +1156,12 @@ with st.expander("📈 Historical Data Plot"):
         current_year_data = monthly_data[monthly_data['Year'] == current_year]
         if not current_year_data.empty:
             # Calculate cumulative drawup and drawdown for the current year
-            current_year_drawdown = current_year_data[current_year_data['Return'] < 0]['Return'].sum() * 100
-            current_year_drawup = current_year_data[current_year_data['Return'] > 0]['Return'].sum() * 100
+            current_year_data['Cumulative Drawdown'] = (1 + current_year_data['Return'][current_year_data['Return'] < 0]).cumprod() - 1
+            current_year_data['Cumulative Drawup'] = (1 + current_year_data['Return'][current_year_data['Return'] > 0]).cumprod() - 1
+            
+            current_year_drawdown = current_year_data['Cumulative Drawdown'].iloc[-1] * 100
+            current_year_drawup = current_year_data['Cumulative Drawup'].iloc[-1] * 100
+
             # Yearly performance for the current year
             start_of_year = data[data.index.month == 1].iloc[0]['Close']  # Price at the start of the year
             current_year_performance = (data.iloc[-1]['Close'] - start_of_year) / start_of_year * 100
@@ -1167,9 +1170,10 @@ with st.expander("📈 Historical Data Plot"):
             current_year_drawup = 0
             current_year_performance = 0
 
-        # Group by Year and classify returns as drawdown or drawup for previous years
-        drawdown = monthly_data[monthly_data['Return'] < 0].groupby('Year')['Return'].sum() * 100  # Negative returns as Drawdown
-        drawup = monthly_data[monthly_data['Return'] > 0].groupby('Year')['Return'].sum() * 100   # Positive returns as Drawup
+        # Cumulative returns for previous years
+        monthly_data['Cumulative Return'] = (1 + monthly_data['Return']).cumprod() - 1
+        drawdown = monthly_data[monthly_data['Return'] < 0].groupby('Year')['Cumulative Return'].last() * 100
+        drawup = monthly_data[monthly_data['Return'] > 0].groupby('Year')['Cumulative Return'].last() * 100
 
         # Combine into a single DataFrame
         result = pd.DataFrame({
@@ -1178,7 +1182,7 @@ with st.expander("📈 Historical Data Plot"):
             'Drawup': drawup.reindex(drawdown.index, fill_value=0).values,
         })
 
-        # Use pd.concat instead of append to add the current year
+        # Add the current year data
         current_year_data = pd.DataFrame({
             'Year': [current_year],
             'Drawdown': [current_year_drawdown],
