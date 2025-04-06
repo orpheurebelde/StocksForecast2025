@@ -1233,9 +1233,16 @@ with st.expander("📈 Historical Data Plot"):
 
     # Function to display the yearly performance and compare it to historical data
     def display_yearly_performance(ticker, title):
-        df, current_year_performance = get_cumulative_drawdown_drawup(ticker)
-        if df is None:
+        df, current_year_performance, simple_year_performance = get_cumulative_drawdown_drawup(ticker)
+        
+        # Check if the data is None or empty
+        if df is None or df.empty:
             st.error(f"Could not fetch data for {ticker}")
+            return
+
+        # Check if current year performance is None
+        if current_year_performance is None:
+            st.error(f"Could not calculate current year performance for {ticker}")
             return
 
         # Get the highest and lowest yearly performance from the historical data
@@ -1257,7 +1264,7 @@ with st.expander("📈 Historical Data Plot"):
         # Display the highest and lowest performance in the last 10 years
         st.write(f"**Highest Performance in Last 10 Years**: {highest_year_performance:.2f}%")
         st.write(f"**Lowest Performance in Last 10 Years**: {lowest_year_performance:.2f}%")
-    
+
     # Function to display current month performance and compare it with historical data
     def display_monthly_performance(ticker, title):
         performance, category, max_performance, min_performance = get_monthly_performance(ticker)
