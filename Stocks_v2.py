@@ -963,16 +963,16 @@ if menu == "Market Analysis | Buy Signals":
         "VIX": "^VIX"
     }
 
+    # Display current market prices
     with st.expander("📊 Current Market Prices", expanded=True):
-        cols = st.columns(3)
+        cols = st.columns(len(tickers))
         for i, (name, symbol) in enumerate(tickers.items()):
             data = yf.Ticker(symbol).history(period="1d")
             current_price = data["Close"].iloc[-1] if not data.empty else "N/A"
 
-            # If it's the VIX, handle it differently
+            # Handle VIX differently
             if symbol == "^VIX":
                 vix_value = current_price
-                # Categorize the VIX and apply color
                 if isinstance(vix_value, float):
                     category, color = vix_indicator(vix_value)
                     cols[i].write(f"**{name}**: {vix_value:.2f} - {category}", unsafe_allow_html=True)
@@ -980,116 +980,101 @@ if menu == "Market Analysis | Buy Signals":
                 else:
                     cols[i].write(f"**{name}**: {current_price}")
             else:
-                # Format the S&P 500 and Nasdaq 100 as usual
+                # Format S&P 500 and Nasdaq 100
                 cols[i].metric(label=name, value=f"${current_price:,.2f}" if isinstance(current_price, float) else current_price)
 
+    # Display market indicators
     with st.expander("📈 Market Indicators (S&P 500 & Nasdaq 100)"):
         col1, col2 = st.columns(2)
 
-    def show_indicators(ticker, title):
-        data = yf.Ticker(ticker).history(period="10y")
-        if data.empty:
-            st.error(f"Could not fetch data for {ticker}")
-            return
+        def show_indicators(ticker, title):
+            data = yf.Ticker(ticker).history(period="10y")
+            if data.empty:
+                st.error(f"Could not fetch data for {ticker}")
+                return
 
-        close = data["Close"]
+            close = data["Close"]
 
-        # Find the first available trading day of the year using .loc
-        try:
-            start_price = close.loc[close.index >= start_of_year].iloc[0] if not close.loc[close.index >= start_of_year].empty else close.iloc[0]
-        except Exception as e:
-            print(f"Error during selection: {e}")
-            start_price = close.iloc[0]
+            # Find the first available trading day of the year
+            try:
+                start_of_year = pd.Timestamp.now().replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
+                start_price = close.loc[close.index >= start_of_year].iloc[0] if not close.loc[close.index >= start_of_year].empty else close.iloc[0]
+            except Exception as e:
+                st.error(f"Error during selection: {e}")
+                start_price = close.iloc[0]
 
-        # Calculate YTD % return
-        ytd = ((close.iloc[-1] / start_price) - 1) * 100
+            # Calculate YTD % return
+            ytd = ((close.iloc[-1] / start_price) - 1) * 100
 
-        # Calculate RSI, MACD, and other indicators
-        rsi = compute_rsi(close)
-        macd, signal = compute_macd(close)
+            # Calculate RSI, MACD, and Fibonacci levels
+            rsi = compute_rsi(close)
+            macd, signal = compute_macd(close)
+            fib_level_3y = compute_fibonacci_level(close[-252*3:])  # Last 3 years
+            fib_level_5y = compute_fibonacci_level(close[-252*5:])  # Last 5 years
+            fib_level_10y = compute_fibonacci_level(close)  # Last 10 years
 
-        # Calculate Fibonacci levels for 3Y, 5Y, and 10Y ranges
-        fib_level_3y = compute_fibonacci_level(close[-252*3:])  # Last 3 years
-        fib_level_5y = compute_fibonacci_level(close[-252*5:])  # Last 5 years
-        fib_level_10y = compute_fibonacci_level(close)  # Last 10 years
+            st.subheader(title)
+            st.markdown(f"""
+            - **52 Week High**: ${close[-252:].max():,.2f}
+            - **52 Week Low**: ${close[-252:].min():,.2f}
+            - **RSI**: {rsi:.2f}
+            - **MACD**: {macd.iloc[-1]:.2f}
+            - **MACD Signal**: {signal.iloc[-1]:.2f}
+            - **YTD %**: {ytd:.2f}%
+            - **1D %**: {close.pct_change().iloc[-1]*100:.2f}%
+            - **5D %**: {close.pct_change(5).iloc[-1]*100:.2f}%
+            - **1M %**: {close.pct_change(21).iloc[-1]*100:.2f}%
+            - **6M %**: {close.pct_change(126).iloc[-1]*100:.2f}%
+            - **1Y %**: {close.pct_change(252).iloc[-1]*100:.2f}%
+            - **5Y %**: {close.pct_change(1260).iloc[-1]*100:.2f}%
+            - **Fibonacci Level (3Y Range)**: {fib_level_3y:.2f}%
+            - **Fibonacci Level (5Y Range)**: {fib_level_5y:.2f}%
+            - **Fibonacci Level (10Y Range)**: {fib_level_10y:.2f}%
+            """)
 
-        st.subheader(title)
-        st.markdown(f"""
-        - **52 Week High**: ${close[-252:].max():,.2f}
-        - **52 Week Low**: ${close[-252:].min():,.2f}
-        - **RSI**: {rsi:.2f}
-        - **MACD**: {macd[-1]:.2f}
-        - **MACD Signal**: {signal[-1]:.2f}
-        - **YTD %**: {ytd:.2f}%
-        - **1D %**: {close.pct_change().iloc[-1]*100:.2f}%
-        - **5D %**: {close.pct_change(5).iloc[-1]*100:.2f}%
-        - **1M %**: {close.pct_change(21).iloc[-1]*100:.2f}%
-        - **6M %**: {close.pct_change(126).iloc[-1]*100:.2f}%
-        - **1Y %**: {close.pct_change(252).iloc[-1]*100:.2f}%
-        - **5Y %**: {close.pct_change(1260).iloc[-1]*100:.2f}%
-        - **Fibonacci Level (3Y Range)**: {fib_level_3y:.2f}%
-        - **Fibonacci Level (5Y Range)**: {fib_level_5y:.2f}%
-        - **Fibonacci Level (10Y Range)**: {fib_level_10y:.2f}%
-        """)
+        with col1:
+            show_indicators("^GSPC", "S&P 500 Indicators")
 
-with col1:
-    show_indicators("^GSPC", "S&P 500 Indicators")
+        with col2:
+            show_indicators("^NDX", "Nasdaq 100 Indicators")
 
-with col2:
-    show_indicators("^NDX", "Nasdaq 100 Indicators")
+    # Historical data plot
+    with st.expander("📈 Historical Data Plot"):
+        def get_historical_high_low(ticker):
+            data = yf.Ticker(ticker).history(period="10y")
+            if data.empty:
+                return None, None
 
-with st.expander("📈 Historical Data Plot"):
+            # Calculate yearly high and low
+            yearly_high = data['Close'].resample('Y').max()
+            yearly_low = data['Close'].resample('Y').min()
 
-    #Colecting Historical High and Low % for each year of SP500 and Nasdaq 100 and line chart with positive and negative values
-    def get_historical_high_low(ticker):
-        data = yf.Ticker(ticker).history(period="10y")
-        if data.empty:
-            return None, None
+            # Calculate percentage change from the previous year
+            high_pct_change = yearly_high.pct_change() * 100
+            low_pct_change = yearly_low.pct_change() * 100
 
-        # Calculate yearly high and low
-        yearly_high = data['Close'].resample('Y').max()
-        yearly_low = data['Close'].resample('Y').min()
+            return high_pct_change, low_pct_change
 
-        # Calculate percentage change from the previous year
-        high_pct_change = yearly_high.pct_change() * 100
-        low_pct_change = yearly_low.pct_change() * 100
+        def display_historical_high_low(ticker, title):
+            high_pct_change, low_pct_change = get_historical_high_low(ticker)
+            if high_pct_change is None or low_pct_change is None:
+                st.error(f"Could not fetch data for {ticker}")
+                return
 
-        return high_pct_change, low_pct_change
+            # Create a DataFrame for display
+            df = pd.DataFrame({
+                'Year': high_pct_change.index.year,
+                'High % Change': high_pct_change.values,
+                'Low % Change': low_pct_change.values
+            })
 
-    #List the Values in a table
-    def display_historical_high_low(ticker, title):
-        high_pct_change, low_pct_change = get_historical_high_low(ticker)
-        if high_pct_change is None or low_pct_change is None:
-            st.error(f"Could not fetch data for {ticker}")
-            return
-        
-    #Create the Table with the values
-        st.subheader(title)
-        st.write("Yearly High and Low % Change")
-        st.write("High % Change")
-        st.write(high_pct_change)
-        st.write("Low % Change")
-        st.write(low_pct_change)
+            # Display the DataFrame as a table
+            st.subheader(title)
+            st.write("Yearly High and Low % Change")
+            st.write(df)
 
-    #Create the Chart with the values
-        ax.axhline(0, color='black', lw=0.5, ls='--')
-        ax.set_title(f"{ticker} Yearly High and Low % Change")
-        ax.set_xlabel("Year")
-        ax.set_ylabel("% Change")
-        ax.legend()
-        st.pyplot(fig)
-
-
-        # Create a DataFrame for display
-        df = pd.DataFrame({
-            'Year': high_pct_change.index.year,
-            'High % Change': high_pct_change.values,
-            'Low % Change': low_pct_change.values
-        })
-
-        # Display the DataFrame as a table
-        st.subheader(title)
-        st.write(df)
+        display_historical_high_low("^GSPC", "S&P 500 Yearly High/Low % Change")
+        display_historical_high_low("^NDX", "Nasdaq 100 Yearly High/Low % Change")
 
 # Export Data Section
 if menu == "Export Data":
