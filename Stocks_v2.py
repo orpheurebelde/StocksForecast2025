@@ -372,6 +372,12 @@ def train_model(data):
     # Return the model for future predictions
     return model, X_test, y_test, y_pred
 
+# Function to fetch VIX data
+def get_vix():
+    vix = yf.Ticker("^VIX")
+    vix_data = vix.history(period="1d")  # Get the latest data
+    return vix_data["Close"].iloc[-1] if not vix_data.empty else None
+
 menu = st.sidebar.radio(
     "Select a Section",
     [
