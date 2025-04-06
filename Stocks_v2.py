@@ -1083,7 +1083,7 @@ if menu == "Market Analysis | Buy Signals":
             # Display table with the index hidden (but keep 'Year' visible)
             st.subheader(title)
             st.write("Yearly Drawdown, Drawup, and % Change")
-            st.dataframe(df.style.hide(axis='index'))
+            st.table(df.style.hide(axis='index'))
 
             # Plot the data
             # Convert back to float for plotting
