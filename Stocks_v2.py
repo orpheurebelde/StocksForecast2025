@@ -48,13 +48,13 @@ def compute_fibonacci_level(series):
 # Define VIX categorization thresholds
 def categorize_vix(vix_value):
     if vix_value < 15:
-        return "Low", "green"
+        return "Low", "normal"  # You can keep 'normal' here or use the corresponding status
     elif 15 <= vix_value < 20:
-        return "Neutral", "yellow"
+        return "Neutral", "normal"
     elif 20 <= vix_value < 30:
-        return "High", "orange"
+        return "High", "increase"  # Assuming increase color for high
     else:
-        return "Very High", "red"
+        return "Very High", "decrease"  # Decrease color for very high
 
 # Function to fetch stock news from TradingView
 def fetch_tradingview_news(ticker):
@@ -985,8 +985,8 @@ if menu == "Market Analysis | Buy Signals":
                 vix_value = current_price
                 # Categorize the VIX and apply color
                 if isinstance(vix_value, float):
-                    category, color = categorize_vix(vix_value)
-                    cols[i].metric(label=name, value=f"{vix_value:.2f}", help=f"VIX is {category}", delta_color=color)
+                    category, delta_color = categorize_vix(vix_value)
+                    cols[i].metric(label=name, value=f"{vix_value:.2f}", help=f"VIX is {category}", delta_color=delta_color)
                 else:
                     cols[i].metric(label=name, value=current_price)
             else:
