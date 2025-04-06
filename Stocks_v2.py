@@ -372,11 +372,11 @@ def vix_indicator(vix_value):
     if vix_value is None:
         return "No Data", "gray"
     elif vix_value < 15:
-        return "🟢 BUY - Low Volatility (Bullish)", "green"
+        return "🟢 BUY", "green"
     elif 15 <= vix_value <= 25:
-        return "🟡 NEUTRAL - Moderate Volatility", "yellow"
+        return "🟡 NEUTRAL", "yellow"
     else:
-        return "🔴 SELL - High Volatility (Bearish)", "red"
+        return "🔴 SELL", "red"
 
 menu = st.sidebar.radio(
     "Select a Section",
