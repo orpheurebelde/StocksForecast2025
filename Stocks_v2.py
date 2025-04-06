@@ -997,7 +997,8 @@ if menu == "Market Analysis | Buy Signals":
 
             # Find the first available trading day of the year
             try:
-                start_of_year = pd.Timestamp.now().replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
+                # Ensure start_of_year is timezone-aware and matches the timezone of close.index
+                start_of_year = pd.Timestamp.now(tz=close.index.tz).replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
                 start_price = close.loc[close.index >= start_of_year].iloc[0] if not close.loc[close.index >= start_of_year].empty else close.iloc[0]
             except Exception as e:
                 st.error(f"Error during selection: {e}")
