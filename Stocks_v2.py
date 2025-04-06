@@ -372,7 +372,7 @@ menu = st.sidebar.radio(
         "Export Data",
         "Sector Map",
         "Refined Strategy (RSI with Trend)",
-        "Market Analysis | Buy Signals"  # ✅ New menu item
+        "Market Analysis | Buy Signals"
     ]
 )
 
