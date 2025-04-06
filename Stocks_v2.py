@@ -1061,7 +1061,7 @@ if menu == "Market Analysis | Buy Signals":
             result = pd.DataFrame({
                 'Year': drawdown.index,
                 'Drawdown': drawdown.values * 100,
-                'Drawup': drawup.reindex(drawdown.index, fill_value=0).values * 100,
+                'Drawup': drawup.reindex(drawdown.index, fill_value=0).values * 1,
             })
 
             # Calculate yearly % change: difference between drawup and drawdown
@@ -1083,7 +1083,7 @@ if menu == "Market Analysis | Buy Signals":
             # Display table with the index hidden (but keep 'Year' visible)
             st.subheader(title)
             st.write("Yearly Drawdown, Drawup, and % Change")
-            st.dataframe(df.style.hide(axis=['columns'[0]]))  # Hide the index column
+            st.dataframe(df.style.hide(axis='index'))
 
             # Plot the data
             # Convert back to float for plotting
