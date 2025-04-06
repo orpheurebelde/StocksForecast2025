@@ -1039,72 +1039,85 @@ if menu == "Market Analysis | Buy Signals":
         with col2:
             show_indicators("^NDX", "Nasdaq 100 Indicators")
 
-    import yfinance as yf
-import streamlit as st
-import pandas as pd
-import matplotlib.pyplot as plt
+    # Historical data plot
+    with st.expander("📈 Historical Data Plot"):
 
-# Historical data plot
-with st.expander("📈 Historical Data Plot"):
+        def get_cumulative_drawdown_drawup(ticker):
+            data = yf.Ticker(ticker).history(period="10y")
+            if data.empty:
+                return None, None
 
-    def get_historical_high_low(ticker):
-        data = yf.Ticker(ticker).history(period="10y")
-        if data.empty:
-            return None, None
+            # Calculate daily returns
+            data['Daily Return'] = data['Close'].pct_change()
 
-        # Calculate yearly high and low
-        yearly_high = data['Close'].resample('Y').max()
-        yearly_low = data['Close'].resample('Y').min()
+            # Cumulative returns
+            data['Cumulative Return'] = (1 + data['Daily Return']).cumprod() - 1
 
-        # Calculate percentage change from the previous year
-        high_pct_change = yearly_high.pct_change() * 100
-        low_pct_change = yearly_low.pct_change() * 100
+            # Calculate drawdowns
+            data['Drawdown'] = (data['Cumulative Return'] - data['Cumulative Return'].cummax())
+            
+            # Calculate drawups (inverse of drawdown)
+            data['Drawup'] = (data['Cumulative Return'] - data['Cumulative Return'].cummin())
 
-        return high_pct_change, low_pct_change
+            # Resample yearly data (calculate yearly high and low)
+            yearly_drawdown = data['Drawdown'].resample('Y').min()
+            yearly_drawup = data['Drawup'].resample('Y').max()
 
-    def display_historical_high_low(ticker, title):
-        high_pct_change, low_pct_change = get_historical_high_low(ticker)
-        if high_pct_change is None or low_pct_change is None:
-            st.error(f"Could not fetch data for {ticker}")
-            return
+            # Convert to percentage
+            yearly_drawdown_pct = yearly_drawdown * 100
+            yearly_drawup_pct = yearly_drawup * 100
 
-        # Create a DataFrame for display
-        df = pd.DataFrame({
-            'Year': high_pct_change.index.year,
-            'High % Change': high_pct_change.values,
-            'Low % Change': low_pct_change.values
-        })
+            return yearly_drawdown_pct, yearly_drawup_pct
 
-        # Display the DataFrame as a table
-        st.subheader(title)
-        st.write("Yearly High and Low % Change")
-        st.write(df)
+        def display_cumulative_drawdown_drawup(ticker, title):
+            drawdown_pct, drawup_pct = get_cumulative_drawdown_drawup(ticker)
+            if drawdown_pct is None or drawup_pct is None:
+                st.error(f"Could not fetch data for {ticker}")
+                return
 
-        # Plot the data
-        fig, ax = plt.subplots(figsize=(10, 6))
+            # Create a DataFrame for display
+            df = pd.DataFrame({
+                'Year': drawdown_pct.index.year,
+                'Drawdown %': drawdown_pct.values,
+                'Drawup %': drawup_pct.values
+            })
 
-        ax.plot(df['Year'], df['High % Change'], label='High % Change', color='green', marker='o')
-        ax.plot(df['Year'], df['Low % Change'], label='Low % Change', color='red', marker='o')
+            # Format the table as percentages with two decimals
+            df['Drawdown %'] = df['Drawdown %'].apply(lambda x: f"{x:.2f}%")
+            df['Drawup %'] = df['Drawup %'].apply(lambda x: f"{x:.2f}%")
 
-        # Add labels and title
-        ax.set_xlabel('Year')
-        ax.set_ylabel('% Change')
-        ax.set_title(f'{title} - Yearly High/Low % Change')
+            # Display the DataFrame as a table without the index column
+            st.subheader(title)
+            st.write("Yearly Drawdown and Drawup (%)")
+            st.write(df.drop(columns=['Year']))  # Hides the index column
 
-        # Add grid and legend
-        ax.grid(True)
-        ax.legend()
+            # Plot the data
+            fig, ax = plt.subplots(figsize=(10, 6))
 
-        # Display the plot
-        st.pyplot(fig)
+            # Plot both drawdown and drawup
+            ax.plot(df['Year'], df['Drawdown %'].apply(lambda x: float(x[:-1])), label='Drawdown %', color='red', marker='o')
+            ax.plot(df['Year'], df['Drawup %'].apply(lambda x: float(x[:-1])), label='Drawup %', color='green', marker='o')
 
-# Use containers to organize expanders
-with st.container():
-    with st.expander("📈 S&P 500 Yearly High/Low % Change"):
-        display_historical_high_low("^GSPC", "S&P 500 Yearly High/Low % Change")
+            # Add labels and title
+            ax.set_xlabel('Year')
+            ax.set_ylabel('%')
+            ax.set_title(f'{title} - Yearly Drawdown and Drawup (%)')
 
-    with st.expander("📈 Nasdaq 100 Yearly High/Low % Change"):
-        display_historical_high_low("^NDX", "Nasdaq 100 Yearly High/Low % Change")
+            # Add grid and legend
+            ax.grid(True)
+            ax.legend()
+
+            # Display the plot
+            st.pyplot(fig)
+
+    # Use containers to organize expanders
+    with st.container():
+        with st.expander("📈 S&P 500 Yearly Drawdown/Drawup %"):
+            display_cumulative_drawdown_drawup("^GSPC", "S&P 500 Yearly Drawdown/Drawup %")
+
+        with st.expander("📈 Nasdaq 100 Yearly Drawdown/Drawup %"):
+            display_cumulative_drawdown_drawup("^NDX", "Nasdaq 100 Yearly Drawdown/Drawup %")
+
 
 # Export Data Section
 if menu == "Export Data":
