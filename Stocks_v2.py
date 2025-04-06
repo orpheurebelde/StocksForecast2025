@@ -984,20 +984,6 @@ with st.expander("📈 Market Indicators (S&P 500 & Nasdaq 100)"):
 
         close = data["Close"]
 
-        # Print to debug the type of the index
-        print(f"Index type: {close.index.dtype}")
-        print(f"Index: {close.index}")
-
-        # Ensure the index is a datetime index (if it's not already)
-        close.index = pd.to_datetime(close.index)
-
-        # Print the index after conversion to ensure it's correct
-        print(f"Index after conversion: {close.index}")
-
-        # Get the start of the year as a timestamp
-        start_of_year = pd.Timestamp(f"{pd.Timestamp.now().year}-01-01")
-        print(f"Start of year: {start_of_year}")
-
         # Find the first available trading day of the year using .loc
         try:
             start_price = close.loc[close.index >= start_of_year].iloc[0] if not close.loc[close.index >= start_of_year].empty else close.iloc[0]
@@ -1026,6 +1012,8 @@ with st.expander("📈 Market Indicators (S&P 500 & Nasdaq 100)"):
         - **6M %**: {close.pct_change(126).iloc[-1]*100:.2f}%
         - **1Y %**: {close.pct_change(252).iloc[-1]*100:.2f}%
         - **5Y %**: {close.pct_change(1260).iloc[-1]*100:.2f}%
+        - **Fibonacci Level (3Y Range)**: {fib_level:.2f}%
+        - **Fibonacci Level (5Y Range)**: {fib_level:.2f}%
         - **Fibonacci Level (10Y Range)**: {fib_level:.2f}%
         """)
 
