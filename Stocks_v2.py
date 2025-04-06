@@ -1083,22 +1083,21 @@ if menu == "Market Analysis | Buy Signals":
             # Display table with the index hidden (but keep 'Year' visible)
             st.subheader(title)
             st.write("Yearly Drawdown, Drawup, and % Change")
-            # Detect and remove the unnamed column by position if it exists
-            if df.columns[0] == "":
-                df_to_display = df.drop(df.columns[0], axis=1)
+            # Safely remove the first column if it has no name or is unnamed
+            if df.columns[0] == "" or "Unnamed" in df.columns[0]:
+                df_to_display = df.drop(columns=df.columns[0])
             else:
-                df_to_display = df
+                df_to_display = df.copy()
 
-            # Format columns with percentage values
-            formatter_dict = {
-                "Drawdown": "{:.2f}%",
-                "Drawup": "{:.2f}%",
-                "% Change": "{:.2f}%"
-            }
+            # Make sure the percentage columns are rounded and formatted as strings
+            for col in ["Drawdown", "Drawup", "% Change"]:
+                if col in df_to_display.columns:
+                    df_to_display[col] = df_to_display[col].apply(
+                        lambda x: f"{x:.2f}%" if pd.notnull(x) and isinstance(x, (int, float)) else x
+                    )
 
-            # Display in Streamlit with formatting and index hidden
-            st.dataframe(df_to_display.style.format(formatter_dict).hide(axis="index"))
-
+            # Display without the index (but keeping 'Year')
+            st.dataframe(df_to_display, hide_index=True)
 
             # Plot the data
             # Convert back to float for plotting
