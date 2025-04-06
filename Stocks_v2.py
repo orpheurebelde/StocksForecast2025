@@ -1087,6 +1087,11 @@ with st.expander("📈 Historical Data Plot"):
             st.error(f"Could not fetch data for {ticker}")
             return
 
+        # Ensure that the 'Drawdown', 'Drawup', and 'Yearly % Change' columns are numeric
+        df['Drawdown'] = pd.to_numeric(df['Drawdown'], errors='coerce').fillna(0)
+        df['Drawup'] = pd.to_numeric(df['Drawup'], errors='coerce').fillna(0)
+        df['Yearly % Change'] = pd.to_numeric(df['Yearly % Change'], errors='coerce').fillna(0)
+
         # Format values as percentages with 2 decimal places
         df['Drawdown'] = df['Drawdown'].map(lambda x: f"{x:.2f}%")
         df['Drawup'] = df['Drawup'].map(lambda x: f"{x:.2f}%")
