@@ -255,66 +255,6 @@ def analyze_fundamentals(ticker):
         st.error(f"Error analyzing fundamentals: {e}")
         return None
     
-    
-
-def dcf_valuation(ticker, years=10, manual_growth=None, manual_terminal_growth=None):
-    try:
-        # Fetch stock data
-        stock = yf.Ticker(ticker)
-        info = stock.info
-
-        # Get EPS: Prefer Forward EPS but fallback to Trailing EPS
-        eps = stock.info.get("forwardEps", stock.info.get("trailingEps", 0))
-
-        # Get shares outstanding
-        shares_outstanding = info.get("sharesOutstanding", 1)
-
-        # Get Cash Flow Statement
-        cashflow_df = stock.cashflow
-
-        # Extract FCF components safely
-        try:
-            operating_cash_flow = cashflow_df.loc["Total Cash From Operating Activities"].iloc[0]
-            capital_expenditures = cashflow_df.loc["Capital Expenditures"].iloc[0]
-            fcf = operating_cash_flow - capital_expenditures
-        except (KeyError, IndexError):
-            fcf = None  # Set to None if missing
-
-        # Use last known FCF instead of EPS if missing
-        if fcf is None:
-            fcf = eps * shares_outstanding  # Approximate using EPS
-
-        # Convert to FCF per share
-        fcf_per_share = fcf / shares_outstanding
-
-        # Get analyst growth estimate or allow manual input
-        analyst_growth = info.get("earningsGrowth", 0.10)  # Default to 10% if missing
-        growth_rate = manual_growth if manual_growth else analyst_growth
-
-        # Use default terminal growth rate if not provided manually
-        terminal_growth = manual_terminal_growth if manual_terminal_growth else 0.04
-
-        # Set Discount Rate (WACC approximation), default to 8%
-        discount_rate = info.get("costOfCapital", 0.08)  # Default to 8% if missing
-
-        # Calculate future cash flows
-        future_cash_flows = [fcf_per_share * (1 + growth_rate) ** i for i in range(1, years + 1)]
-        
-        # Discount future cash flows to present value
-        dcf_value = sum([cf / (1 + discount_rate) ** i for i, cf in enumerate(future_cash_flows, 1)])
-
-        # Add Terminal Value (TV) using the Gordon Growth Model
-        terminal_value = (future_cash_flows[-1] * (1 + terminal_growth)) / (discount_rate - terminal_growth)
-        terminal_value_discounted = terminal_value / ((1 + discount_rate) ** years)
-        
-        # Final DCF Value per share
-        intrinsic_value = (dcf_value + terminal_value_discounted)
-
-        return round(intrinsic_value, 2)
-
-    except Exception as e:
-        st.error(f"❌ Error calculating DCF for {ticker}: {e}")
-        return None  # Return None instead of crashing
 
 # Monte Carlo Simulation
 def monte_carlo_simulation(data, n_simulations=1000, n_days=252, log_normal=False, volatility=None):
@@ -565,9 +505,6 @@ if menu == "Stock Info":
     else:
         st.warning("Stock information not found.")
 
-        # Calculate DCF Value
-    dcf_value = dcf_valuation(ticker)
-
     with st.expander("Stock Overview", expanded=True):
         col1, col2, col3 = st.columns(3)
 
@@ -598,7 +535,6 @@ if menu == "Stock Info":
                 forward_pe = safe_float(info.get('forwardPE', None))
                 totaldebt = safe_float(info.get('totalDebt', None))
                 totalcash = safe_float(info.get('totalCash', None))
-                dcf_value = safe_float(info.get('dcf', None))
 
                 # Ensure info is a dictionary
                 if isinstance(info, dict):
@@ -667,8 +603,6 @@ if menu == "Stock Info":
                 st.metric(label="📈 Total Debt", value=f"${totaldebt / 1e9:.2f}B" if isinstance(totaldebt, (int, float)) else "N/A")
                 st.metric(label="📈 Total Cash", value=f"${totalcash / 1e9:.2f}B" if isinstance(totalcash, (int, float)) else "N/A")
 
-                # Display DCF Valuation
-                st.metric(label="📉 DCF Valuation", value=f"${dcf_value:,.2f}" if isinstance(dcf_value, (int, float)) else "N/A")
             else:
                 # Handle the case where info is None
                 st.write("Error: 'info' object is not properly initialized or is None.")
