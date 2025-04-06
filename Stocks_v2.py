@@ -45,17 +45,6 @@ def compute_fibonacci_level(series):
     current_price = series.iloc[-1]
     return ((current_price - min_price) / (max_price - min_price)) * 100
 
-# Define VIX categorization thresholds
-def categorize_vix(vix_value):
-    if vix_value < 15:
-        return "Low", "normal"  # You can keep 'normal' here or use the corresponding status
-    elif 15 <= vix_value < 20:
-        return "Neutral", "normal"
-    elif 20 <= vix_value < 30:
-        return "High", "increase"  # Assuming increase color for high
-    else:
-        return "Very High", "decrease"  # Decrease color for very high
-
 # Function to fetch stock news from TradingView
 def fetch_tradingview_news(ticker):
     url = f"https://www.tradingview.com/symbols/{ticker}/news/"
@@ -377,6 +366,17 @@ def get_vix():
     vix = yf.Ticker("^VIX")
     vix_data = vix.history(period="1d")  # Get the latest data
     return vix_data["Close"].iloc[-1] if not vix_data.empty else None
+
+# Function to determine VIX Indicator signal
+def vix_indicator(vix_value):
+    if vix_value is None:
+        return "No Data", "gray"
+    elif vix_value < 15:
+        return "🟢 BUY - Low Volatility (Bullish)", "green"
+    elif 15 <= vix_value <= 25:
+        return "🟡 NEUTRAL - Moderate Volatility", "yellow"
+    else:
+        return "🔴 SELL - High Volatility (Bearish)", "red"
 
 menu = st.sidebar.radio(
     "Select a Section",
