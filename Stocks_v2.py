@@ -1039,74 +1039,74 @@ if menu == "Market Analysis | Buy Signals":
         with col2:
             show_indicators("^NDX", "Nasdaq 100 Indicators")
 
-    with st.expander("📈 Historical Data Plot"):
+with st.expander("📈 Historical Data Plot"):
 
-        def get_cumulative_drawdown_drawup(ticker):
-            data = yf.Ticker(ticker).history(period="10y")
-            if data.empty:
-                return None
+    def get_cumulative_drawdown_drawup(ticker):
+        data = yf.Ticker(ticker).history(period="10y")
+        if data.empty:
+            return None
 
-            data['Daily Return'] = data['Close'].pct_change()
-            data['Year'] = data.index.year
+        data['Daily Return'] = data['Close'].pct_change()
+        data['Year'] = data.index.year
 
-            # Group all returns by year
-            yearly_returns = data.groupby('Year')['Daily Return']
+        # Group all returns by year
+        yearly_returns = data.groupby('Year')['Daily Return']
 
-            # Calculate sum of negative and positive returns per year
-            yearly_drawdown = yearly_returns.apply(lambda x: x[x < 0].sum() * 100)
-            yearly_drawup = yearly_returns.apply(lambda x: x[x > 0].sum() * 100)
+        # Calculate sum of negative and positive returns per year
+        yearly_drawdown = yearly_returns.apply(lambda x: x[x < 0].sum() * 100)
+        yearly_drawup = yearly_returns.apply(lambda x: x[x > 0].sum() * 100)
 
-            # Combine into a DataFrame
-            result = pd.DataFrame({
-                'Year': yearly_returns.groups.keys(),
-                'Drawdown': yearly_drawdown.values,
-                'Drawup': yearly_drawup.values
-            })
+        # Combine into a DataFrame
+        result = pd.DataFrame({
+            'Year': yearly_returns.groups.keys(),
+            'Drawdown': yearly_drawdown.values,
+            'Drawup': yearly_drawup.values
+        })
 
-            # Calculate Yearly % Change (can also use total return if needed)
-            result['Yearly % Change'] = result['Drawup'] + result['Drawdown']  # since drawdown is negative
+        # Calculate Yearly % Change (can also use total return if needed)
+        result['Yearly % Change'] = result['Drawup'] + result['Drawdown']  # since drawdown is negative
 
-            return result
+        return result
 
-        def display_cumulative_drawdown_drawup(ticker, title):
-            df = get_cumulative_drawdown_drawup(ticker)
-            if df is None:
-                st.error(f"Could not fetch data for {ticker}")
-                return
+    def display_cumulative_drawdown_drawup(ticker, title):
+        df = get_cumulative_drawdown_drawup(ticker)
+        if df is None:
+            st.error(f"Could not fetch data for {ticker}")
+            return
 
-            st.subheader(title)
-            st.write("Yearly Drawdown, Drawup, and % Change")
+        st.subheader(title)
+        st.write("Yearly Drawdown, Drawup, and % Change")
 
-            # Display table with styled formatting (values still float)
-            formatter_dict = {
-                "Drawdown": "{:.2f}%",
-                "Drawup": "{:.2f}%",
-                "Yearly % Change": "{:.2f}%"
-            }
-            st.dataframe(df.style.format(formatter_dict), hide_index=True)
+        # Display table with styled formatting (values still float)
+        formatter_dict = {
+            "Drawdown": "{:.2f}%",
+            "Drawup": "{:.2f}%",
+            "Yearly % Change": "{:.2f}%"
+        }
+        st.dataframe(df.style.format(formatter_dict), hide_index=True)
 
-            # Plotting
-            fig, ax = plt.subplots(figsize=(10, 6))
-            ax.bar(df['Year'], df['Drawup'], label='Drawup', color='green')
-            ax.bar(df['Year'], df['Drawdown'], label='Drawdown', color='red')
-            ax.plot(df['Year'], df['Yearly % Change'], label='Yearly % Change', color='blue', marker='o')
+        # Plotting
+        fig, ax = plt.subplots(figsize=(10, 6))
+        ax.bar(df['Year'], df['Drawup'], label='Drawup', color='green')
+        ax.bar(df['Year'], df['Drawdown'], label='Drawdown', color='red')
+        ax.plot(df['Year'], df['Yearly % Change'], label='Yearly % Change', color='blue', marker='o')
 
-            ax.set_title(f"{title} - Yearly Drawup, Drawdown, and % Change")
-            ax.set_ylabel('Percentage (%)')
-            ax.set_xlabel('Year')
-            ax.axhline(0, color='black', linewidth=0.5)
-            ax.legend()
-            ax.grid(True)
+        ax.set_title(f"{title} - Yearly Drawup, Drawdown, and % Change")
+        ax.set_ylabel('Percentage (%)')
+        ax.set_xlabel('Year')
+        ax.axhline(0, color='black', linewidth=0.5)
+        ax.legend()
+        ax.grid(True)
 
-            st.pyplot(fig)
+        st.pyplot(fig)
 
-        # Use containers to organize expanders
-        with st.container():
-            with st.expander("📉 S&P 500 Yearly Drawdown/Drawup %"):
-                display_cumulative_drawdown_drawup("^GSPC", "S&P 500 Yearly Drawdown/Drawup %")
+    # Use containers to organize expanders
+    with st.container():
+        with st.expander("📉 S&P 500 Yearly Drawdown/Drawup %"):
+            display_cumulative_drawdown_drawup("^GSPC", "S&P 500 Yearly Drawdown/Drawup %")
 
-            with st.expander("📉 Nasdaq 100 Yearly Drawdown/Drawup %"):
-                display_cumulative_drawdown_drawup("^NDX", "Nasdaq 100 Yearly Drawdown/Drawup %")
+        with st.expander("📉 Nasdaq 100 Yearly Drawdown/Drawup %"):
+            display_cumulative_drawdown_drawup("^NDX", "Nasdaq 100 Yearly Drawdown/Drawup %")
 
 # Export Data Section
 if menu == "Export Data":
