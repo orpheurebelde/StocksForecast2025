@@ -1079,7 +1079,7 @@ if menu == "Market Analysis | Buy Signals":
             # Display the DataFrame as a table without the first column (index column)
             st.subheader(title)
             st.write("Yearly Drawdown and Drawup (%)")
-            st.write(yearly_data.style.hide(axis="index"))  # Hide the index column
+            #st.write(yearly_data.style.hide(axis="index"))  # Hide the index column
 
             # Plot the data
             fig, ax = plt.subplots(figsize=(10, 6))
