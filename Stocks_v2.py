@@ -1188,7 +1188,7 @@ with st.expander("📈 Historical Data Plot"):
 
     # Function to display the yearly performance and compare it to historical data
     def display_yearly_performance(ticker, title):
-        df, current_year_performance, simple_year_performance = get_cumulative_drawdown_drawup(ticker)
+        df, current_year_performance = get_cumulative_drawdown_drawup(ticker)
         
         # Check if the data is None or empty
         if df is None or df.empty:
