@@ -1083,7 +1083,7 @@ with st.expander("📈 Historical Data Plot"):
         return result
 
     def display_cumulative_drawdown_drawup(ticker, title):
-        df, current_year_performance = get_cumulative_drawdown_drawup(ticker)
+        df, current_year_performance, simple_year_performance = get_cumulative_drawdown_drawup(ticker)
         
         if df is None or df.empty:
             st.error(f"Could not fetch data for {ticker}")
