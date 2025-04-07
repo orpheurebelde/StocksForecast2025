@@ -1088,7 +1088,7 @@ with st.expander("📈 Historical Data Plot"):
 
         st.pyplot(fig)
 
-    # Function to get cumulative drawdown and drawup, including current year data and yearly performance
+    # In get_cumulative_drawdown_drawup function:
     def get_cumulative_drawdown_drawup(ticker):
         data = yf.Ticker(ticker).history(period="10y")
         if data.empty:
@@ -1138,17 +1138,20 @@ with st.expander("📈 Historical Data Plot"):
             'Drawup': drawup.reindex(drawdown.index, fill_value=0).values,
         })
 
-        # Add the current year's drawdown, drawup, and performance to the result DataFrame
-        result = result.append({
-            'Year': current_year,
-            'Drawdown': current_year_drawdown,
-            'Drawup': current_year_drawup,
-        }, ignore_index=True)
+        # Use pd.concat instead of append to add the current year
+        current_year_data = pd.DataFrame({
+            'Year': [current_year],
+            'Drawdown': [current_year_drawdown],
+            'Drawup': [current_year_drawup]
+        })
+
+        result = pd.concat([result, current_year_data], ignore_index=True)
 
         # Calculate the yearly percent change as the sum of drawup and drawdown
         result['Yearly % Change'] = result['Drawup'] + result['Drawdown']  # drawdown is negative, so it subtracts
 
         return result, current_year_performance
+
     
     # Function to calculate monthly returns and compare with historical performance
     def get_monthly_performance(ticker):
