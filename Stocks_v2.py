@@ -1089,48 +1089,61 @@ with st.expander("📈 Historical Data Plot"):
         st.pyplot(fig)
 
     def get_cumulative_drawdown_drawup(ticker):
-        # Fetch the data from Yahoo Finance
         data = yf.Ticker(ticker).history(period="10y")
         if data.empty:
-            return None, None  # Return None if no data
+            return None, None, None
 
-        # Resample data monthly and calculate monthly returns
-        data['Month'] = data.index.month
+        # Resample to yearly data (taking first and last price for the year)
         data['Year'] = data.index.year
+        yearly_data = data.resample('Y').agg({'Close': ['first', 'last']})
 
-        # Group data by year to get first and last close of each year
-        yearly_data = data.groupby('Year').agg({'Close': ['first', 'last']})
+        # Calculate the yearly return as (last - first) / first
+        yearly_data['Yearly Return'] = (yearly_data[('Close', 'last')] - yearly_data[('Close', 'first')]) / yearly_data[('Close', 'first')] * 100
 
-        # Calculate the yearly performance: (last - first) / first
-        yearly_data['Yearly % Change'] = (yearly_data[('Close', 'last')] - yearly_data[('Close', 'first')]) / yearly_data[('Close', 'first')] * 100
+        # Reset the index and flatten the column multi-index for easier access
+        yearly_data = yearly_data.reset_index()
+        yearly_data.columns = ['Date', 'First Close', 'Last Close', 'Yearly Return']
 
-        # Calculate the drawdown and drawup for each year
-        # Drawdown is the negative return, Drawup is the positive return
-        drawdown = yearly_data[yearly_data['Yearly % Change'] < 0]['Yearly % Change'].sum()  # Negative returns are drawdown
-        drawup = yearly_data[yearly_data['Yearly % Change'] > 0]['Yearly % Change'].sum()    # Positive returns are drawup
+        # Add 'Year' column
+        yearly_data['Year'] = yearly_data['Date'].dt.year
 
-        # Current year performance calculation
+        # Calculate the current year's data separately
         current_year = datetime.datetime.now().year
-        start_of_year = data[data.index.month == 1].iloc[0]['Close']  # First closing price of the year
-        current_year_data = data[data.index.year == current_year]
-
+        current_year_data = yearly_data[yearly_data['Year'] == current_year]
         if not current_year_data.empty:
+            # Yearly performance for the current year
+            start_of_year = data[data.index.month == 1].iloc[0]['Close']  # Price at the start of the year
             current_year_performance = (data.iloc[-1]['Close'] - start_of_year) / start_of_year * 100
         else:
             current_year_performance = 0
 
-        # Combine historical yearly performance with current year
-        result = yearly_data[['Yearly % Change']].reset_index()
+        # Group by Year and classify returns as drawdown or drawup for previous years
+        drawdown = yearly_data[yearly_data['Yearly Return'] < 0].groupby('Year')['Yearly Return'].sum()  # Negative returns as Drawdown
+        drawup = yearly_data[yearly_data['Yearly Return'] > 0].groupby('Year')['Yearly Return'].sum()   # Positive returns as Drawup
 
-        # Add the Drawdown and Drawup into the result DataFrame
-        result['Drawdown'] = drawdown
-        result['Drawup'] = drawup
+        # Combine into a single DataFrame
+        result = pd.DataFrame({
+            'Year': drawdown.index,
+            'Drawdown': drawdown.values,
+            'Drawup': drawup.reindex(drawdown.index, fill_value=0).values,
+        })
 
-        # Return both the result (historical yearly data) and the current year performance
+        # Use pd.concat instead of append to add the current year
+        current_year_data = pd.DataFrame({
+            'Year': [current_year],
+            'Drawdown': [0],  # No drawdown or drawup for current year yet
+            'Drawup': [0]  # We don't have full data yet
+        })
+
+        result = pd.concat([result, current_year_data], ignore_index=True)
+
+        # Recalculate yearly percentage change as the difference between last and first prices
+        result['Yearly % Change'] = result['Drawup'] + result['Drawdown']  # Note: Drawdown is negative, so it subtracts
+
+        # Make sure highest performance is capped at 100%
+        result['Yearly % Change'] = result['Yearly % Change'].apply(lambda x: min(x, 100))  # Capping at 100%
+
         return result, current_year_performance
-
-
-
     
     # Function to calculate monthly returns and compare with historical performance
     def get_monthly_performance(ticker):
