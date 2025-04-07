@@ -1153,7 +1153,7 @@ with st.expander("📈 Historical Data Plot"):
 
     # Display monthly performance with the highest and lowest historical performance comparison
     def display_monthly_performance(ticker, title):
-        performance, category, max_performance, min_performance = get_monthly_performance(ticker)
+        performance, category, max_performance, min_performance = get_cumulative_drawdown_drawup(ticker)
         
         if performance is None:
             st.error(f"Could not fetch data for {ticker}")
