@@ -1155,8 +1155,13 @@ with st.expander("📈 Historical Data Plot"):
         # Concatenate the drawdown and drawup data for other years
         result = pd.concat([result, drawdown_data], ignore_index=True)
 
-        # Return the final DataFrame and current year performance
-        return result, current_year_performance
+        # Now return the necessary values
+        performance = result  # The entire result DataFrame will be returned as performance
+        category = None  # Assuming 'category' is not yet defined; modify as necessary
+        max_performance = result['Yearly % Change'].max()  # Maximum yearly % change
+        min_performance = result['Yearly % Change'].min()  # Minimum yearly % change
+
+        return performance, category, max_performance, min_performance
 
 
 
