@@ -1160,14 +1160,15 @@ with st.expander("📈 Historical Data Plot"):
         category = None  # Assuming 'category' is not yet defined; modify as necessary
         max_performance = result['Yearly % Change'].max()  # Maximum yearly % change
         min_performance = result['Yearly % Change'].min()  # Minimum yearly % change
+        recent_performance = performance['Yearly % Change'].iloc[-1]
 
-        return performance, category, max_performance, min_performance
+        return performance, category, max_performance, min_performance, recent_performance
 
 
 
     # Display monthly performance with the highest and lowest historical performance comparison
     def display_monthly_performance(ticker, title):
-        performance, category, max_performance, min_performance = get_cumulative_drawdown_drawup(ticker)
+        performance, category, max_performance, min_performance, recent_performance = get_cumulative_drawdown_drawup(ticker)
         
         if performance is None:
             st.error(f"Could not fetch data for {ticker}")
@@ -1181,7 +1182,7 @@ with st.expander("📈 Historical Data Plot"):
             st.markdown(f"**Current Month Loss**: {performance * 100:.2f}% - **Worst Performance** (Lowest) of the last 10 years!", unsafe_allow_html=True)
             st.markdown('<span style="color:red;">🔽 Lowest Loss</span>', unsafe_allow_html=True)
         else:
-            st.markdown(f"**Current Month Performance**: {performance * 100:.2f}% - Within Historical Range", unsafe_allow_html=True)
+            st.markdown(f"**Current Month Performance**: {recent_performance * 100:.2f}% - Within Historical Range", unsafe_allow_html=True)
             st.markdown('<span style="color:gray;">⏺ Neutral</span>', unsafe_allow_html=True)
 
         st.write(f"**Highest Performance**: {max_performance * 100:.2f}%")
