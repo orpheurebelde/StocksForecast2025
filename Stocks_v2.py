@@ -1089,6 +1089,7 @@ with st.expander("📈 Historical Data Plot"):
         st.pyplot(fig)
 
     def get_cumulative_drawdown_drawup(ticker):
+        # Fetch the data from Yahoo Finance
         data = yf.Ticker(ticker).history(period="10y")
         if data.empty:
             return None, None  # Return None if no data
@@ -1103,13 +1104,17 @@ with st.expander("📈 Historical Data Plot"):
         # Calculate the yearly performance: (last - first) / first
         yearly_data['Yearly % Change'] = (yearly_data[('Close', 'last')] - yearly_data[('Close', 'first')]) / yearly_data[('Close', 'first')] * 100
 
-        # Extract the current year's performance based on data for this year
+        # Calculate the drawdown and drawup for each year
+        # Drawdown is the negative return, Drawup is the positive return
+        drawdown = yearly_data[yearly_data['Yearly % Change'] < 0]['Yearly % Change'].sum()  # Negative returns are drawdown
+        drawup = yearly_data[yearly_data['Yearly % Change'] > 0]['Yearly % Change'].sum()    # Positive returns are drawup
+
+        # Current year performance calculation
         current_year = datetime.datetime.now().year
         start_of_year = data[data.index.month == 1].iloc[0]['Close']  # First closing price of the year
         current_year_data = data[data.index.year == current_year]
 
         if not current_year_data.empty:
-            # Current year performance as the percentage change from start of the year to today
             current_year_performance = (data.iloc[-1]['Close'] - start_of_year) / start_of_year * 100
         else:
             current_year_performance = 0
@@ -1117,8 +1122,13 @@ with st.expander("📈 Historical Data Plot"):
         # Combine historical yearly performance with current year
         result = yearly_data[['Yearly % Change']].reset_index()
 
+        # Add the Drawdown and Drawup into the result DataFrame
+        result['Drawdown'] = drawdown
+        result['Drawup'] = drawup
+
         # Return both the result (historical yearly data) and the current year performance
         return result, current_year_performance
+
 
 
     
