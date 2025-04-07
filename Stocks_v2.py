@@ -521,7 +521,7 @@ if menu == "Stock Info":
         profit_margin = info.get('profitMargins', 'N/A')
         institutional_ownership = info.get('heldPercentInstitutions', 'N/A')
         insider_ownership = info.get('heldPercentInsiders', 'N/A')
-        trailingeps = info.get('trailingEps', 'N/A')
+        trailingeps = info.get('epsCurrentYear', 'N/A')
         forwardeps = info.get('forwardEps', 'N/A')
         revenue = info.get('totalRevenue', 'N/A')
         totaldebt = info.get('totalDebt', 'N/A')
