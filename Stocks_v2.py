@@ -1150,6 +1150,7 @@ with st.expander("📈 Historical Data Plot"):
         # Return the final DataFrame and current year performance
         return result, current_year_performance
 
+
     # Display monthly performance with the highest and lowest historical performance comparison
     def display_monthly_performance(ticker, title):
         performance, category, max_performance, min_performance = get_monthly_performance(ticker)
