@@ -1042,7 +1042,8 @@ if menu == "Market Analysis | Buy Signals":
 
 # Historical data plot
 with st.expander("📈 Historical Data Plot"):
-
+    
+    # Modify your existing function to include monthly and yearly performance
     def display_cumulative_drawdown_drawup(ticker, title):
         df, current_year_performance = get_cumulative_drawdown_drawup(ticker)
         
@@ -1057,19 +1058,18 @@ with st.expander("📈 Historical Data Plot"):
                 st.error(f"Column '{col}' not found in DataFrame.")
                 return
 
-        # Create formatter dictionary for percentage formatting
+        # Display the DataFrame with the correct formatting
         formatter_dict = {
             "Drawdown": "{:.2f}%",
             "Drawup": "{:.2f}%",
-            "Yearly % Change": "{:.2f}%"  # Add format for Yearly % Change
+            "Yearly % Change": "{:.2f}%" 
         }
 
-        # Display the DataFrame with style applied (ensure proper formatting)
         st.subheader(title)
         st.write("Yearly Drawdown, Drawup, and % Change")
 
         try:
-            st.dataframe(df.style.format(formatter_dict), hide_index=True)  # Only show this table
+            st.dataframe(df.style.format(formatter_dict), hide_index=True)
         except Exception as e:
             st.error(f"Error during DataFrame formatting: {e}")
 
@@ -1088,46 +1088,29 @@ with st.expander("📈 Historical Data Plot"):
 
         st.pyplot(fig)
 
-    # In get_cumulative_drawdown_drawup function:
+    # Update the function that fetches historical data
     def get_cumulative_drawdown_drawup(ticker):
         data = yf.Ticker(ticker).history(period="10y")
         if data.empty:
-            return None
+            return None, None
 
-        # Calculate monthly returns based on first and last closing prices for the month
+        # Calculate monthly returns
         data['Month'] = data.index.month
         data['Year'] = data.index.year
 
-        # Resample to monthly data and calculate returns (using first and last closing prices)
+        # Resample to monthly data and calculate returns
         monthly_data = data.resample('M').agg({'Close': ['first', 'last']})
-
-        # Calculate the monthly return as (last - first) / first
         monthly_data['Return'] = (monthly_data[('Close', 'last')] - monthly_data[('Close', 'first')]) / monthly_data[('Close', 'first')]
 
-        # Reset the index and flatten the column multi-index for easier access
+        # Reset the index and flatten the column multi-index
         monthly_data = monthly_data.reset_index()
         monthly_data.columns = ['Date', 'First Close', 'Last Close', 'Return']
-
-        # Add 'Year' and 'Month' columns for grouping
+        
+        # Add Year and Month columns for grouping
         monthly_data['Year'] = monthly_data['Date'].dt.year
         monthly_data['Month'] = monthly_data['Date'].dt.month
 
-        # Calculate the current year's data separately
-        current_year = datetime.datetime.now().year
-        current_year_data = monthly_data[monthly_data['Year'] == current_year]
-        if not current_year_data.empty:
-            # Calculate cumulative drawup and drawdown for the current year
-            current_year_drawdown = current_year_data[current_year_data['Return'] < 0]['Return'].sum() * 100
-            current_year_drawup = current_year_data[current_year_data['Return'] > 0]['Return'].sum() * 100
-            # Yearly performance for the current year
-            start_of_year = data[data.index.month == 1].iloc[0]['Close']  # Price at the start of the year
-            current_year_performance = (data.iloc[-1]['Close'] - start_of_year) / start_of_year * 100
-        else:
-            current_year_drawdown = 0
-            current_year_drawup = 0
-            current_year_performance = 0
-
-        # Group by Year and classify returns as drawdown or drawup for previous years
+        # Calculate cumulative drawdown and drawup for each year
         drawdown = monthly_data[monthly_data['Return'] < 0].groupby('Year')['Return'].sum() * 100  # Negative returns as Drawdown
         drawup = monthly_data[monthly_data['Return'] > 0].groupby('Year')['Return'].sum() * 100   # Positive returns as Drawup
 
@@ -1138,80 +1121,66 @@ with st.expander("📈 Historical Data Plot"):
             'Drawup': drawup.reindex(drawdown.index, fill_value=0).values,
         })
 
-        # Use pd.concat instead of append to add the current year
+        # Calculate yearly performance
+        result['Yearly % Change'] = result['Drawup'] + result['Drawdown']  # drawdown is negative, so it subtracts
+
+        # Calculate current year data
+        current_year = datetime.datetime.now().year
+        current_year_data = monthly_data[monthly_data['Year'] == current_year]
+        if not current_year_data.empty:
+            start_of_year = data[data.index.month == 1].iloc[0]['Close']
+            current_year_performance = (data.iloc[-1]['Close'] - start_of_year) / start_of_year * 100
+            current_year_drawdown = current_year_data[current_year_data['Return'] < 0]['Return'].sum() * 100
+            current_year_drawup = current_year_data[current_year_data['Return'] > 0]['Return'].sum() * 100
+        else:
+            current_year_drawdown = 0
+            current_year_drawup = 0
+            current_year_performance = 0
+
+        # Adding current year data to the result DataFrame
         current_year_data = pd.DataFrame({
             'Year': [current_year],
             'Drawdown': [current_year_drawdown],
-            'Drawup': [current_year_drawup]
+            'Drawup': [current_year_drawup],
         })
 
         result = pd.concat([result, current_year_data], ignore_index=True)
 
-        # Calculate the yearly percent change as the sum of drawup and drawdown
-        result['Yearly % Change'] = result['Drawup'] + result['Drawdown']  # drawdown is negative, so it subtracts
-
         return result, current_year_performance
 
-    
-    # Function to calculate monthly returns and compare with historical performance
-    def get_monthly_performance(ticker):
-        data = yf.Ticker(ticker).history(period="10y")
-        if data.empty:
-            return None
+    # Display monthly performance with the highest and lowest historical performance comparison
+    def display_monthly_performance(ticker, title):
+        performance, category, max_performance, min_performance = get_monthly_performance(ticker)
+        
+        if performance is None:
+            st.error(f"Could not fetch data for {ticker}")
+            return
 
-        # Calculate monthly returns based on first and last closing prices for the month
-        data['Month'] = data.index.month
-        data['Year'] = data.index.year
-
-        # Resample to monthly data and calculate returns (using first and last closing prices)
-        monthly_data = data.resample('M').agg({'Close': ['first', 'last']})
-
-        # Calculate the monthly return as (last - first) / first
-        monthly_data['Return'] = (monthly_data[('Close', 'last')] - monthly_data[('Close', 'first')]) / monthly_data[('Close', 'first')]
-
-        # Reset the index and flatten the column multi-index for easier access
-        monthly_data = monthly_data.reset_index()
-        monthly_data.columns = ['Date', 'First Close', 'Last Close', 'Return']
-
-        # Get the last month performance
-        last_month_data = monthly_data.iloc[-1]
-
-        # Compare the current month performance with the highest and lowest historical performance
-        max_performance = monthly_data['Return'].max()
-        min_performance = monthly_data['Return'].min()
-
-        # Get the current month's return
-        current_month_performance = last_month_data['Return']
-
-        # Determine the category based on comparison
-        if current_month_performance == max_performance:
-            category = "green"  # Highest value
-        elif current_month_performance == min_performance:
-            category = "red"    # Lowest value
+        st.subheader(f"{title} ({ticker})")
+        if category == "green":
+            st.markdown(f"**Current Month Gain**: {performance * 100:.2f}% - **Best Performance** (Highest) of the last 10 years!", unsafe_allow_html=True)
+            st.markdown('<span style="color:green;">🔼 Highest Gain</span>', unsafe_allow_html=True)
+        elif category == "red":
+            st.markdown(f"**Current Month Loss**: {performance * 100:.2f}% - **Worst Performance** (Lowest) of the last 10 years!", unsafe_allow_html=True)
+            st.markdown('<span style="color:red;">🔽 Lowest Loss</span>', unsafe_allow_html=True)
         else:
-            category = "neutral"  # Not the highest or lowest
+            st.markdown(f"**Current Month Performance**: {performance * 100:.2f}% - Within Historical Range", unsafe_allow_html=True)
+            st.markdown('<span style="color:gray;">⏺ Neutral</span>', unsafe_allow_html=True)
 
-        return current_month_performance, category, max_performance, min_performance
+        st.write(f"**Highest Performance**: {max_performance * 100:.2f}%")
+        st.write(f"**Lowest Performance**: {min_performance * 100:.2f}%")
 
-    # Function to display the yearly performance and compare it to historical data
+    # Display the historical performance for a ticker
     def display_yearly_performance(ticker, title):
         df, current_year_performance = get_cumulative_drawdown_drawup(ticker)
         
-        # Check if the data is None or empty
         if df is None or df.empty:
             st.error(f"Could not fetch data for {ticker}")
             return
 
-        # Check if current year performance is None
-        if current_year_performance is None:
-            st.error(f"Could not calculate current year performance for {ticker}")
-            return
-
-        # Get the highest and lowest yearly performance from the historical data
         highest_year_performance = df['Yearly % Change'].max()
         lowest_year_performance = df['Yearly % Change'].min()
 
-        # Display the results with color coding
         st.subheader(f"{title} - Yearly Performance")
         if current_year_performance == highest_year_performance:
             st.markdown(f"**Current Year Performance**: {current_year_performance:.2f}% - **Best Performance** of the last 10 years!", unsafe_allow_html=True)
@@ -1223,49 +1192,22 @@ with st.expander("📈 Historical Data Plot"):
             st.markdown(f"**Current Year Performance**: {current_year_performance:.2f}% - Within Historical Range", unsafe_allow_html=True)
             st.markdown('<span style="color:gray;">⏺ Neutral</span>', unsafe_allow_html=True)
 
-        # Display the highest and lowest performance in the last 10 years
         st.write(f"**Highest Performance in Last 10 Years**: {highest_year_performance:.2f}%")
         st.write(f"**Lowest Performance in Last 10 Years**: {lowest_year_performance:.2f}%")
 
-    # Function to display current month performance and compare it with historical data
-    def display_monthly_performance(ticker, title):
-        performance, category, max_performance, min_performance = get_monthly_performance(ticker)
-        if performance is None:
-            st.error(f"Could not fetch data for {ticker}")
-            return
-
-        # Display result under the subheader
-        st.subheader(f"{title} ({ticker})")
-        
-        # Categorize the result color
-        if category == "green":
-            st.markdown(f"**Current Month Gain**: {performance * 100:.2f}% - **Best Performance** (Highest) of the last 10 years!", unsafe_allow_html=True)
-            st.markdown('<span style="color:green;">🔼 Highest Gain</span>', unsafe_allow_html=True)
-        elif category == "red":
-            st.markdown(f"**Current Month Loss**: {performance * 100:.2f}% - **Worst Performance** (Lowest) of the last 10 years!", unsafe_allow_html=True)
-            st.markdown('<span style="color:red;">🔽 Lowest Loss</span>', unsafe_allow_html=True)
-        else:
-            st.markdown(f"**Current Month Performance**: {performance * 100:.2f}% - Within Historical Range", unsafe_allow_html=True)
-            st.markdown('<span style="color:gray;">⏺ Neutral</span>', unsafe_allow_html=True)
-
-        # Display the historical performance comparison
-        st.write(f"**Highest Performance**: {max_performance * 100:.2f}%")
-        st.write(f"**Lowest Performance**: {min_performance * 100:.2f}%")
-
-    # Use containers to organize expanders
+    # Example of usage in Streamlit
     with st.container():
-        #st.subheader("📉 S&P 500 Yearly Drawdown/Drawup %")
         display_monthly_performance("^GSPC", "S&P 500 Monthly Performance")
-        st.write("")  # Empty line
+        st.write("")  
         display_yearly_performance("^GSPC", "S&P 500 Yearly Performance")
-        st.write("")  # Empty line
+        st.write("")  
         display_cumulative_drawdown_drawup("^GSPC", "S&P 500 Yearly Drawdown/Drawup %")
-
-        #st.subheader("📉 Nasdaq 100 Yearly Drawdown/Drawup %")
+        
+        st.write("")  
         display_monthly_performance("^NDX", "Nasdaq 100 Monthly Performance")
-        st.write("")  # Empty line
+        st.write("")  
         display_yearly_performance("^NDX", "Nasdaq 100 Yearly Performance")
-        st.write("")  # Empty line
+        st.write("")  
         display_cumulative_drawdown_drawup("^NDX", "Nasdaq 100 Yearly Drawdown/Drawup %")
 
 # Export Data Section
