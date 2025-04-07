@@ -1088,7 +1088,6 @@ with st.expander("📈 Historical Data Plot"):
 
         st.pyplot(fig)
 
-    # Update the function that fetches historical data
     def get_cumulative_drawdown_drawup(ticker):
         data = yf.Ticker(ticker).history(period="10y")
         if data.empty:
@@ -1134,7 +1133,7 @@ with st.expander("📈 Historical Data Plot"):
             'Yearly % Change': [current_year_drawup + current_year_drawdown]  # Ensure the correct calculation
         })
 
-        # Append the current year data to the result
+        # Concatenate the current year data to the result DataFrame
         result = pd.concat([result, current_year_data], ignore_index=True)
 
         # Combine the drawdown and drawup for each year into the result DataFrame
@@ -1145,12 +1144,11 @@ with st.expander("📈 Historical Data Plot"):
             'Yearly % Change': drawup + drawdown  # Correctly combine the values
         })
 
-        # Append the drawdown and drawup data for other years
+        # Concatenate the drawdown and drawup data for other years
         result = pd.concat([result, drawdown_data], ignore_index=True)
 
         # Return the final DataFrame and current year performance
         return result, current_year_performance
-
 
     # Display monthly performance with the highest and lowest historical performance comparison
     def display_monthly_performance(ticker, title):
