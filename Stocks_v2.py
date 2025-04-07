@@ -1042,7 +1042,7 @@ if menu == "Market Analysis | Buy Signals":
 
 # Historical data plot
 with st.expander("📈 Historical Data Plot"):
-    
+
     # Modify your existing function to include monthly and yearly performance
     def display_cumulative_drawdown_drawup(ticker, title):
         df, current_year_performance = get_cumulative_drawdown_drawup(ticker)
@@ -1106,23 +1106,12 @@ with st.expander("📈 Historical Data Plot"):
         monthly_data = monthly_data.reset_index()
         monthly_data.columns = ['Date', 'First Close', 'Last Close', 'Return']
         
-        # Add Year and Month columns for grouping
-        monthly_data['Year'] = monthly_data['Date'].dt.year
-        monthly_data['Month'] = monthly_data['Date'].dt.month
-
         # Calculate cumulative drawdown and drawup for each year
         drawdown = monthly_data[monthly_data['Return'] < 0].groupby('Year')['Return'].sum() * 100  # Negative returns as Drawdown
         drawup = monthly_data[monthly_data['Return'] > 0].groupby('Year')['Return'].sum() * 100   # Positive returns as Drawup
 
-        # Combine into a single DataFrame
-        result = pd.DataFrame({
-            'Year': drawdown.index,
-            'Drawdown': drawdown.values,
-            'Drawup': drawup.reindex(drawdown.index, fill_value=0).values,
-        })
-
-        # Calculate yearly performance
-        result['Yearly % Change'] = result['Drawup'] + result['Drawdown']  # drawdown is negative, so it subtracts
+        # Create an empty DataFrame to store results
+        result = pd.DataFrame(columns=['Year', 'Drawdown', 'Drawup', 'Yearly % Change'])
 
         # Calculate current year data
         current_year = datetime.datetime.now().year
@@ -1137,16 +1126,31 @@ with st.expander("📈 Historical Data Plot"):
             current_year_drawup = 0
             current_year_performance = 0
 
-        # Adding current year data to the result DataFrame
+        # Add the data for the current year to the result DataFrame
         current_year_data = pd.DataFrame({
             'Year': [current_year],
             'Drawdown': [current_year_drawdown],
             'Drawup': [current_year_drawup],
+            'Yearly % Change': [current_year_drawup + current_year_drawdown]  # Ensure the correct calculation
         })
 
+        # Append the current year data to the result
         result = pd.concat([result, current_year_data], ignore_index=True)
 
+        # Combine the drawdown and drawup for each year into the result DataFrame
+        drawdown_data = pd.DataFrame({
+            'Year': drawdown.index,
+            'Drawdown': drawdown.values,
+            'Drawup': drawup.values,
+            'Yearly % Change': drawup + drawdown  # Correctly combine the values
+        })
+
+        # Append the drawdown and drawup data for other years
+        result = pd.concat([result, drawdown_data], ignore_index=True)
+
+        # Return the final DataFrame and current year performance
         return result, current_year_performance
+
 
     # Display monthly performance with the highest and lowest historical performance comparison
     def display_monthly_performance(ticker, title):
