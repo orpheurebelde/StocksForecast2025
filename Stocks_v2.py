@@ -1091,7 +1091,7 @@ with st.expander("📈 Historical Data Plot"):
     def get_cumulative_drawdown_drawup(ticker):
         data = yf.Ticker(ticker).history(period="10y")
         if data.empty:
-            return None, None
+            return None, None, None, None  # Return None if the data is empty
 
         # Calculate monthly returns
         data['Month'] = data.index.month
@@ -1104,7 +1104,15 @@ with st.expander("📈 Historical Data Plot"):
         # Reset the index and flatten the column multi-index
         monthly_data = monthly_data.reset_index()
         monthly_data.columns = ['Date', 'First Close', 'Last Close', 'Return']
-        
+
+        # Add Year and Month columns for grouping
+        monthly_data['Year'] = monthly_data['Date'].dt.year
+        monthly_data['Month'] = monthly_data['Date'].dt.month
+
+        # Ensure the 'Year' column exists before performing groupby
+        if 'Year' not in monthly_data.columns:
+            raise KeyError("'Year' column not found in the data. Please check the input data.")
+
         # Calculate cumulative drawdown and drawup for each year
         drawdown = monthly_data[monthly_data['Return'] < 0].groupby('Year')['Return'].sum() * 100  # Negative returns as Drawdown
         drawup = monthly_data[monthly_data['Return'] > 0].groupby('Year')['Return'].sum() * 100   # Positive returns as Drawup
@@ -1149,6 +1157,7 @@ with st.expander("📈 Historical Data Plot"):
 
         # Return the final DataFrame and current year performance
         return result, current_year_performance
+
 
 
     # Display monthly performance with the highest and lowest historical performance comparison
