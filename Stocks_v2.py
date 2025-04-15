@@ -1152,16 +1152,16 @@ if menu == "Market Analysis | Buy Signals":
             else:
                 st.write("No data available for the current year.")
 
-        # Streamlit app
-        st.title("Market Performance Analysis")
+            # Streamlit app
+            st.title("Market Performance Analysis")
 
-        # S&P 500
-        display_monthly_performance("^GSPC", "S&P 500")
-        display_yearly_performance("^GSPC", "S&P 500")
+            # S&P 500
+            display_monthly_performance("^GSPC", "S&P 500")
+            display_yearly_performance("^GSPC", "S&P 500")
 
-        # Nasdaq 100
-        display_monthly_performance("^NDX", "Nasdaq 100")
-        display_yearly_performance("^NDX", "Nasdaq 100")
+            # Nasdaq 100
+            display_monthly_performance("^NDX", "Nasdaq 100")
+            display_yearly_performance("^NDX", "Nasdaq 100")
 
 
 # Export Data Section
