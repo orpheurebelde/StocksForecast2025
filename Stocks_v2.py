@@ -1177,8 +1177,8 @@ if menu == "Market Analysis | Buy Signals":
     st.title("Market Performance Analysis - Last 10 Years")
 
     # S&P 500
-    display_monthly_performance("^GSPC", "S&P 500")
-    display_yearly_performance("^GSPC", "S&P 500")
+    display_monthly_performance("^SPX", "S&P 500")
+    display_yearly_performance("^SPX", "S&P 500")
 
     # Nasdaq 100
     display_monthly_performance("^NDX", "Nasdaq 100")
