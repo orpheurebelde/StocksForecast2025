@@ -839,7 +839,6 @@ if menu == "Stock Info":
                 st.bar_chart(st.session_state.stock_data["y"])
 
 
-
 # Historical Analysis Section
 if menu == "Historical Analysis":
 
@@ -1209,23 +1208,23 @@ if menu == "Market Analysis | Buy Signals":
 
         
         
-        # Historical data plot
-        with st.expander("📈 Historical Data Plot"):
+    # Historical data plot
+    with st.expander("📈 Historical Data Plot"):
 
-            # Example of usage in Streamlit
-            with st.container():
-                display_monthly_performance("^GSPC", "S&P 500 Monthly Performance")
-                st.write("")  
-                display_yearly_performance("^GSPC", "S&P 500 Yearly Performance")
-                st.write("")  
-                display_cumulative_drawdown_drawup("^GSPC", "S&P 500 Yearly Drawdown/Drawup %")
-                
-                st.write("")  
-                display_monthly_performance("^NDX", "Nasdaq 100 Monthly Performance")
-                st.write("")  
-                display_yearly_performance("^NDX", "Nasdaq 100 Yearly Performance")
-                st.write("")  
-                display_cumulative_drawdown_drawup("^NDX", "Nasdaq 100 Yearly Drawdown/Drawup %")
+        # Example of usage in Streamlit
+        with st.container():
+            display_monthly_performance("^GSPC", "S&P 500 Monthly Performance")
+            st.write("")  
+            display_yearly_performance("^GSPC", "S&P 500 Yearly Performance")
+            st.write("")  
+            display_cumulative_drawdown_drawup("^GSPC", "S&P 500 Yearly Drawdown/Drawup %")
+            
+            st.write("")  
+            display_monthly_performance("^NDX", "Nasdaq 100 Monthly Performance")
+            st.write("")  
+            display_yearly_performance("^NDX", "Nasdaq 100 Yearly Performance")
+            st.write("")  
+            display_cumulative_drawdown_drawup("^NDX", "Nasdaq 100 Yearly Drawdown/Drawup %")
 
 # Export Data Section
 if menu == "Export Data":
