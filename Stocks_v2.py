@@ -1041,7 +1041,7 @@ if menu == "Market Analysis | Buy Signals":
         
         
     with st.expander("📈 Monthly Performance Analysis", expanded=True):
-        @st.cache_data    
+        @st.cache_data
         def fetch_monthly_returns(ticker):
             data = yf.download(ticker, period="10y", interval="1d")
             if data.empty:
@@ -1051,21 +1051,18 @@ if menu == "Market Analysis | Buy Signals":
             monthly_data = data['Close'].resample('M').ffill()
             monthly_returns = monthly_data.pct_change().dropna()
 
-            if isinstance(monthly_returns, pd.Series):
-                df = monthly_returns.to_frame(name='Monthly Return')
-            else:
-                df = monthly_returns.rename(columns={'Close': 'Monthly Return'})  # Just in case
+            df = monthly_returns.to_frame(name='Monthly Return')
+            df['Year'] = df.index.year
+            df['Month'] = df.index.month
 
             return df
 
         def analyze_monthly_performance(monthly_returns):
-            # Get current year and month
             current_year = datetime.now().year
             current_month = datetime.now().month
 
-            # Filter for the current month
             current_month_data = monthly_returns[
-                (monthly_returns['Year'] == current_year) & 
+                (monthly_returns['Year'] == current_year) &
                 (monthly_returns['Month'] == current_month)
             ]
 
@@ -1074,11 +1071,9 @@ if menu == "Market Analysis | Buy Signals":
             else:
                 current_performance = current_month_data['Monthly Return'].values[0]
 
-            # Calculate historical max and min monthly returns
             historical_max = monthly_returns['Monthly Return'].max()
             historical_min = monthly_returns['Monthly Return'].min()
 
-            # Categorize current performance
             if current_performance is not None:
                 if current_performance == historical_max:
                     category = 'Highest'
