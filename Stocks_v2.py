@@ -1050,11 +1050,13 @@ if menu == "Market Analysis | Buy Signals":
             # Resample to monthly frequency and calculate monthly returns
             monthly_data = data['Close'].resample('M').ffill()
             monthly_returns = monthly_data.pct_change().dropna()
-            monthly_returns = monthly_returns.to_frame(name='Monthly Return')
-            monthly_returns['Year'] = monthly_returns.index.year
-            monthly_returns['Month'] = monthly_returns.index.month
 
-            return monthly_returns
+            # Convert Series to DataFrame
+            df = pd.DataFrame({'Monthly Return': monthly_returns})
+            df['Year'] = df.index.year
+            df['Month'] = df.index.month
+
+            return df
 
         def analyze_monthly_performance(monthly_returns):
             # Get current year and month
