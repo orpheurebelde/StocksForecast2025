@@ -1043,21 +1043,24 @@ if menu == "Market Analysis | Buy Signals":
     with st.expander("📈 Monthly Performance Analysis", expanded=True):
         @st.cache_data    
         def fetch_monthly_returns(ticker):
-            # Download daily historical data for 10 years
             data = yf.download(ticker, period="10y", interval="1d", progress=False)
 
             if data.empty or 'Close' not in data.columns:
                 print(f"[ERROR] No data for {ticker}")
                 return pd.DataFrame()
 
-            # Ensure we're working only with the Close column
+            # Resample to monthly close
             monthly_close = data['Close'].resample('M').ffill()
 
-            # monthly_close is now a Series
+            # Calculate monthly returns
             monthly_returns = monthly_close.pct_change().dropna()
 
-            # Convert Series to DataFrame
-            df = monthly_returns.to_frame(name='Monthly Return')
+            # Convert to DataFrame if needed
+            if isinstance(monthly_returns, pd.Series):
+                df = monthly_returns.to_frame(name='Monthly Return')
+            else:
+                df = monthly_returns.rename(columns=lambda x: f"{x} Return")
+
             df['Year'] = df.index.year
             df['Month'] = df.index.month
 
