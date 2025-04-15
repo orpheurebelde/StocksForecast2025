@@ -1133,8 +1133,12 @@ if menu == "Market Analysis | Buy Signals":
             yearly_returns = yearly_data.pct_change().dropna()
             yearly_returns.index = yearly_returns.index.year
 
+            # Ensure column is named properly
             if isinstance(yearly_returns, pd.Series):
-                yearly_returns = yearly_returns.to_frame(name='Yearly Return')
+                yearly_returns = yearly_returns.to_frame()
+                yearly_returns.columns = ['Yearly Return']
+            else:
+                yearly_returns.columns = ['Yearly Return']
 
             # Get current year
             current_year = datetime.now().year
