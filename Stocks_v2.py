@@ -1162,8 +1162,8 @@ if menu == "Market Analysis | Buy Signals":
             else:
                 st.write("No data available for the current year.")
 
-            # Streamlit app
-            st.title("Market Performance Analysis")
+    # Streamlit app
+    st.title("Market Performance Analysis")
 
     # S&P 500
     display_monthly_performance("^GSPC", "S&P 500")
