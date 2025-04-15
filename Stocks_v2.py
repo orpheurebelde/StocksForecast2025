@@ -1048,15 +1048,15 @@ if menu == "Market Analysis | Buy Signals":
 
             if data.empty or 'Close' not in data.columns:
                 print(f"[ERROR] No data for {ticker}")
-                return pd.DataFrame()
+                return pd.DataFrame()  # Safe fallback
 
-            # Resample to monthly frequency
+            # Convert daily to monthly closing prices
             monthly_close = data['Close'].resample('M').ffill()
 
-            # Calculate monthly returns and ensure it's a Series
-            monthly_returns = pd.Series(monthly_close.pct_change().dropna())
+            # Calculate monthly returns (percent change)
+            monthly_returns = monthly_close.pct_change().dropna()
 
-            # Convert to DataFrame and add time features
+            # ✅ Ensure monthly_returns is a Series before calling .to_frame()
             df = monthly_returns.to_frame(name='Monthly Return')
             df['Year'] = df.index.year
             df['Month'] = df.index.month
