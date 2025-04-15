@@ -1041,22 +1041,24 @@ if menu == "Market Analysis | Buy Signals":
         
         
     with st.expander("📈 Monthly Performance Analysis", expanded=True):
+ 
         def fetch_monthly_returns(ticker):
-            # Fetch historical data for the past 10 years
             data = yf.download(ticker, period="10y", interval="1d")
-            if data.empty:
+            if data.empty or 'Close' not in data.columns:
                 return None
 
-            # Resample to monthly frequency and calculate monthly returns
+            # Resample daily close to month-end, forward-filling missing data
             monthly_data = data['Close'].resample('M').ffill()
+
+            # Calculate monthly percentage change
             monthly_returns = monthly_data.pct_change().dropna()
 
-            # Convert Series to DataFrame
-            df = pd.DataFrame({'Monthly Return': monthly_returns})
+            # monthly_returns is a Series with DateTime index — now convert to DataFrame
+            df = monthly_returns.to_frame(name='Monthly Return')
             df['Year'] = df.index.year
             df['Month'] = df.index.month
 
-            return df
+            return df.reset_index(drop=True)
 
         def analyze_monthly_performance(monthly_returns):
             # Get current year and month
