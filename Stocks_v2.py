@@ -1118,8 +1118,12 @@ if menu == "Market Analysis | Buy Signals":
                 st.write("No data available for the current month.")
 
         def display_yearly_performance(ticker, title):
+            import yfinance as yf
+            import pandas as pd
+            from datetime import datetime
+
             # Fetch historical data for the past 10 years
-            data = yf.download(ticker, period="10y", interval="1d")
+            data = yf.download(ticker, period="10y", interval="1d", progress=False)
             if data.empty:
                 st.error(f"Could not fetch data for {ticker}")
                 return
@@ -1128,7 +1132,9 @@ if menu == "Market Analysis | Buy Signals":
             yearly_data = data['Close'].resample('Y').ffill()
             yearly_returns = yearly_data.pct_change().dropna()
             yearly_returns.index = yearly_returns.index.year
-            yearly_returns = yearly_returns.to_frame(name='Yearly Return')
+
+            if isinstance(yearly_returns, pd.Series):
+                yearly_returns = yearly_returns.to_frame(name='Yearly Return')
 
             # Get current year
             current_year = datetime.now().year
@@ -1161,6 +1167,7 @@ if menu == "Market Analysis | Buy Signals":
                 st.write(f"**Category**: {category}")
             else:
                 st.write("No data available for the current year.")
+
 
     # Streamlit app
     st.title("Market Performance Analysis")
