@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import streamlit as st
 import math
 import openai
-import datetime
+from datetime import datetime
 from textblob import TextBlob
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
