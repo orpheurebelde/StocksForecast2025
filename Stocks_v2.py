@@ -1043,17 +1043,26 @@ if menu == "Market Analysis | Buy Signals":
     with st.expander("📈 Monthly Performance Analysis", expanded=True):
         @st.cache_data
         def fetch_monthly_returns(ticker):
+            # Fetch data from Yahoo Finance
             data = yf.download(ticker, period="10y", interval="1d", progress=False)
+            
             if data.empty:
                 st.error(f"Could not fetch data for {ticker}")
                 return pd.DataFrame()
 
-            # Resample to monthly close prices
+            # Resample to monthly frequency (closing prices)
             monthly_data = data['Close'].resample('M').ffill()
+            
+            # Calculate percentage change to get returns
             monthly_returns = monthly_data.pct_change().dropna()
 
-            # Convert to DataFrame and add year and month columns
-            df = pd.DataFrame(monthly_returns, columns=['Monthly Return'])
+            # Check if monthly_returns is a Series and convert to DataFrame
+            if isinstance(monthly_returns, pd.Series):
+                df = monthly_returns.to_frame(name='Monthly Return')
+            else:
+                df = monthly_returns.rename(columns={monthly_returns.columns[0]: 'Monthly Return'})
+
+            # Add 'Year' and 'Month' columns for easy filtering
             df['Year'] = df.index.year
             df['Month'] = df.index.month
 
