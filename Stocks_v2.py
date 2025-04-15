@@ -1043,15 +1043,17 @@ if menu == "Market Analysis | Buy Signals":
     with st.expander("📈 Monthly Performance Analysis", expanded=True):
         @st.cache_data
         def fetch_monthly_returns(ticker):
-            data = yf.download(ticker, period="10y", interval="1d")
+            data = yf.download(ticker, period="10y", interval="1d", progress=False)
             if data.empty:
                 st.error(f"Could not fetch data for {ticker}")
                 return pd.DataFrame()
 
+            # Resample to monthly close prices
             monthly_data = data['Close'].resample('M').ffill()
             monthly_returns = monthly_data.pct_change().dropna()
 
-            df = monthly_returns.to_frame(name='Monthly Return')
+            # Convert to DataFrame and add year and month columns
+            df = pd.DataFrame(monthly_returns, columns=['Monthly Return'])
             df['Year'] = df.index.year
             df['Month'] = df.index.month
 
@@ -1062,7 +1064,7 @@ if menu == "Market Analysis | Buy Signals":
             current_month = datetime.now().month
 
             current_month_data = monthly_returns[
-                (monthly_returns['Year'] == current_year) &
+                (monthly_returns['Year'] == current_year) & 
                 (monthly_returns['Month'] == current_month)
             ]
 
