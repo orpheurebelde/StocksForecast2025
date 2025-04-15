@@ -1098,7 +1098,7 @@ if menu == "Market Analysis | Buy Signals":
 
         def display_monthly_performance(ticker, title):
             monthly_returns = fetch_monthly_returns(ticker)
-            if monthly_returns is None:
+            if monthly_returns.empty or 'Monthly Return' not in monthly_returns.columns:
                 st.error(f"Could not fetch data for {ticker}")
                 return
 
