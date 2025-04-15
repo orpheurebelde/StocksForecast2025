@@ -1174,7 +1174,7 @@ if menu == "Market Analysis | Buy Signals":
 
 
     # Streamlit app
-    st.title("Market Performance Analysis")
+    st.title("Market Performance Analysis - Last 10 Years")
 
     # S&P 500
     display_monthly_performance("^GSPC", "S&P 500")
