@@ -492,8 +492,7 @@ def generate_signals(data):
     data['Buy Signal'] = (data['RSI'] < 30) & (data['MACD'] > data['MACD_signal']) 
                            
     
-    data['Sell Signal'] = (data['RSI'] > 70) & 
-                    (data['MACD'] < data['MACD_signal'])
+    data['Sell Signal'] = (data['RSI'] > 70) & (data['MACD'] < data['MACD_signal'])
 
     
     # Filter to only keep the most significant signals
