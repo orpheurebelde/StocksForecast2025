@@ -1211,20 +1211,20 @@ if menu == "Market Analysis | Buy Signals":
             st.write(f"**Highest Performance in Last 10 Years**: {highest_year_performance:.2f}%")
             st.write(f"**Lowest Performance in Last 10 Years**: {lowest_year_performance:.2f}%")
 
-                # Example of usage in Streamlit
-                with st.container():
-                    display_monthly_performance("^GSPC", "S&P 500 Monthly Performance")
-                    st.write("")  
-                    display_yearly_performance("^GSPC", "S&P 500 Yearly Performance")
-                    st.write("")  
-                    display_cumulative_drawdown_drawup("^GSPC", "S&P 500 Yearly Drawdown/Drawup %")
-                    
-                    st.write("")  
-                    display_monthly_performance("^NDX", "Nasdaq 100 Monthly Performance")
-                    st.write("")  
-                    display_yearly_performance("^NDX", "Nasdaq 100 Yearly Performance")
-                    st.write("")  
-                    display_cumulative_drawdown_drawup("^NDX", "Nasdaq 100 Yearly Drawdown/Drawup %")
+        # Example of usage in Streamlit
+        with st.container():
+            display_monthly_performance("^GSPC", "S&P 500 Monthly Performance")
+            st.write("")  
+            display_yearly_performance("^GSPC", "S&P 500 Yearly Performance")
+            st.write("")  
+            display_cumulative_drawdown_drawup("^GSPC", "S&P 500 Yearly Drawdown/Drawup %")
+            
+            st.write("")  
+            display_monthly_performance("^NDX", "Nasdaq 100 Monthly Performance")
+            st.write("")  
+            display_yearly_performance("^NDX", "Nasdaq 100 Yearly Performance")
+            st.write("")  
+            display_cumulative_drawdown_drawup("^NDX", "Nasdaq 100 Yearly Drawdown/Drawup %")
 
 # Export Data Section
 if menu == "Export Data":
