@@ -1040,7 +1040,6 @@ if menu == "Market Analysis | Buy Signals":
             - **52 Week High**: ${close[-252:].max():,.2f}
             - **52 Week Low**: ${close[-252:].min():,.2f}
             - **RSI**: {rsi:.2f} (<span style='color:{rsi_color}; font-size:18px;'> {rsi_signal}</span>)
-            - **MACD**: {macd.iloc[-1]:.2f}
             - **MACD Signal**: {signal.iloc[-1]:.2f} (<span style='color:{macd_color}; font-size:18px;'> {macd_signal}</span>)
             - **YTD %**: {ytd:.2f}%
             - **1D %**: {close.pct_change().iloc[-1]*100:.2f}%
