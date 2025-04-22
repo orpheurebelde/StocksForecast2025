@@ -1013,13 +1013,17 @@ if menu == "Market Analysis | Buy Signals":
             fib_level_5y = compute_fibonacci_level(close[-252*5:])  # Last 5 years
             fib_level_10y = compute_fibonacci_level(close)  # Last 10 years
 
+            #Calculate and categorize MACD signal into a variable
+            macd_signal = "Bullish" if macd.iloc[-1] > signal.iloc[-1] else "Bearish"
+            macd_color = "green" if macd_signal == "Bullish" else "red"
+
             st.subheader(title)
             st.markdown(f"""
             - **52 Week High**: ${close[-252:].max():,.2f}
             - **52 Week Low**: ${close[-252:].min():,.2f}
             - **RSI**: {rsi:.2f}
             - **MACD**: {macd.iloc[-1]:.2f}
-            - **MACD Signal**: {signal.iloc[-1]:.2f}
+            - **MACD Signal**: {signal.iloc[-1]:.2f} (<span style='color:{macd_color}; font-size:18px;'>MACD Signal: {macd_signal}</span>, unsafe_allow_html=True)
             - **YTD %**: {ytd:.2f}%
             - **1D %**: {close.pct_change().iloc[-1]*100:.2f}%
             - **5D %**: {close.pct_change(5).iloc[-1]*100:.2f}%
