@@ -1017,7 +1017,7 @@ if menu == "Market Analysis | Buy Signals":
             macd_signal = "Bullish" if macd.iloc[-1] > signal.iloc[-1] else "Bearish"
             macd_color = "green" if macd_signal == "Bullish" else "red"
 
-            #Calculate and categorize RSI signal for markdown incoroporation
+            #Calculate and categorize RSI signal for markdown incorporation
             rsi_signal = None
             rsi_color = None
             if rsi < 30:
@@ -1034,6 +1034,19 @@ if menu == "Market Analysis | Buy Signals":
             else:
                 rsi = "N/A"
 
+            #Calculate and classify the YTD % if with Correction, Bear Market, Crash or Bull Market
+            if ytd > 0:
+                ytd_signal = "Bull Market"
+                ytd_color = "green"
+            elif -10 < ytd <= 0:
+                ytd_signal = "Correction"
+                ytd_color = "orange"
+            elif -20 < ytd <= -10:
+                ytd_signal = "Bear Market"
+                ytd_color = "red"
+            else:
+                ytd_signal = "Crash"
+                ytd_color = "darkred"
 
             st.subheader(title)
             st.markdown(f"""
@@ -1041,7 +1054,7 @@ if menu == "Market Analysis | Buy Signals":
             - **52 Week Low**: ${close[-252:].min():,.2f}
             - **RSI**: {rsi:.2f} (<span style='color:{rsi_color}; font-size:18px;'> {rsi_signal}</span>)
             - **MACD Signal**: {signal.iloc[-1]:.2f} (<span style='color:{macd_color}; font-size:18px;'> {macd_signal}</span>)
-            - **YTD %**: {ytd:.2f}%
+            - **YTD %**: {ytd:.2f}% (<span style='color:{ytd_color}; font-size:18px;'> {ytd_signal}</span>)
             - **1D %**: {close.pct_change().iloc[-1]*100:.2f}%
             - **5D %**: {close.pct_change(5).iloc[-1]*100:.2f}%
             - **1M %**: {close.pct_change(21).iloc[-1]*100:.2f}%
