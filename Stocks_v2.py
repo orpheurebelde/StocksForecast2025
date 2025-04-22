@@ -1034,7 +1034,7 @@ if menu == "Market Analysis | Buy Signals":
             else:
                 rsi = "N/A"
 
-            #Calculate and classify the YTD % if with Correction, Bear Market, Crash or Bull Market
+            #Calculate and classify the YTD % if with Correction, Bear Market, Crash or Bull Market for markdown incorporation
             ytd_signal = None
             ytd_color = None
             if ytd > 0:
@@ -1046,9 +1046,12 @@ if menu == "Market Analysis | Buy Signals":
             elif -20 < ytd <= -10:
                 ytd_signal = "Bear Market"
                 ytd_color = "red"
-            else:
+            elif ytd > -20:
                 ytd_signal = "Crash"
                 ytd_color = "darkred"
+            else:
+                ytd_signal = "N/A"
+                ytd_color = "gray"
 
             st.subheader(title)
             st.markdown(f"""
