@@ -1040,13 +1040,13 @@ if menu == "Market Analysis | Buy Signals":
             if ytd > 0:
                 ytd_signal = "Bull Market"
                 ytd_color = "green"
-            elif -10 < ytd <= 0:
+            elif -20 < ytd <= 0:
                 ytd_signal = "Correction"
                 ytd_color = "orange"
-            elif -20 < ytd <= -10:
+            elif -30 < ytd <= -20:
                 ytd_signal = "Bear Market"
                 ytd_color = "red"
-            elif ytd > -20:
+            elif ytd > -30:
                 ytd_signal = "Crash"
                 ytd_color = "darkred"
             else:
