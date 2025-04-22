@@ -1023,7 +1023,7 @@ if menu == "Market Analysis | Buy Signals":
             - **52 Week Low**: ${close[-252:].min():,.2f}
             - **RSI**: {rsi:.2f}
             - **MACD**: {macd.iloc[-1]:.2f}
-            - **MACD Signal**: {signal.iloc[-1]:.2f} (<span style='color:{macd_color}; font-size:18px;'>MACD Signal: {macd_signal}</span>, unsafe_allow_html=True)
+            - **MACD Signal**: {signal.iloc[-1]:.2f} (<span style='color:{macd_color}; font-size:18px;'>MACD Signal: {macd_signal}</span>)
             - **YTD %**: {ytd:.2f}%
             - **1D %**: {close.pct_change().iloc[-1]*100:.2f}%
             - **5D %**: {close.pct_change(5).iloc[-1]*100:.2f}%
@@ -1034,7 +1034,7 @@ if menu == "Market Analysis | Buy Signals":
             - **Fibonacci Level (3Y Range)**: {fib_level_3y:.2f}%
             - **Fibonacci Level (5Y Range)**: {fib_level_5y:.2f}%
             - **Fibonacci Level (10Y Range)**: {fib_level_10y:.2f}%
-            """)
+            """, unsafe_allow_html=True)
 
         with col1:
             show_indicators("^GSPC", "S&P 500 Indicators")
