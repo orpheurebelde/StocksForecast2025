@@ -1028,7 +1028,7 @@ if menu == "Market Analysis | Buy Signals":
                 rsi_color = "red"
             else:
                 rsi_signal = "Neutral"
-                rsi_color = "gray"
+                rsi_color = "yellow"
             if isinstance(rsi, (int, float)):
                 rsi = round(rsi, 2)
             else:
