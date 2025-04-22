@@ -1220,7 +1220,7 @@ if menu == "Market Analysis | Buy Signals":
             display_monthly_performance("^NDX", "Nasdaq 100")
 
     with col2:
-        with st.expander("📈 Nasdaq 100 Monthly Performance", expanded=True):
+        with st.expander("📈 S&P 500 | Nasdaq 100 Yearly Performance", expanded=True):
             display_yearly_performance("^GSPC", "S&P 500")
             display_yearly_performance("^NDX", "Nasdaq 100")
 
