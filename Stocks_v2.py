@@ -1035,6 +1035,8 @@ if menu == "Market Analysis | Buy Signals":
                 rsi = "N/A"
 
             #Calculate and classify the YTD % if with Correction, Bear Market, Crash or Bull Market
+            ytd_signal = None
+            ytd_color = None
             if ytd > 0:
                 ytd_signal = "Bull Market"
                 ytd_color = "green"
