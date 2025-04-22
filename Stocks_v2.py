@@ -1017,11 +1017,29 @@ if menu == "Market Analysis | Buy Signals":
             macd_signal = "Bullish" if macd.iloc[-1] > signal.iloc[-1] else "Bearish"
             macd_color = "green" if macd_signal == "Bullish" else "red"
 
+            #Calculate and categorize RSI signal for markdown incoroporation
+            rsi_signal = None
+            rsi_color = None
+            if rsi < 30:
+                rsi_signal = "Bullish"
+                rsi_color = "green"
+            elif rsi > 70:
+                rsi_signal = "Bearish"
+                rsi_color = "red"
+            else:
+                rsi_signal = "Neutral"
+                rsi_color = "gray"
+            if isinstance(rsi, (int, float)):
+                rsi = round(rsi, 2)
+            else:
+                rsi = "N/A"
+
+
             st.subheader(title)
             st.markdown(f"""
             - **52 Week High**: ${close[-252:].max():,.2f}
             - **52 Week Low**: ${close[-252:].min():,.2f}
-            - **RSI**: {rsi:.2f}
+            - **RSI**: {rsi:.2f} (<span style='color:{rsi_color}; font-size:18px;'> {rsi_signal}</span>)
             - **MACD**: {macd.iloc[-1]:.2f}
             - **MACD Signal**: {signal.iloc[-1]:.2f} (<span style='color:{macd_color}; font-size:18px;'> {macd_signal}</span>)
             - **YTD %**: {ytd:.2f}%
