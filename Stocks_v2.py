@@ -1212,13 +1212,17 @@ if menu == "Market Analysis | Buy Signals":
 
     st.title("Market Performance Analysis - Last 10 Years")
 
-    # S&P 500
-    display_monthly_performance("^SPX", "S&P 500")
-    display_yearly_performance("^SPX", "S&P 500")
+    # Display S&P 500 monthly performance in 2 columns expander
+    col1, col2 = st.columns(2)
+    with col1:
+        with st.expander("📈 S&P 500 | Nasdaq 100 Monthly Performance", expanded=True):
+            display_monthly_performance("^GSPC", "S&P 500")
+            display_monthly_performance("^NDX", "Nasdaq 100")
 
-    # Nasdaq 100
-    display_monthly_performance("^NDX", "Nasdaq 100")
-    display_yearly_performance("^NDX", "Nasdaq 100")
+    with col2:
+        with st.expander("📈 Nasdaq 100 Monthly Performance", expanded=True):
+            display_yearly_performance("^GSPC", "S&P 500")
+            display_yearly_performance("^NDX", "Nasdaq 100")
 
 
 # Export Data Section
