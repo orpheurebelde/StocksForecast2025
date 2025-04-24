@@ -317,20 +317,42 @@ def calculate_indicators(data):
     return data
 
 # Generate Buy/Sell signals
-def generate_signals(data):
+def generate_signals(data, vix_data):
     data = calculate_indicators(data)
     
+    # Align VIX with stock data
+    vix_data = vix_data.reindex(data.index).fillna(method='ffill')
+    data['VIX'] = vix_data
+
     signals = pd.DataFrame(index=data.index)
     signals['Signal'] = 0
 
     in_position = False
 
     for i in range(len(data)):
-        if not in_position and data['RSI'].iloc[i] <= 20:
-            signals.at[data.index[i], 'Signal'] = 1  # Buy
+        rsi = data['RSI'].iloc[i]
+        macd = data['MACD'].iloc[i]
+        macd_signal = data['MACD_signal'].iloc[i]
+        vix = data['VIX'].iloc[i]
+
+        # Buy Signal
+        if (
+            not in_position and
+            rsi <= 30 and
+            macd > macd_signal and
+            vix >= 25  # VIX high (fear zone)
+        ):
+            signals.at[data.index[i], 'Signal'] = 1
             in_position = True
-        elif in_position and data['RSI'].iloc[i] >= 80:
-            signals.at[data.index[i], 'Signal'] = -1  # Sell
+
+        # Sell Signal
+        elif (
+            in_position and
+            rsi >= 70 and
+            macd < macd_signal and
+            vix <= 15  # VIX low (greed/complacency)
+        ):
+            signals.at[data.index[i], 'Signal'] = -1
             in_position = False
 
     return signals
