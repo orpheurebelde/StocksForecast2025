@@ -326,10 +326,10 @@ def generate_signals(data):
     in_position = False
 
     for i in range(len(data)):
-        if not in_position and data['RSI'].iloc[i] <= 30:
+        if not in_position and data['RSI'].iloc[i] <= 25:
             signals.at[data.index[i], 'Signal'] = 1  # Buy
             in_position = True
-        elif in_position and data['RSI'].iloc[i] >= 70:
+        elif in_position and data['RSI'].iloc[i] >= 80:
             signals.at[data.index[i], 'Signal'] = -1  # Sell
             in_position = False
 
