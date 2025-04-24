@@ -1261,56 +1261,66 @@ if menu == "Refined Strategy (RSI with Trend)":
     
     st.pyplot(fig)
 
-# Machine Learning Strategy
+def alternate_signals(binary_preds):
+    """
+    Converts binary predictions (0/1) into alternating buy (1) and sell (-1) signals.
+    Prevents multiple buys or sells in a row.
+    """
+    signals = []
+    last_signal = 0  # 0 = no position, 1 = bought
+
+    for p in binary_preds:
+        if p == 1 and last_signal == 0:
+            signals.append(1)  # Buy
+            last_signal = 1
+        elif p == 0 and last_signal == 1:
+            signals.append(-1)  # Sell
+            last_signal = 0
+        else:
+            signals.append(0)  # Hold
+    return np.array(signals)
+
 if menu == "Machine Learning Strategy":
     st.title("📊 Machine Learning Buy/Sell Strategy")
 
     ticker = st.text_input("Enter Stock Ticker for ML Strategy", "AAPL")
     data, info = fetch_data(ticker)
 
-    # Get RSI Strategy Signals with Trend Confirmation
+    # Optional: Display some basic stock info
+    st.write(f"**Company Name:** {info.get('longName', 'N/A')}")
+    st.write(f"**Industry:** {info.get('industry', 'N/A')}")
+    st.write(f"**Market Cap:** {info.get('marketCap', 'N/A')}")
+
+    # Generate RSI or any other signals if needed (not used in ML here directly)
     signals = generate_signals(data)
 
-    # Define filtering function
-    def filter_signals(signals):
-        filtered = []
-        last_signal = 0  # 0 = none, 1 = buy, -1 = sell
-        for signal in signals:
-            if signal == 1 and last_signal != 1:
-                filtered.append(1)
-                last_signal = 1
-            elif signal == -1 and last_signal != -1:
-                filtered.append(-1)
-                last_signal = -1
-            else:
-                filtered.append(0)
-        return np.array(filtered)
+    # Train ML Model
+    model, X_test, y_test, raw_preds = train_model(data)  # raw_preds = binary 0/1
 
-    # Train ML model
-    model, X_test, y_test, y_pred = train_model(data)
+    # Convert raw model predictions to alternating buy/sell signals
+    y_pred = alternate_signals(raw_preds)
 
-    # Filter signals after prediction
-    filtered_signals = filter_signals(y_pred)
+    # Create a Series for proper index alignment
+    filtered_signals = pd.Series(y_pred, index=X_test.index)
 
-    # Convert filtered signals to a Series for alignment
-    filtered_signals_series = pd.Series(filtered_signals, index=X_test.index)
-
-    # Plotting
+    # --- Plotting ---
     st.subheader("Stock Price and ML-based Buy/Sell Signals")
-    fig, ax = plt.subplots(figsize=(10, 6))
+    fig, ax = plt.subplots(figsize=(12, 6))
     ax.plot(data['Close'], label='Stock Price', color='blue')
-    ax.plot(data['SMA50'], label='50-Day SMA', color='orange')
+    if 'SMA50' in data.columns:
+        ax.plot(data['SMA50'], label='50-Day SMA', color='orange')
 
-    # Plot buy signals
-    buy_indices = filtered_signals_series[filtered_signals_series == 1].index
-    sell_indices = filtered_signals_series[filtered_signals_series == -1].index
+    # Get Buy and Sell signal indices
+    buy_signals = filtered_signals[filtered_signals == 1].index
+    sell_signals = filtered_signals[filtered_signals == -1].index
 
-    ax.plot(buy_indices, data['Close'].loc[buy_indices], '^', markersize=10, color='green', label='ML Buy Signal')
-    ax.plot(sell_indices, data['Close'].loc[sell_indices], 'v', markersize=10, color='red', label='ML Sell Signal')
+    ax.plot(buy_signals, data.loc[buy_signals, 'Close'], '^', color='green', markersize=10, label='Buy Signal')
+    ax.plot(sell_signals, data.loc[sell_signals, 'Close'], 'v', color='red', markersize=10, label='Sell Signal')
 
     ax.set_title(f"{ticker} Stock Price with ML Buy/Sell Signals")
     ax.set_xlabel("Date")
     ax.set_ylabel("Price")
     ax.legend()
+    ax.grid(True)
 
     st.pyplot(fig)
