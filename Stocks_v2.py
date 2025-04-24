@@ -1262,8 +1262,10 @@ if menu == "Refined Strategy (RSI with Trend)":
     ticker = st.text_input("Enter Stock Ticker", "AAPL")
     data, info = fetch_data(ticker)
 
+    vix_data = get_vix()
+
     # Get RSI Strategy Signals with Trend Confirmation
-    signals = generate_signals(data)
+    signals = generate_signals(data, vix_data)
 
     # Plotting the stock price and buy/sell signals
     st.subheader("Stock Price and Buy/Sell Signals")
