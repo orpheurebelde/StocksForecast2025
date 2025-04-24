@@ -320,18 +320,18 @@ def calculate_indicators(data):
 def generate_signals(data):
     data = calculate_indicators(data)
     
-    # Define signals
-    data['Buy Signal'] = (data['RSI'] <= 30)
-                           
-    
-    data['Sell Signal'] = (data['RSI'] >= 70)
-
-    
-    # Filter to only keep the most significant signals
     signals = pd.DataFrame(index=data.index)
     signals['Signal'] = 0
-    signals.loc[data['Buy Signal'], 'Signal'] = 1
-    signals.loc[data['Sell Signal'], 'Signal'] = -1
+
+    in_position = False
+
+    for i in range(len(data)):
+        if not in_position and data['RSI'].iloc[i] <= 30:
+            signals.at[data.index[i], 'Signal'] = 1  # Buy
+            in_position = True
+        elif in_position and data['RSI'].iloc[i] >= 70:
+            signals.at[data.index[i], 'Signal'] = -1  # Sell
+            in_position = False
 
     return signals
 
