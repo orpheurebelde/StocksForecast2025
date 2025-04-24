@@ -321,6 +321,7 @@ def generate_signals(data, vix_data):
     data = calculate_indicators(data)
     
     # Align VIX with stock data
+    vix_data = get_vix
     vix_data = vix_data.reindex(data.index).fillna(method='ffill')
     data['VIX'] = vix_data
 
