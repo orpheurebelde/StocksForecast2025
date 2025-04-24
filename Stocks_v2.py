@@ -295,67 +295,62 @@ def monte_carlo_simulation(data, n_simulations=1000, n_days=252, log_normal=Fals
 
     return simulations
 
-# Calculate RSI and MACD
 def calculate_indicators(data):
-    # Calculate RSI
+    # RSI
     delta = data['Close'].diff()
-    gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
-    loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
+    gain = delta.where(delta > 0, 0).rolling(window=14).mean()
+    loss = -delta.where(delta < 0, 0).rolling(window=14).mean()
     rs = gain / loss
-    rsi = 100 - (100 / (1 + rs))
-    data['RSI'] = rsi
+    data['RSI'] = 100 - (100 / (1 + rs))
 
-    # Calculate MACD
-    short_ema = data['Close'].ewm(span=12, adjust=False).mean()
-    long_ema = data['Close'].ewm(span=26, adjust=False).mean()
-    data['MACD'] = short_ema - long_ema
+    # MACD
+    ema12 = data['Close'].ewm(span=12, adjust=False).mean()
+    ema26 = data['Close'].ewm(span=26, adjust=False).mean()
+    data['MACD'] = ema12 - ema26
     data['MACD_signal'] = data['MACD'].ewm(span=9, adjust=False).mean()
 
-    # Calculate Moving Average (SMA)
+    # SMA
     data['SMA50'] = data['Close'].rolling(window=50).mean()
-    
+
     return data
 
-# Generate Buy/Sell signals
-def generate_signals(data, vix_data):
+def generate_signals(data, vix_data=None):
     data = calculate_indicators(data)
-    
-    # Align VIX with stock data
-    vix_data = vix_data.reindex(data.index).fillna(method='ffill')
-    data['VIX'] = vix_data
 
-    signals = pd.DataFrame(index=data.index)
-    signals['Signal'] = 0
+    # Handle VIX data
+    if vix_data is not None and not vix_data.empty:
+        vix_data = vix_data.reindex(data.index).fillna(method='ffill')
+        vix_mean = vix_data.mean()
+        vix_std = vix_data.std()
+        vix_high = vix_mean + vix_std
+        vix_low = vix_mean - vix_std
 
-    in_position = False
+        data['VIX_Buy'] = vix_data < vix_low
+        data['VIX_Sell'] = vix_data > vix_high
+    else:
+        data['VIX_Buy'] = True
+        data['VIX_Sell'] = True
 
-    for i in range(len(data)):
-        rsi = data['RSI'].iloc[i]
-        macd = data['MACD'].iloc[i]
-        macd_signal = data['MACD_signal'].iloc[i]
-        vix = data['VIX'].iloc[i]
+    # Core signals
+    data['Buy_Signal'] = (
+        (data['RSI'] < 30) &
+        (data['MACD'] > data['MACD_signal']) &
+        (data['Close'] > data['SMA50']) &
+        (data['VIX_Buy'])
+    )
 
-        # Buy Signal
-        if (
-            not in_position and
-            rsi <= 30 and
-            macd > macd_signal and
-            vix >= 25  # VIX high (fear zone)
-        ):
-            signals.at[data.index[i], 'Signal'] = 1
-            in_position = True
+    data['Sell_Signal'] = (
+        (data['RSI'] > 70) &
+        (data['MACD'] < data['MACD_signal']) &
+        (data['Close'] < data['SMA50']) &
+        (data['VIX_Sell'])
+    )
 
-        # Sell Signal
-        elif (
-            in_position and
-            rsi >= 70 and
-            macd < macd_signal and
-            vix <= 15  # VIX low (greed/complacency)
-        ):
-            signals.at[data.index[i], 'Signal'] = -1
-            in_position = False
+    # Alternate signals to avoid duplicates
+    raw_signals = [1 if b else -1 if s else 0 for b, s in zip(data['Buy_Signal'], data['Sell_Signal'])]
+    data['Signal'] = alternate_signals(raw_signals)
 
-    return signals
+    return data[['Signal']]
 
 # Train a simple machine learning model using past signals
 def train_model(data):
