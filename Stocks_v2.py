@@ -321,7 +321,6 @@ def generate_signals(data, vix_data):
     data = calculate_indicators(data)
     
     # Align VIX with stock data
-    vix_data = get_vix
     vix_data = vix_data.reindex(data.index).fillna(method='ffill')
     data['VIX'] = vix_data
 
@@ -389,6 +388,14 @@ def get_vix():
     vix = yf.Ticker("^VIX")
     vix_data = vix.history(period="1d")  # Get the latest data
     return vix_data["Close"].iloc[-1] if not vix_data.empty else None
+
+def fetch_vix():
+    import yfinance as yf
+    vix = yf.download("^VIX", start="2010-01-01", progress=False)
+    if 'Close' in vix.columns:
+        return vix['Close']
+    else:
+        return pd.Series(dtype=float)  # Empty fallback if no data
 
 # Function to determine VIX Indicator signal
 def vix_indicator(vix_value):
@@ -1263,7 +1270,7 @@ if menu == "Refined Strategy (RSI with Trend)":
     ticker = st.text_input("Enter Stock Ticker", "AAPL")
     data, info = fetch_data(ticker)
 
-    vix_data = get_vix()
+    vix_data = fetch_vix()
 
     # Get RSI Strategy Signals with Trend Confirmation
     signals = generate_signals(data, vix_data)
