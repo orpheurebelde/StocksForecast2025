@@ -1259,30 +1259,6 @@ if menu == "Export Data":
 if menu == "Refined Strategy (RSI with Trend)":
     st.title("📊 Refined RSI Buy and Sell Strategy with Trend Confirmation")
 
-    ticker = st.text_input("Enter Stock Ticker", "AAPL")
-    data, info = fetch_data(ticker)
-
-    # Get RSI Strategy Signals with Trend Confirmation
-    signals = generate_signals(data)
-
-    # Plotting the stock price and buy/sell signals
-    st.subheader("Stock Price and Buy/Sell Signals")
-    
-    fig, ax = plt.subplots(figsize=(10, 6))
-    ax.plot(data['Close'], label='Stock Price', color='blue')
-    ax.plot(data['SMA50'], label='50-Day SMA', color='orange')
-
-    # Mark Buy and Sell signals on the plot
-    ax.plot(signals.index[signals['Signal'] == 1], data['Close'][signals['Signal'] == 1], '^', markersize=10, color='green', lw=0, label='Buy Signal')
-    ax.plot(signals.index[signals['Signal'] == -1], data['Close'][signals['Signal'] == -1], 'v', markersize=10, color='red', lw=0, label='Sell Signal')
-    
-    ax.set_title(f"{ticker} Stock Price with Buy/Sell Signals (RSI with Trend)")
-    ax.set_xlabel("Date")
-    ax.set_ylabel("Price")
-    ax.legend()
-    
-    st.pyplot(fig)
-
 def alternate_signals(binary_preds):
     """
     Converts binary predictions (0/1) into alternating buy (1) and sell (-1) signals.
