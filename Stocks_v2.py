@@ -1271,11 +1271,11 @@ if menu == "Machine Learning Strategy":
     # Get RSI Strategy Signals with Trend Confirmation
     signals = generate_signals(data)
 
-    def filter_signals(y_pred):
+    # Define filtering function
+    def filter_signals(signals):
         filtered = []
-        last_signal = 0  # 0 = no signal, 1 = buy, -1 = sell
-
-        for signal in y_pred:
+        last_signal = 0  # 0 = none, 1 = buy, -1 = sell
+        for signal in signals:
             if signal == 1 and last_signal != 1:
                 filtered.append(1)
                 last_signal = 1
@@ -1283,34 +1283,34 @@ if menu == "Machine Learning Strategy":
                 filtered.append(-1)
                 last_signal = -1
             else:
-                filtered.append(0)  # ignore duplicate consecutive signals
-
+                filtered.append(0)
         return np.array(filtered)
 
-    # Train Machine Learning Model
+    # Train ML model
     model, X_test, y_test, y_pred = train_model(data)
 
-    # Plotting the stock price and ML-based buy/sell signals
+    # Filter signals after prediction
+    filtered_signals = filter_signals(y_pred)
+
+    # Convert filtered signals to a Series for alignment
+    filtered_signals_series = pd.Series(filtered_signals, index=X_test.index)
+
+    # Plotting
     st.subheader("Stock Price and ML-based Buy/Sell Signals")
-    
     fig, ax = plt.subplots(figsize=(10, 6))
     ax.plot(data['Close'], label='Stock Price', color='blue')
     ax.plot(data['SMA50'], label='50-Day SMA', color='orange')
 
-    # Mark ML-based Buy and Sell signals
-    # Filter alternating signals
-    filtered_signals = filter_signals(y_pred)
+    # Plot buy signals
+    buy_indices = filtered_signals_series[filtered_signals_series == 1].index
+    sell_indices = filtered_signals_series[filtered_signals_series == -1].index
 
-    # Plot only filtered signals
-    buy_signals = (filtered_signals == 1)
-    sell_signals = (filtered_signals == -1)
-
-    ax.plot(X_test.index[buy_signals], data['Close'].iloc[X_test.index][buy_signals], '^', markersize=10, color='green', lw=0, label='ML Buy Signal')
-    ax.plot(X_test.index[sell_signals], data['Close'].iloc[X_test.index][sell_signals], 'v', markersize=10, color='red', lw=0, label='ML Sell Signal')
+    ax.plot(buy_indices, data['Close'].loc[buy_indices], '^', markersize=10, color='green', label='ML Buy Signal')
+    ax.plot(sell_indices, data['Close'].loc[sell_indices], 'v', markersize=10, color='red', label='ML Sell Signal')
 
     ax.set_title(f"{ticker} Stock Price with ML Buy/Sell Signals")
     ax.set_xlabel("Date")
     ax.set_ylabel("Price")
     ax.legend()
-    
+
     st.pyplot(fig)
