@@ -334,13 +334,12 @@ def alternate_signals(binary_preds):
     return np.array(signals)
 
 def generate_signals(data, vix_data=None):
-    # Reindex and fill missing VIX values
     if vix_data is not None and not vix_data.empty:
         vix_data = vix_data.reindex(data.index).fillna(method='ffill')
 
-        # Use percentiles ONLY
-        vix_high = vix_data.quantile(0.80)  # 80th percentile for high VIX (sell signal)
-        vix_low = vix_data.quantile(0.20)   # 20th percentile for low VIX (buy signal)
+        # ✅ Correct: Calculate percentile thresholds
+        vix_high = vix_data.quantile(0.80)  # Top 20% -> high risk
+        vix_low = vix_data.quantile(0.20)   # Bottom 20% -> low risk
 
         data['VIX_Buy'] = vix_data < vix_low
         data['VIX_Sell'] = vix_data > vix_high
@@ -348,11 +347,11 @@ def generate_signals(data, vix_data=None):
         data['VIX_Buy'] = False
         data['VIX_Sell'] = False
 
-    # VIX-only signals
+    # Generate initial raw signals
     data['Buy_Signal'] = data['VIX_Buy']
     data['Sell_Signal'] = data['VIX_Sell']
 
-    # Convert to alternating buy/sell signal series
+    # Convert to alternating signals (buy -> sell -> buy -> sell)
     raw_signals = [1 if buy else -1 if sell else 0 for buy, sell in zip(data['Buy_Signal'], data['Sell_Signal'])]
     data['Signal'] = alternate_signals(raw_signals)
 
@@ -1302,6 +1301,7 @@ if menu == "Refined Strategy (RSI with Trend)":
     # 4. Optional: Show last signals for debug
     st.subheader("🔍 Last Signals Check")
     st.dataframe(data[['Close', 'Signal']].tail(30))
+    st.dataframe(data[['Close', 'VIX_Buy', 'VIX_Sell', 'Signal']].tail(50))
 
 if menu == "Machine Learning Strategy":
     st.title("📊 Machine Learning Buy/Sell Strategy")
