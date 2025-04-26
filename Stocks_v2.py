@@ -1284,7 +1284,7 @@ if menu == "Refined Strategy (RSI with Trend)":
     
     fig, ax = plt.subplots(figsize=(10, 6))
     ax.plot(data['Close'], label='Stock Price', color='blue')
-    ax.plot(data['SMA50'], label='50-Day SMA', color='orange')
+    #ax.plot(data['SMA50'], label='50-Day SMA', color='orange')
 
     # Mark Buy and Sell signals on the plot
     ax.plot(signals.index[signals['Signal'] == 1], data['Close'][signals['Signal'] == 1], '^', markersize=10, color='green', lw=0, label='Buy Signal')
