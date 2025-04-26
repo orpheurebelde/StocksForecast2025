@@ -316,43 +316,51 @@ def calculate_indicators(data):
 
 def alternate_signals(signals):
     result = []
-    last_signal = 0  # 0: no signal yet
-
-    for signal in signals:
-        if signal == 1 and last_signal != 1:
-            result.append(1)
-            last_signal = 1
-        elif signal == -1 and last_signal != -1:
-            result.append(-1)
-            last_signal = -1
-        else:
+    last_signal = 0
+    for sig in signals:
+        if sig == 0:
             result.append(0)
-
+        elif sig == 1:
+            if last_signal != 1:
+                result.append(1)
+                last_signal = 1
+            else:
+                result.append(0)
+        elif sig == -1:
+            if last_signal != -1:
+                result.append(-1)
+                last_signal = -1
+            else:
+                result.append(0)
     return result
 
 def generate_signals(data, vix_data=None):
     if vix_data is not None and not vix_data.empty:
+        # Match VIX index to stock data
         vix_data = vix_data.reindex(data.index).fillna(method='ffill')
 
-        # ✅ Correct: Calculate percentile thresholds
-        vix_high = vix_data.quantile(0.50)  # Top 20% -> high risk
-        vix_low = vix_data.quantile(0.20)   # Bottom 20% -> low risk
+        # Use Percentiles, NOT mean and std
+        vix_high = vix_data.quantile(0.80)  # Top 20% VIX
+        vix_low = vix_data.quantile(0.20)   # Bottom 20% VIX
 
+        # Buy when VIX is low, Sell when VIX is high
         data['VIX_Buy'] = vix_data < vix_low
         data['VIX_Sell'] = vix_data > vix_high
+
     else:
         data['VIX_Buy'] = False
         data['VIX_Sell'] = False
 
-    # Generate initial raw signals
+    # Generate raw signals
     data['Buy_Signal'] = data['VIX_Buy']
     data['Sell_Signal'] = data['VIX_Sell']
 
-    # Convert to alternating signals (buy -> sell -> buy -> sell)
+    # Alternate signals properly
     raw_signals = [1 if buy else -1 if sell else 0 for buy, sell in zip(data['Buy_Signal'], data['Sell_Signal'])]
     data['Signal'] = alternate_signals(raw_signals)
 
     return data[['Signal']]
+
 
 # Train a simple machine learning model using past signals
 def train_model(data):
