@@ -314,39 +314,22 @@ def calculate_indicators(data):
 
     return data
 
-def alternate_signals(signals):
-    result = []
-    last_signal = 0
-    for sig in signals:
-        if sig == 0:
-            result.append(0)
-        elif sig == 1:
-            if last_signal != 1:
-                result.append(1)
-                last_signal = 1
-            else:
-                result.append(0)
-        elif sig == -1:
-            if last_signal != -1:
-                result.append(-1)
-                last_signal = -1
-            else:
-                result.append(0)
-    return result
-
 def generate_signals(data, vix_data=None):
+    """Generates Buy/Sell signals based on VIX levels."""
     if vix_data is not None and not vix_data.empty:
         vix_data = vix_data.reindex(data.index).fillna(method='ffill')
-
-        # Make the thresholds softer
-        vix_high = vix_data.quantile(0.65)  # Before was 80%
-        vix_low = vix_data.quantile(0.35)   # Before was 20%
-
+        
+        # Static VIX thresholds (for testing purposes)
+        vix_high = 35
+        vix_low = 25
+        
+        print(f"VIX Data (last 10 values):\n{vix_data.tail(10)}")
         print(f"VIX High Threshold: {vix_high}")
         print(f"VIX Low Threshold: {vix_low}")
 
         data['VIX_Buy'] = vix_data < vix_low
         data['VIX_Sell'] = vix_data > vix_high
+
     else:
         data['VIX_Buy'] = False
         data['VIX_Sell'] = False
@@ -357,7 +340,18 @@ def generate_signals(data, vix_data=None):
     raw_signals = [1 if buy else -1 if sell else 0 for buy, sell in zip(data['Buy_Signal'], data['Sell_Signal'])]
     data['Signal'] = alternate_signals(raw_signals)
 
+    print(f"Generated Signals (last 10 rows):\n{data[['Signal']].tail(10)}")
+
     return data[['Signal']]
+
+def alternate_signals(signals):
+    """Alternates between buy and sell signals."""
+    for i in range(1, len(signals)):
+        if signals[i] == 1 and signals[i - 1] == 1:
+            signals[i] = 0
+        elif signals[i] == -1 and signals[i - 1] == -1:
+            signals[i] = 0
+    return signals
 
 # Train a simple machine learning model using past signals
 def train_model(data):
@@ -1268,36 +1262,29 @@ if menu == "Export Data":
 if menu == "Refined Strategy (RSI with Trend)":
     st.title("📊 Refined RSI Buy and Sell Strategy with Trend Confirmation")
 
-    # 1. Ticker input
     ticker = st.text_input("Enter Stock Ticker", "AAPL")
     data, info = fetch_data(ticker)
+
     vix_data = fetch_vix()
 
-    # 2. Generate signals
+    # Get RSI Strategy Signals with Trend Confirmation
     signals = generate_signals(data, vix_data)
-    data['Signal'] = signals['Signal']  # Merge signals into main data
 
-    # 3. Plotting
+    # Plotting the stock price and buy/sell signals
     st.subheader("Stock Price and Buy/Sell Signals")
     
-    fig, ax = plt.subplots(figsize=(12, 6))
-
-    # Plot stock price
-    ax.plot(data.index, data['Close'], label='Stock Price', color='blue')
-
-    # Plot buy and sell signals
-    buy_signals = data[data['Signal'] == 1]
-    sell_signals = data[data['Signal'] == -1]
-
-    ax.plot(buy_signals.index, buy_signals['Close'], '^', markersize=10, color='green', lw=0, label='Buy Signal')
-    ax.plot(sell_signals.index, sell_signals['Close'], 'v', markersize=10, color='red', lw=0, label='Sell Signal')
-
-    # Labels and title
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.plot(data['Close'], label='Stock Price', color='blue')
+    
+    # Mark Buy and Sell signals on the plot
+    ax.plot(signals.index[signals['Signal'] == 1], data['Close'][signals['Signal'] == 1], '^', markersize=10, color='green', lw=0, label='Buy Signal')
+    ax.plot(signals.index[signals['Signal'] == -1], data['Close'][signals['Signal'] == -1], 'v', markersize=10, color='red', lw=0, label='Sell Signal')
+    
     ax.set_title(f"{ticker} Stock Price with Buy/Sell Signals (RSI with Trend)")
     ax.set_xlabel("Date")
     ax.set_ylabel("Price")
     ax.legend()
-
+    
     st.pyplot(fig)
 
     # 4. Optional: Show last signals for debug
