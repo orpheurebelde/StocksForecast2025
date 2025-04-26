@@ -336,38 +336,26 @@ def alternate_signals(signals):
 
 def generate_signals(data, vix_data=None):
     if vix_data is not None and not vix_data.empty:
-        # Align VIX index to stock data
         vix_data = vix_data.reindex(data.index).fillna(method='ffill')
 
-        # Calculate VIX percentiles correctly
-        vix_high = vix_data.quantile(0.65)  # Top 20% = high volatility
-        vix_low = vix_data.quantile(0.35)   # Bottom 20% = low volatility
+        # Make the thresholds softer
+        vix_high = vix_data.quantile(0.65)  # Before was 80%
+        vix_low = vix_data.quantile(0.35)   # Before was 20%
 
-        # Now create a new Series for Buy/Sell
-        buy_signal = vix_data < vix_low
-        sell_signal = vix_data > vix_high
+        print(f"VIX High Threshold: {vix_high}")
+        print(f"VIX Low Threshold: {vix_low}")
 
-        data['VIX_Buy'] = buy_signal
-        data['VIX_Sell'] = sell_signal
-
+        data['VIX_Buy'] = vix_data < vix_low
+        data['VIX_Sell'] = vix_data > vix_high
     else:
         data['VIX_Buy'] = False
         data['VIX_Sell'] = False
 
-    # Create a raw signal list
-    signals = []
-    last_signal = 0
-    for buy, sell in zip(data['VIX_Buy'], data['VIX_Sell']):
-        if buy and last_signal != 1:
-            signals.append(1)
-            last_signal = 1
-        elif sell and last_signal != -1:
-            signals.append(-1)
-            last_signal = -1
-        else:
-            signals.append(0)
+    data['Buy_Signal'] = data['VIX_Buy']
+    data['Sell_Signal'] = data['VIX_Sell']
 
-    data['Signal'] = signals
+    raw_signals = [1 if buy else -1 if sell else 0 for buy, sell in zip(data['Buy_Signal'], data['Sell_Signal'])]
+    data['Signal'] = alternate_signals(raw_signals)
 
     return data[['Signal']]
 
@@ -1318,6 +1306,8 @@ if menu == "Refined Strategy (RSI with Trend)":
     st.dataframe(data[['Close', 'VIX_Buy', 'VIX_Sell', 'Signal']].tail(50))
     st.write("📊 Sample VIX Data:", vix_data.head(20))
     st.write(signals['Signal'].value_counts())
+    print(f"VIX High Threshold: {vix_high}")
+    print(f"VIX Low Threshold: {vix_low}")
 
 
 if menu == "Machine Learning Strategy":
