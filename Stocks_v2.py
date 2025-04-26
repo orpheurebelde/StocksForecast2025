@@ -1264,35 +1264,44 @@ if menu == "Export Data":
     
     st.download_button("Download Data as CSV", data.to_csv(index=True), file_name=f"{ticker}_historical_data.csv")
 
-# Refined Strategy Section (RSI with Trend Confirmation)
 if menu == "Refined Strategy (RSI with Trend)":
     st.title("📊 Refined RSI Buy and Sell Strategy with Trend Confirmation")
 
+    # 1. Ticker input
     ticker = st.text_input("Enter Stock Ticker", "AAPL")
     data, info = fetch_data(ticker)
-
     vix_data = fetch_vix()
 
-    # Get RSI Strategy Signals with Trend Confirmation
+    # 2. Generate signals
     signals = generate_signals(data, vix_data)
+    data['Signal'] = signals['Signal']  # Merge signals into main data
 
-    # Plotting the stock price and buy/sell signals
+    # 3. Plotting
     st.subheader("Stock Price and Buy/Sell Signals")
     
-    fig, ax = plt.subplots(figsize=(10, 6))
-    ax.plot(data['Close'], label='Stock Price', color='blue')
-    #ax.plot(data['SMA50'], label='50-Day SMA', color='orange')
+    fig, ax = plt.subplots(figsize=(12, 6))
 
-    # Mark Buy and Sell signals on the plot
-    ax.plot(signals.index[signals['Signal'] == 1], data['Close'][signals['Signal'] == 1], '^', markersize=10, color='green', lw=0, label='Buy Signal')
-    ax.plot(signals.index[signals['Signal'] == -1], data['Close'][signals['Signal'] == -1], 'v', markersize=10, color='red', lw=0, label='Sell Signal')
-    
+    # Plot stock price
+    ax.plot(data.index, data['Close'], label='Stock Price', color='blue')
+
+    # Plot buy and sell signals
+    buy_signals = data[data['Signal'] == 1]
+    sell_signals = data[data['Signal'] == -1]
+
+    ax.plot(buy_signals.index, buy_signals['Close'], '^', markersize=10, color='green', lw=0, label='Buy Signal')
+    ax.plot(sell_signals.index, sell_signals['Close'], 'v', markersize=10, color='red', lw=0, label='Sell Signal')
+
+    # Labels and title
     ax.set_title(f"{ticker} Stock Price with Buy/Sell Signals (RSI with Trend)")
     ax.set_xlabel("Date")
     ax.set_ylabel("Price")
     ax.legend()
-    
+
     st.pyplot(fig)
+
+    # 4. Optional: Show last signals for debug
+    st.subheader("🔍 Last Signals Check")
+    st.dataframe(data[['Close', 'Signal']].tail(30))
 
 if menu == "Machine Learning Strategy":
     st.title("📊 Machine Learning Buy/Sell Strategy")
