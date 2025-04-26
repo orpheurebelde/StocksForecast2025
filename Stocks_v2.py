@@ -336,31 +336,40 @@ def alternate_signals(signals):
 
 def generate_signals(data, vix_data=None):
     if vix_data is not None and not vix_data.empty:
-        # Match VIX index to stock data
+        # Align VIX index to stock data
         vix_data = vix_data.reindex(data.index).fillna(method='ffill')
 
-        # Use Percentiles, NOT mean and std
-        vix_high = vix_data.quantile(0.80)  # Top 20% VIX
-        vix_low = vix_data.quantile(0.20)   # Bottom 20% VIX
+        # Calculate VIX percentiles correctly
+        vix_high = vix_data.quantile(0.80)  # Top 20% = high volatility
+        vix_low = vix_data.quantile(0.20)   # Bottom 20% = low volatility
 
-        # Buy when VIX is low, Sell when VIX is high
-        data['VIX_Buy'] = vix_data < vix_low
-        data['VIX_Sell'] = vix_data > vix_high
+        # Now create a new Series for Buy/Sell
+        buy_signal = vix_data < vix_low
+        sell_signal = vix_data > vix_high
+
+        data['VIX_Buy'] = buy_signal
+        data['VIX_Sell'] = sell_signal
 
     else:
         data['VIX_Buy'] = False
         data['VIX_Sell'] = False
 
-    # Generate raw signals
-    data['Buy_Signal'] = data['VIX_Buy']
-    data['Sell_Signal'] = data['VIX_Sell']
+    # Create a raw signal list
+    signals = []
+    last_signal = 0
+    for buy, sell in zip(data['VIX_Buy'], data['VIX_Sell']):
+        if buy and last_signal != 1:
+            signals.append(1)
+            last_signal = 1
+        elif sell and last_signal != -1:
+            signals.append(-1)
+            last_signal = -1
+        else:
+            signals.append(0)
 
-    # Alternate signals properly
-    raw_signals = [1 if buy else -1 if sell else 0 for buy, sell in zip(data['Buy_Signal'], data['Sell_Signal'])]
-    data['Signal'] = alternate_signals(raw_signals)
+    data['Signal'] = signals
 
     return data[['Signal']]
-
 
 # Train a simple machine learning model using past signals
 def train_model(data):
