@@ -337,14 +337,10 @@ def generate_signals(data, vix_data=None):
     # Reindex and fill missing VIX values
     if vix_data is not None and not vix_data.empty:
         vix_data = vix_data.reindex(data.index).fillna(method='ffill')
-        vix_high = vix_data.quantile(0.30)
-        vix_low = vix_data.quantile(0.20)
 
-        # Calculate VIX thresholds
-        vix_mean = vix_data.mean()
-        vix_std = vix_data.std()
-        vix_high = vix_mean + vix_std
-        vix_low = vix_mean - vix_std
+        # Use percentiles ONLY
+        vix_high = vix_data.quantile(0.80)  # 80th percentile for high VIX (sell signal)
+        vix_low = vix_data.quantile(0.20)   # 20th percentile for low VIX (buy signal)
 
         data['VIX_Buy'] = vix_data < vix_low
         data['VIX_Sell'] = vix_data > vix_high
