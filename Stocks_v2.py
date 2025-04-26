@@ -334,39 +334,29 @@ def alternate_signals(binary_preds):
     return np.array(signals)
 
 def generate_signals(data, vix_data=None):
-    data = calculate_indicators(data)
-
-    # Handle VIX data
+    # Reindex and fill missing VIX values
     if vix_data is not None and not vix_data.empty:
         vix_data = vix_data.reindex(data.index).fillna(method='ffill')
+
+        # Calculate VIX thresholds
         vix_mean = vix_data.mean()
         vix_std = vix_data.std()
         vix_high = vix_mean + vix_std
         vix_low = vix_mean - vix_std
 
+        # Generate VIX-based conditions
         data['VIX_Buy'] = vix_data < vix_low
         data['VIX_Sell'] = vix_data > vix_high
     else:
-        data['VIX_Buy'] = True
-        data['VIX_Sell'] = True
+        data['VIX_Buy'] = False
+        data['VIX_Sell'] = False
 
-    # Core signals
-    data['Buy_Signal'] = (
-        (data['RSI'] < 30) &
-        (data['MACD'] > data['MACD_signal']) &
-        (data['Close'] > data['SMA50']) &
-        (data['VIX_Buy'])
-    )
+    # VIX-only signals
+    data['Buy_Signal'] = data['VIX_Buy']
+    data['Sell_Signal'] = data['VIX_Sell']
 
-    data['Sell_Signal'] = (
-        (data['RSI'] > 70) &
-        (data['MACD'] < data['MACD_signal']) &
-        (data['Close'] < data['SMA50']) &
-        (data['VIX_Sell'])
-    )
-
-    # Alternate signals to avoid duplicates
-    raw_signals = [1 if b else -1 if s else 0 for b, s in zip(data['Buy_Signal'], data['Sell_Signal'])]
+    # Convert to alternating buy/sell signal series
+    raw_signals = [1 if buy else -1 if sell else 0 for buy, sell in zip(data['Buy_Signal'], data['Sell_Signal'])]
     data['Signal'] = alternate_signals(raw_signals)
 
     return data[['Signal']]
