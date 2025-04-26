@@ -340,8 +340,8 @@ def generate_signals(data, vix_data=None):
         vix_data = vix_data.reindex(data.index).fillna(method='ffill')
 
         # Calculate VIX percentiles correctly
-        vix_high = vix_data.quantile(0.80)  # Top 20% = high volatility
-        vix_low = vix_data.quantile(0.20)   # Bottom 20% = low volatility
+        vix_high = vix_data.quantile(0.20)  # Top 20% = high volatility
+        vix_low = vix_data.quantile(0.10)   # Bottom 20% = low volatility
 
         # Now create a new Series for Buy/Sell
         buy_signal = vix_data < vix_low
