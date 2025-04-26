@@ -1306,8 +1306,6 @@ if menu == "Refined Strategy (RSI with Trend)":
     st.dataframe(data[['Close', 'VIX_Buy', 'VIX_Sell', 'Signal']].tail(50))
     st.write("📊 Sample VIX Data:", vix_data.head(20))
     st.write(signals['Signal'].value_counts())
-    print(f"VIX High Threshold: {vix_high}")
-    print(f"VIX Low Threshold: {vix_low}")
 
 
 if menu == "Machine Learning Strategy":
