@@ -314,24 +314,21 @@ def calculate_indicators(data):
 
     return data
 
-def alternate_signals(binary_preds):
-    """
-    Converts binary predictions (0/1) into alternating buy (1) and sell (-1) signals.
-    Prevents multiple buys or sells in a row.
-    """
-    signals = []
-    last_signal = 0  # 0 = no position, 1 = bought
+def alternate_signals(signals):
+    result = []
+    last_signal = 0  # 0: no signal yet
 
-    for p in binary_preds:
-        if p == 1 and last_signal == 0:
-            signals.append(1)  # Buy
+    for signal in signals:
+        if signal == 1 and last_signal != 1:
+            result.append(1)
             last_signal = 1
-        elif p == 0 and last_signal == 1:
-            signals.append(-1)  # Sell
-            last_signal = 0
+        elif signal == -1 and last_signal != -1:
+            result.append(-1)
+            last_signal = -1
         else:
-            signals.append(0)  # Hold
-    return np.array(signals)
+            result.append(0)
+
+    return result
 
 def generate_signals(data, vix_data=None):
     if vix_data is not None and not vix_data.empty:
