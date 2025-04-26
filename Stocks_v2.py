@@ -337,8 +337,8 @@ def generate_signals(data, vix_data=None):
     # Reindex and fill missing VIX values
     if vix_data is not None and not vix_data.empty:
         vix_data = vix_data.reindex(data.index).fillna(method='ffill')
-        vix_high = vix_data.quantile(0.40)
-        vix_low = vix_data.quantile(0.15)
+        vix_high = vix_data.quantile(0.30)
+        vix_low = vix_data.quantile(0.20)
 
         # Calculate VIX thresholds
         vix_mean = vix_data.mean()
