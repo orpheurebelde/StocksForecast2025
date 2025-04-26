@@ -335,7 +335,7 @@ def generate_signals(data, vix_data=None):
         vix_data = vix_data.reindex(data.index).fillna(method='ffill')
 
         # ✅ Correct: Calculate percentile thresholds
-        vix_high = vix_data.quantile(0.80)  # Top 20% -> high risk
+        vix_high = vix_data.quantile(0.50)  # Top 20% -> high risk
         vix_low = vix_data.quantile(0.20)   # Bottom 20% -> low risk
 
         data['VIX_Buy'] = vix_data < vix_low
