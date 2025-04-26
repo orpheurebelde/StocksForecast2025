@@ -314,6 +314,25 @@ def calculate_indicators(data):
 
     return data
 
+def alternate_signals(binary_preds):
+    """
+    Converts binary predictions (0/1) into alternating buy (1) and sell (-1) signals.
+    Prevents multiple buys or sells in a row.
+    """
+    signals = []
+    last_signal = 0  # 0 = no position, 1 = bought
+
+    for p in binary_preds:
+        if p == 1 and last_signal == 0:
+            signals.append(1)  # Buy
+            last_signal = 1
+        elif p == 0 and last_signal == 1:
+            signals.append(-1)  # Sell
+            last_signal = 0
+        else:
+            signals.append(0)  # Hold
+    return np.array(signals)
+
 def generate_signals(data, vix_data=None):
     data = calculate_indicators(data)
 
@@ -1287,25 +1306,6 @@ if menu == "Refined Strategy (RSI with Trend)":
     ax.legend()
     
     st.pyplot(fig)
-
-def alternate_signals(binary_preds):
-    """
-    Converts binary predictions (0/1) into alternating buy (1) and sell (-1) signals.
-    Prevents multiple buys or sells in a row.
-    """
-    signals = []
-    last_signal = 0  # 0 = no position, 1 = bought
-
-    for p in binary_preds:
-        if p == 1 and last_signal == 0:
-            signals.append(1)  # Buy
-            last_signal = 1
-        elif p == 0 and last_signal == 1:
-            signals.append(-1)  # Sell
-            last_signal = 0
-        else:
-            signals.append(0)  # Hold
-    return np.array(signals)
 
 if menu == "Machine Learning Strategy":
     st.title("📊 Machine Learning Buy/Sell Strategy")
