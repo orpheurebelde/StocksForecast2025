@@ -1308,6 +1308,8 @@ if menu == "Refined Strategy (RSI with Trend)":
     st.dataframe(data[['Close', 'Signal']].tail(30))
     st.dataframe(data[['Close', 'VIX_Buy', 'VIX_Sell', 'Signal']].tail(50))
     st.write("📊 Sample VIX Data:", vix_data.head(20))
+    st.write("BUY signals:", (signals['Signal'] == 1).sum())
+    st.write("SELL signals:", (signals['Signal'] == -1).sum())
 
 if menu == "Machine Learning Strategy":
     st.title("📊 Machine Learning Buy/Sell Strategy")
