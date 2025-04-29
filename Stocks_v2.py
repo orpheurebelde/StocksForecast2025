@@ -320,8 +320,8 @@ def generate_signals(data, vix_data=None):
         vix_data = vix_data.reindex(data.index).fillna(method='ffill')
         
         # Static VIX thresholds (for testing purposes)
-        vix_high = 35
-        vix_low = 25
+        vix_high = 25
+        vix_low = 15
         
         print(f"VIX Data (last 10 values):\n{vix_data.tail(10)}")
         print(f"VIX High Threshold: {vix_high}")
