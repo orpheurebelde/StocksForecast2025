@@ -315,33 +315,31 @@ def calculate_indicators(data):
     return data
 
 def generate_signals(data, vix_data=None):
-    """Generates Buy/Sell signals based on VIX levels."""
+    """Generates dynamic Buy/Sell signals based on VIX quartiles."""
     if vix_data is not None and not vix_data.empty:
         vix_data = vix_data.reindex(data.index).fillna(method='ffill')
-        
-        # Static VIX thresholds (for testing purposes)
-        vix_high = 25
-        vix_low = 15
-        
-        print(f"VIX Data (last 10 values):\n{vix_data.tail(10)}")
-        print(f"VIX High Threshold: {vix_high}")
-        print(f"VIX Low Threshold: {vix_low}")
+
+        # Calculate dynamic thresholds
+        vix_low = vix_data.quantile(0.25)
+        vix_high = vix_data.quantile(0.75)
+
+        print(f"Dynamic VIX Thresholds → Low: {vix_low:.2f}, High: {vix_high:.2f}")
 
         data['VIX_Buy'] = vix_data < vix_low
         data['VIX_Sell'] = vix_data > vix_high
-
     else:
         data['VIX_Buy'] = False
         data['VIX_Sell'] = False
 
+    # Raw signal flags
     data['Buy_Signal'] = data['VIX_Buy']
     data['Sell_Signal'] = data['VIX_Sell']
 
+    # Generate signal: 1 = Buy, -1 = Sell, 0 = Hold
     raw_signals = [1 if buy else -1 if sell else 0 for buy, sell in zip(data['Buy_Signal'], data['Sell_Signal'])]
     data['Signal'] = alternate_signals(raw_signals)
 
     print(f"Generated Signals (last 10 rows):\n{data[['Signal']].tail(10)}")
-
     return data[['Signal']]
 
 def alternate_signals(signals):
