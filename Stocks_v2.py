@@ -343,13 +343,20 @@ def generate_signals(data, vix_data=None):
     return data[['Signal']]
 
 def alternate_signals(signals):
-    """Alternates between buy and sell signals."""
-    for i in range(1, len(signals)):
-        if signals[i] == 1 and signals[i - 1] == 1:
-            signals[i] = 0
-        elif signals[i] == -1 and signals[i - 1] == -1:
-            signals[i] = 0
-    return signals
+    """Ensure signals alternate: Buy (1) then Sell (-1), and vice versa."""
+    filtered = [0] * len(signals)
+    last_signal = 0
+
+    for i in range(len(signals)):
+        if signals[i] == 1 and last_signal != 1:
+            filtered[i] = 1
+            last_signal = 1
+        elif signals[i] == -1 and last_signal != -1:
+            filtered[i] = -1
+            last_signal = -1
+        # If same as last, skip (filtered[i] remains 0)
+    
+    return filtered
 
 # Train a simple machine learning model using past signals
 def train_model(data):
