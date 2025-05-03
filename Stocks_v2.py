@@ -95,10 +95,10 @@ def analyze_sentiment(news_list):
     return sentiments
 
 # Load API key from secrets
-api_key = st.secrets["openai"]["api_key"]
+#api_key = st.secrets["openai"]["api_key"]
 
 # Initialize OpenAI client
-client = openai.OpenAI(api_key=api_key)
+#client = openai.OpenAI(api_key=api_key)
 
 # Ensure session_state variable is initialized
 if "stock_analysis" not in st.session_state:
